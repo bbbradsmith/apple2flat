@@ -1,0 +1,11 @@
+cc65/
+temp/runtime/
+temp/*.o
+temp/*.s
+temp/*.dbg
+temp/*.map
+temp/*.lst
+temp/*.SYM
+temp/*.bin
+temp/*.dsk
+*.lnk
