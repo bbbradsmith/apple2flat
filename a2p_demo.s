@@ -15,7 +15,9 @@ disksys_temp: .res 2
 
 .segment "LOWRAM"
 test_buf: .res 256
-read_seg: .res 2
+read_seg: .res 1
+read_track: .res 1
+read_combo: .res 2
 
 SECTORS = 35 * 16
 
@@ -30,41 +32,55 @@ start:
 	jsr $FD8E ; CROUT
 	MESSAGE msg_start
 	lda #0
-	sta read_seg+0
-	sta read_seg+1
+	sta read_seg
+	sta read_track
 	@loop:
 		jsr test
-		jsr invert
-		jsr test
-		jsr invert
-		inc read_seg+0
-		bne :+
-			inc read_seg+1
-		:
-		lda read_seg+0
-		cmp #<(SECTORS/2)
-		lda read_seg+1
-		sbc #>(SECTORS/2)
+		jsr pick_next
+		lda read_track
+		cmp #35
 		bcc @loop
 	jsr $FD8E ; CROUT
 	MESSAGE msg_pass
 	jmp $FF69 ; MONZ monitor * prompt
 
-invert:
-	lda #<(SECTORS-1)
-	sec
-	sbc read_seg+0
-	sta read_seg+0
-	lda #>(SECTORS-1)
-	sbc read_seg+1
-	sta read_seg+1
+track_order:
+.repeat 17, I
+	.byte I
+	.byte 34-I
+.endrepeat
+	.byte 17
+
+pick_next:
+	inc read_seg
+	lda read_seg
+	cmp #16
+	bcc :+
+		inc read_track
+		lda #0
+		sta read_seg
+	:
 	rts
 
 test:
+	ldx read_track
+	lda track_order, X
+	asl
+	asl
+	asl
+	asl
+	ora read_seg
+	sta read_combo+0
+	lda track_order, X
+	lsr
+	lsr
+	lsr
+	lsr
+	sta read_combo+1
 	jsr $FE80 ; SETINV
-	lda read_seg+1
+	lda read_combo+1
 	jsr $FDDA ; PRBYTE
-	lda read_seg+0
+	lda read_combo+0
 	jsr $FDDA
 	jsr $FE84 ; SETNORM
 	; read the sector
@@ -72,8 +88,8 @@ test:
 	sta disksys_ptr+0
 	lda #>test_buf
 	sta disksys_ptr+1
-	lda read_seg+0
-	ldx read_seg+1
+	lda read_combo+0
+	ldx read_combo+1
 	ldy #1
 	jsr disksys_read
 	lda test_buf+0
