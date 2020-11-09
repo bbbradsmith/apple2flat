@@ -51,6 +51,10 @@
 .export disksys_find_sector
 .export disksys_read_unpack
 .export disksys_seek_prewait
+.export disksys_sector_index
+
+; DISKBOOT has a COUT-string that you could use if you never clear that memory
+.export boot_couts
 
 ;
 ; RAM usage outside code block
@@ -712,11 +716,8 @@ motor_wait:
 	rts
 .endproc
 
-.proc disksys_read
+.proc disksys_sector_index
 	; X:A = (track * 16) + sector
-	; Y = count of sectors to read
-	; ptr = data out ptr
-	sty disksys_remain
 	sta disksys_seekto
 	and #15
 	sta disksys_sector
@@ -727,6 +728,15 @@ motor_wait:
 	ror disksys_seekto
 	lsr disksys_seekto
 	lsr disksys_seekto
+	rts
+.endproc
+
+.proc disksys_read
+	; X:A = (track * 16) + sector
+	; Y = count of sectors to read
+	; ptr = data out ptr
+	sty disksys_remain
+	jsr disksys_sector_index
 	; spin up the drive
 	lda disksys_driveto
 	jsr disksys_start ; X = disksys_slot
