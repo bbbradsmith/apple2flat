@@ -24,10 +24,10 @@
 ; Returns: disksys_error in A/flags (0 on success)
 
 ; DISKSYS variables (exported for access via optional DISKSYS write procedures)
-.export disksys_nibbles1 ; 86 bytes, LOWRAM
-.export disksys_slot
+.export disksys_slot ; 
 .export disksys_track
 .export disksys_drive
+.export disksys_driveto
 .export disksys_sector
 .export disksys_seekto
 .export disksys_remain
@@ -37,6 +37,7 @@
 .export disksys_counter
 .export disksys_field ; 4 bytes
 .export disksys_partial
+.export disksys_nibbles1 ; 86 bytes, temporary buffer for 2+2+2 nibbles
 
 ; DISKSYS internal procedures (exported for optional DISKSYS write procedures)
 .export disksys_delay_10ms
@@ -49,6 +50,7 @@
 .export disksys_seek0
 .export disksys_find_sector
 .export disksys_read_unpack
+.export disksys_seek_prewait
 
 ;
 ; RAM usage outside code block
@@ -59,9 +61,6 @@ disksys_nibble   = disksys_temp+0
 disksys_checksum = disksys_temp+1
 disksys_nidx     = disksys_nibble ; not used at the same time as nibble
 
-.segment "LOWRAM"
-disksys_nibbles1: .res 86
-
 ;
 ; DISKBOOT
 ;
@@ -71,13 +70,21 @@ disksys_nibbles1: .res 86
 .import __DISKSYS_LOAD__ ; disk image location of DISKSYS
 .import __DISKSYS_RUN__ ; memory destination of DISKSYS
 .import __DISKSYS_SIZE__
+
+.import __DISKREAD_START__ ; memory reserved for DISKSYS (to ensure space for disksys_nibbles1)
+.import __DISKREAD_LAST__
+.import __DISKREAD_SIZE__
+
 .import __MAIN_START__ ; memory destination of MAIN
 .import __MAIN_LAST__
 .import BSEC ; sector where MAIN begins
 
-DISKSYS_BOOT_OFFSET = __DISKSYS_RUN__ - (__DISKSYS_LOAD__ + $800)
+DISKSYS_BOOT_START = __DISKSYS_LOAD__ + $800 ; where boot0 loads DISKSYS into memory temporarily
+DISKSYS_BOOT_OFFSET = __DISKSYS_RUN__ - DISKSYS_BOOT_START
+DISKSYS_END = __DISKSYS_RUN__ + __DISKSYS_SIZE__ ; end of code in DISKSYS run location
+DISKREAD_END = __DISKREAD_START__ + __DISKREAD_SIZE__ ; end of memory reserved for DISKSYS
 
-boot_slot = $2B ; slot used by disk boot
+boot_slot = $2B ; device slot used by disk boot0 (i.e. what peripheral slot booted this disk)
 
 .assert boot_sector_count = $800, error, "DISKBOOT must be placed at $800"
 .assert boot1 = $801, error, "DISKBOOT must be placed at $800"
@@ -99,10 +106,10 @@ dst = $08
 	lda #<msg_boot1
 	ldx #>msg_boot1
 	jsr boot_couts
-	; copy DISKSYS to its permanent location
-	lda #<(__DISKSYS_LOAD__ + $800)
+	; copy DISKSYS to its permanent run location
+	lda #<DISKSYS_BOOT_START
 	sta src+0
-	lda #>(__DISKSYS_LOAD__ + $800)
+	lda #>DISKSYS_BOOT_START
 	sta src+1
 	lda #<__DISKSYS_RUN__
 	sta dst+0
@@ -118,30 +125,27 @@ copy_disksys:
 	:
 	jsr inc_dst
 	lda dst+0
-	cmp #<(__DISKSYS_RUN__ + __DISKSYS_SIZE__)
+	cmp #<DISKSYS_END
 	bne copy_disksys
 	lda dst+1
-	sbc #>(__DISKSYS_RUN__ + __DISKSYS_SIZE__)
+	sbc #>DISKSYS_END
 	bcc copy_disksys
-	; initialize rest of space to $C000 as 0
+	; initialize rest of reserved space to 0
 	ldy #0
 zero_disksys:
 	lda dst+0
-	bne :+
+	cmp #<DISKREAD_END
 	lda dst+1
-	cmp #$C0
+	sbc #>DISKREAD_END
 	bcc :+
-	bcs read_main
+		bcs read_main
 	:
 	tya
 	sta (dst), Y
 	jsr inc_dst
 	jmp zero_disksys
-	; load MAIN
+	; use DISKSYS read to load MAIN
 read_main:
-	lda #<msg_main
-	ldx #>msg_main
-	jsr boot_couts
 	lda #<__MAIN_START__
 	sta disksys_ptr+0
 	lda #>__MAIN_START__
@@ -164,16 +168,14 @@ error:
 	;jsr $FDDA ; PRBYTE (if you want to know the specific reason the read failed)
 	;jsr $FD8E ; CROUT
 	jmp $FF69 ; MONZ monitor * prompt, for debugging
-inc_dst:
+inc_dst: ; shared increment for smaller code
 	inc dst+0
 	bne :+
-	inc dst+1
+		inc dst+1
 	:
 	rts
 msg_boot1:
-	.asciiz "DISK BOOTING"
-msg_main:
-	.asciiz "LOADING PROGRAM"
+	.asciiz "LOADING A2P PROGRAM..."
 msg_error:
 	.asciiz "LOAD ERROR"
 msg_run:
@@ -251,19 +253,20 @@ Q7H          = $C08F
 DISKSYS_PAGE_0 = *
 
 ; variables
-disksys_slot:      .byte 6<<4
-disksys_track:     .byte 0
-disksys_drive:     .byte 0
-disksys_sector:    .byte 0
-disksys_seekto:    .byte 0
-disksys_remain:    .byte 0
-disksys_retryseek: .byte 0
-disksys_retryfind: .byte 0
-disksys_retryread: .byte 0
-disksys_counter:   .byte 0
-disksys_field:     .byte 0, 0, 0, 0
-disksys_partial:   .byte 0
-disksys_error:     .byte 0
+disksys_error:     .byte 0          ; error flags of last operation
+disksys_slot:      .byte 6<<4       ; disk peripheral slot * 16
+disksys_drive:     .byte 0          ; drive in use
+disksys_driveto:   .byte 0          ; drive requested
+disksys_track:     .byte 0          ; track position
+disksys_seekto:    .byte 0          ; track requested
+disksys_sector:    .byte 0          ; sector requested
+disksys_remain:    .byte 0          ; sectors left to read
+disksys_retryseek: .byte 0          ; retries left for a failed seek
+disksys_retryfind: .byte 0          ; retries left to find a sector address
+disksys_retryread: .byte 0          ; retries left to read a sector
+disksys_counter:   .byte 0          ; nibble tests left to find start of sector address/data
+disksys_field:     .byte 0, 0, 0, 0 ; last read address field
+disksys_partial:   .byte 0          ; temporary error if last attempt was a partial read
 
 .proc disksys_delay_10ms
 	; A * 10 = ms to delay (approximate, at least), A >= 1
@@ -366,7 +369,7 @@ find_error:
 .endproc
 
 ; denibble table must be placed at exactly $96 bytes into the page
-.res 12 ; padding
+.res 11 ; padding
 
 ; Generated by notes/nibble.py
 disksys_denibble_suffix:
@@ -678,26 +681,9 @@ inner: ; 1 pass over Y = 0-255
 	rts
 .endproc
 
-.proc disksys_read
-	; X:A = (track * 16) + sector
-	; Y = count of sectors to read
-	; ptr = data out ptr
-	sty disksys_remain
-	sta disksys_seekto
-	and #15
-	sta disksys_sector
-	txa
-	lsr
-	ror disksys_seekto
-	lsr
-	ror disksys_seekto
-	lsr disksys_seekto
-	lsr disksys_seekto
-	; spin up the drive
-	lda disksys_drive
-	jsr disksys_start ; X = disksys_slot
-	bcs sector_loop ; drive is already spinning, start reading sectors
-	; predict first seek time
+.proc disksys_seek_prewait
+	; Motor is spinning up, but we can seek while it happens.
+	; Predict the first seek time, and wait any remaining motor spinup time.
 	lda disksys_seekto
 	sec
 	sbc disksys_track
@@ -720,8 +706,32 @@ inner: ; 1 pass over Y = 0-255
 motor_wait:
 	clc
 	adc #MOTOR_WAIT
-	bmi sector_loop ; seek is already longer than MOTOR_WAIT
-	jsr disksys_delay_10ms
+	bmi :+ ; seek is already longer than MOTOR_WAIT
+		jmp disksys_delay_10ms
+	:
+	rts
+.endproc
+
+.proc disksys_read
+	; X:A = (track * 16) + sector
+	; Y = count of sectors to read
+	; ptr = data out ptr
+	sty disksys_remain
+	sta disksys_seekto
+	and #15
+	sta disksys_sector
+	txa
+	lsr
+	ror disksys_seekto
+	lsr
+	ror disksys_seekto
+	lsr disksys_seekto
+	lsr disksys_seekto
+	; spin up the drive
+	lda disksys_driveto
+	jsr disksys_start ; X = disksys_slot
+	bcs sector_loop ; drive is already spinning, start reading sectors
+	jsr disksys_seek_prewait
 sector_loop:
 	lda disksys_remain
 	bne :+
@@ -740,3 +750,18 @@ sector_loop:
 	inc disksys_ptr+1
 	jmp sector_loop
 .endproc
+
+; There's empty space on the last page, so it's a reasonable place for this 2+2+2 nibbles buffer.
+; Space is not reserved here so that we can share space in sector 0 with BOOT,
+; but a few asserts here verify that the needed space will exist after it's copied into place.
+disksys_nibbles1:
+;.res 86
+.assert __DISKREAD_LAST__ = disksys_nibbles1, error, "disksys_boot.o must be the last module in DISKBOOT"
+.assert (__DISKREAD_SIZE__ - (disksys_nibbles1 - __DISKREAD_START__)) >= 86, error, "Not enough trailing space in DISKREAD for disksys_nibbles1"
+
+; Also, if this crosses a page there's an inconsistent +1 cycle penalty when accessing it.
+; This is within tolerance for reading, but a fixed timing is essential when writing.
+.assert (>(disksys_nibbles1+85))=(>disksys_nibbles1), error, "disksys_nibbles1 may not cross a page."
+
+; There's more than 100 bytes free here at the end of the reserved page.
+; This is probably not significant, but could be used if we were really in a pinch.
