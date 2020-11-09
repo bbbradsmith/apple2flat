@@ -331,19 +331,19 @@ read_96:
 	ldy #3
 	lda #0
 read_fields:
-	sta disksys_checksum
+	sta z:disksys_checksum
 read_field0:
 	lda Q6L, X
 	BP bpl, read_field0
 	sec
 	rol
-	sta disksys_nibble
+	sta z:disksys_nibble
 read_field1:
 	lda Q6L, X
 	BP bpl, read_field1
-	and disksys_nibble
+	and z:disksys_nibble
 	sta disksys_field, Y
-	eor disksys_checksum
+	eor z:disksys_checksum
 	dey
 	bpl read_fields ; 25 cycles to next read (<32)
 	cmp #0 ; EOR checksum should be 0
@@ -430,22 +430,22 @@ read_AD:
 	lda #0
 read_nibbles1: ; 86 bytes (reverse order)
 	dey
-	sty disksys_nidx
+	sty z:disksys_nidx
 read_nibble1:
 	ldy Q6L, X
 	BP bpl, read_nibble1
 	eor disksys_denibble, Y
-	ldy disksys_nidx
+	ldy z:disksys_nidx
 	sta disksys_nibbles1, Y
 	bne read_nibbles1 ; 26 cycles to next read (<32)
 	;ldy #0
 read_nibbles0: ; 256 bytes (forward order)
-	sty disksys_nidx
+	sty z:disksys_nidx
 read_nibble0:
 	ldy Q6L, X
 	BP bpl, read_nibble0
 	eor disksys_denibble, Y
-	ldy disksys_nidx
+	ldy z:disksys_nidx
 	sta (disksys_ptr), Y
 	iny
 	bne read_nibbles0 ; 27 cycles to next read (<32)
