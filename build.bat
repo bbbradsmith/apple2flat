@@ -14,7 +14,7 @@ cc65\bin\ld65 -o temp\a2p_demo.bin -m temp\a2p_demo.map --dbgfile temp\a2p_demo.
 python sector_order.py temp\a2p_demo.bin temp\a2p_demo.dsk
 @IF ERRORLEVEL 1 GOTO error
 
-python dbg_sym.py temp\a2p_demo.dbg temp\APPLE2E.SYM
+python dbg_sym.py temp\a2p_demo.dbg temp\a2p_demo.sym
 @IF ERRORLEVEL 1 GOTO error
 
 @echo.
