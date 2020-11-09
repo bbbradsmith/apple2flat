@@ -600,7 +600,7 @@ index: ; places X index at phase 0 or phase 2 based on current track
 	tax
 	rts
 hold: ; waits for the drive to reach the next phase
-	lda #SEEK_WAIT
+	lda #PHASE_WAIT
 	jmp disksys_delay_10ms
 half: ; steps through half-track (index+1 = odd phases)
 	lda PHASE1_ON, X
