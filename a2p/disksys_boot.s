@@ -3,31 +3,61 @@
 ;  The read routines will let you load/save 256-byte sectors from the disk, instead of using the DOS file system.
 ;  It is is informed by, but simpler than, the RWST-16 routines from Apple DOS 3.3.
 
+.include "../a2p.inc"
+
+; DISKBOOT will jump here on successful startup
+.import start
+
+; ZEROPAGE imports (defined elsewhere so they can be reused)
+.importzp disksys_ptr ; 2-bytes: pointer to read ouput
+.importzp disksys_temp ; 2-bytes
+
+; DISKSYS public exports
+
+.export disksys_error ; byte: last error code
+
+.export disksys_read
+; Reads contiguous 256-byte sectors from disk:
+;   X:A = (track * 16) + sector
+;   Y = count of sectors to read
+;   disksys_ptr = data out location
+; Returns: disksys_error in A/flags (0 on success)
+
+; DISKSYS variables (exported for access via optional DISKSYS write procedures)
+.export disksys_nibbles1 ; 86 bytes, LOWRAM
 .export disksys_slot
 .export disksys_track
-.export disksys_nibbles1
+.export disksys_drive
+.export disksys_sector
+.export disksys_seekto
+.export disksys_remain
+.export disksys_retryseek
+.export disksys_retryfind
+.export disksys_retryread
+.export disksys_counter
+.export disksys_field ; 4 bytes
+.export disksys_partial
 
+; DISKSYS internal procedures (exported for optional DISKSYS write procedures)
 .export disksys_delay_10ms
+.export disksys_read_address
+.export disksys_denibble
+.export disksys_read_sector
 .export disksys_start
 .export disksys_stop
 .export disksys_seek
 .export disksys_seek0
-.export disksys_read_sector
-.export disksys_read
-
-DISKSYS_ERROR_FIND    = $01
-DISKSYS_ERROR_DATA    = $02
-DISKSYS_ERROR_PARTIAL = $04
+.export disksys_find_sector
+.export disksys_read_unpack
 
 ;
 ; RAM usage outside code block
 ;
 
 .segment "ZEROPAGE"
-disksys_ptr:      .res 2 ; TODO use cc65 temporary
-disksys_nibble:   .res 1
-disksys_checksum: .res 1
-disksys_nidx = disksys_nibble ; not needed at the same time
+disksys_nibble   = disksys_temp+0
+disksys_checksum = disksys_temp+1
+disksys_nidx     = disksys_nibble ; not used at the same time as nibble
 
 .segment "LOWRAM"
 disksys_nibbles1: .res 86
@@ -86,17 +116,29 @@ copy_disksys:
 	bne :+
 		inc src+1
 	:
-	inc dst+0
-	bne :+
-		inc dst+1
-	:
+	jsr inc_dst
 	lda dst+0
 	cmp #<(__DISKSYS_RUN__ + __DISKSYS_SIZE__)
 	bne copy_disksys
 	lda dst+1
 	sbc #>(__DISKSYS_RUN__ + __DISKSYS_SIZE__)
 	bcc copy_disksys
+	; initialize rest of space to $C000 as 0
+	ldy #0
+zero_disksys:
+	lda dst+0
+	bne :+
+	lda dst+1
+	cmp #$C0
+	bcc :+
+	bcs read_main
+	:
+	tya
+	sta (dst), Y
+	jsr inc_dst
+	jmp zero_disksys
 	; load MAIN
+read_main:
 	lda #<msg_main
 	ldx #>msg_main
 	jsr boot_couts
@@ -109,27 +151,33 @@ copy_disksys:
 	ldy #>((__MAIN_LAST__ - __MAIN_START__) + 255) ; MAIN sector count
 	jsr disksys_read
 	bne error
+	; Success!
 	lda #<msg_run
 	ldx #>msg_run
 	jsr boot_couts
-	; TODO jump to crt0 startup
-	jmp $FF69 ; TODO HACK monitor *
+	jmp start
 error:
 	lda #<msg_error
 	ldx #>msg_error
 	jsr boot_couts
-	lda disksys_error
-	jsr $FDDA ; PRBYTE
-	jsr $FD8E ; CROUT
+	;lda disksys_error
+	;jsr $FDDA ; PRBYTE (if you want to know the specific reason the read failed)
+	;jsr $FD8E ; CROUT
 	jmp $FF69 ; MONZ monitor * prompt, for debugging
+inc_dst:
+	inc dst+0
+	bne :+
+	inc dst+1
+	:
+	rts
 msg_boot1:
-	.asciiz "DISK BOOTING..."
+	.asciiz "DISK BOOTING"
 msg_main:
-	.asciiz "LOADING PROGRAM..."
+	.asciiz "LOADING PROGRAM"
 msg_error:
 	.asciiz "LOAD ERROR"
 msg_run:
-	.asciiz "RUN!"
+	.asciiz "RUN"
 .endproc
 
 .proc boot_couts
@@ -692,11 +740,3 @@ sector_loop:
 	inc disksys_ptr+1
 	jmp sector_loop
 .endproc
-
-; HACK TEST the load TODO
-.segment "CODE"
-.repeat 32, I
-	.repeat 256, J
-		.byte I
-	.endrepeat
-.endrepeat

@@ -8,7 +8,10 @@
 cc65\bin\ca65 -o temp\disksys_boot.o -g a2p\disksys_boot.s
 @IF ERRORLEVEL 1 GOTO error
 
-cc65\bin\ld65 -o temp\a2p_demo.bin -m temp\a2p_demo.map --dbgfile temp\a2p_demo.dbg -C a2p_disk.cfg temp\disksys_boot.o
+cc65\bin\ca65 -o temp\a2p_demo.o -g a2p_demo.s
+@IF ERRORLEVEL 1 GOTO error
+
+cc65\bin\ld65 -o temp\a2p_demo.bin -m temp\a2p_demo.map --dbgfile temp\a2p_demo.dbg -C a2p_disk.cfg temp\disksys_boot.o temp\a2p_demo.o
 @IF ERRORLEVEL 1 GOTO error
 
 python sector_order.py temp\a2p_demo.bin temp\a2p_demo.dsk
