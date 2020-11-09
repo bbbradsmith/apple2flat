@@ -65,6 +65,7 @@ dst = $08
 	jsr $FE89 ; SETKBD initialize monitor keyboard handler
 	jsr $FE93 ; SETVID initialize monitor video and text output handler
 	jsr $FB2F ; INIT initialize monitor
+	jsr $FD8E ; CROUT newline before we start
 	lda #<msg_boot1
 	ldx #>msg_boot1
 	jsr boot_couts
@@ -467,13 +468,18 @@ found_address:
 	bne reset_seek ; address field says we're on the wrong track, do a reseek
 	lda disksys_sector
 	cmp disksys_field + FIELD_SEC
-	bne retry_address ; right track, wrong sector, keep looking
-	clc
-	rts
+	beq found_sector
+	dec disksys_retryfind
+	bne retry_address
 seek_error:
 	sec
 	rts
+found_sector:
+	clc
+	rts
 .endproc
+
+.res 4 ; TODO HACK avoiding page crossing
 
 .proc disksys_read_sector
 	lda #0
