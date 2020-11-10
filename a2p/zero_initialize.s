@@ -1,5 +1,6 @@
 ; zero_initialize
-;
+
+.export zero_initialize
 ; Initializes the following regions to zero:
 ;   zero page
 ;   LOWRAM
@@ -7,8 +8,6 @@
 ;   MAIN region following code
 ;   DISKREAD region following code
 ; Does not initialize stack, since it must RTS.
-.
-export zero_initialize
 
 .segment "CODE"
 
@@ -55,6 +54,16 @@ finish:
 		inx
 		bne :-
 	rts
+; table of regions to clear
+.import __LOWRAM_START__
+.import __LOWRAM_SIZE__
+.import __RAM_START__
+.import __RAM_SIZE__
+.import __MAIN_LAST__
+.import __DISKREAD_START__
+.import __DISKREAD_SIZE__
+.import __DISKSYS_RUN__
+.import __DISKSYS_SIZE__
 region_table:
 	.word __LOWRAM_START__, __LOWRAM_START__ + __LOWRAM_SIZE__
 	.word __RAM_START__, __RAM_START__ + __RAM_SIZE__
@@ -62,3 +71,4 @@ region_table:
 	.word __DISKSYS_RUN__ + __DISKSYS_SIZE__, __DISKREAD_START__ + __DISKREAD_SIZE__
 REGION_END = * - region_table
 .endproc
+
