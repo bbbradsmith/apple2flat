@@ -86,7 +86,6 @@ disksys_nidx     = disksys_nibble ; not used at the same time as nibble
 DISKSYS_BOOT_START = __DISKSYS_LOAD__ + $800 ; where boot0 loads DISKSYS into memory temporarily
 DISKSYS_BOOT_OFFSET = __DISKSYS_RUN__ - DISKSYS_BOOT_START
 DISKSYS_END = __DISKSYS_RUN__ + __DISKSYS_SIZE__ ; end of code in DISKSYS run location
-DISKREAD_END = __DISKREAD_START__ + __DISKREAD_SIZE__ ; end of memory reserved for DISKSYS
 
 boot_slot = $2B ; device slot used by disk boot0 (i.e. what peripheral slot booted this disk)
 
@@ -134,20 +133,6 @@ copy_disksys:
 	lda dst+1
 	sbc #>DISKSYS_END
 	bcc copy_disksys
-	; initialize rest of reserved space to 0
-	ldy #0
-zero_disksys:
-	lda dst+0
-	cmp #<DISKREAD_END
-	lda dst+1
-	sbc #>DISKREAD_END
-	bcc :+
-		bcs read_main
-	:
-	tya
-	sta (dst), Y
-	jsr inc_dst
-	jmp zero_disksys
 	; use DISKSYS read to load MAIN
 read_main:
 	lda #<__MAIN_START__
