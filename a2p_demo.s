@@ -14,116 +14,32 @@ disksys_ptr: .res 2
 disksys_temp: .res 2
 
 .segment "LOWRAM"
-test_buf: .res 256
-read_seg: .res 1
-read_track: .res 1
-read_combo: .res 2
 
-SECTORS = 35 * 16
 
-.macro MESSAGE msg_
-	lda #<(msg_)
-	ldx #>(msg_)
-	jsr boot_couts
-.endmacro
+.segment "CODE"
 
-.segment "ALIGN"
 start:
-	jsr $FD8E ; CROUT
-	MESSAGE msg_start
-	lda #0
-	sta read_seg
-	sta read_track
-	@loop:
-		jsr test
-		jsr pick_next
-		lda read_track
-		cmp #35
-		bcc @loop
-	jsr $FD8E ; CROUT
-	MESSAGE msg_pass
-	jmp $FF69 ; MONZ monitor * prompt
+	lda #<message
+	ldx #>message
+	jsr couts
+	jmp $FF69 ; MONZ
 
-track_order:
-.repeat 17, I
-	.byte I
-	.byte 34-I
-.endrepeat
-	.byte 17
+message:
+	.asciiz "YOU ARE READING THIS!"
 
-pick_next:
-	inc read_seg
-	lda read_seg
-	cmp #16
-	bcc :+
-		inc read_track
-		lda #0
-		sta read_seg
+.proc couts
+; X:A = pointer to ASCII string to print, 0 terminated
+	ptr = $06 ; any 2 ZP bytes not used by COUT
+	sta ptr+0
+	stx ptr+1
+	ldy #0
 	:
-	rts
-
-test:
-	ldx read_track
-	lda track_order, X
-	asl
-	asl
-	asl
-	asl
-	ora read_seg
-	sta read_combo+0
-	lda track_order, X
-	lsr
-	lsr
-	lsr
-	lsr
-	sta read_combo+1
-	jsr $FE80 ; SETINV
-	lda read_combo+1
-	jsr $FDDA ; PRBYTE
-	lda read_combo+0
-	jsr $FDDA
-	jsr $FE84 ; SETNORM
-	; read the sector
-	lda #<test_buf
-	sta disksys_ptr+0
-	lda #>test_buf
-	sta disksys_ptr+1
-	lda read_combo+0
-	ldx read_combo+1
-	ldy #1
-	jsr disksys_read
-	lda test_buf+0
-	jsr $FDDA
-	lda disksys_error
-	jsr $FDDA
-	lda disksys_error
-	bne fail
-	rts
-fail:
-	jsr $FD8E
-	MESSAGE msg_fail
-	jmp $FF69
-
-msg_start:
-	.byte "SEEK TEST READS EVERY SECTOR ON DISK", 13
-	.byte "0123 SECTOR NUMBER", 13
-	.byte "  23 DATA (6+ IS SAME AS SECTOR LSB)", 13
-	.byte "  00 ERROR (SHOULD BE 00)", 0
-msg_fail:  .asciiz "FAIL!"
-msg_pass:  .asciiz "PASS"
-
-; fill rest of MAIN with sector number
-.align 256
-.repeat 90, I
-	.repeat 256, J
-		.byte <(((*-MPOS)>>8)+BSEC)
-	.endrepeat
-.endrepeat
-
-; fill EXTRA with sector number
-.segment "EXTRA"
-.repeat 560-96, I
-	.repeat 256, J
-		.byte <(*>>8)
-	.endrepeat
-.endrepeat
+		lda (ptr), Y
+		beq :+
+		ora #$80
+		jsr $FDED ; COUT monitor output character
+		iny
+		jmp :-
+	:
+	jmp $FD8E ; CROUT monitor output newline
+.endproc

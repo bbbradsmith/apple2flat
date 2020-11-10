@@ -12,21 +12,27 @@
 
 .segment "TAPEBOOT0"
 .word __TAPEBOOT1_SIZE__ - 1
-;.byte $D5 ; lock and auto-run
+;.byte $D5 ; lock BASIC program and auto-run
 .byte $55 ; unlocked for testing
 
 .segment "TAPEBOOT1"
 
+; BASIC line
 .macro BLINE n_
 	.ident(.sprintf("line%d",n_)):
-	.word .ident(.sprintf("line%d",n_+10))
-	.word n_
+	.word .ident(.sprintf("line%d",n_+10)) ; pointer to next line
+	.word n_ ; line number
 .endmacro
 
+; BASIC end of program
 .macro BEND n_
 	.ident(.sprintf("line%d",n_)):
-	.word 0
+	.word 0 ; 0 to end program
 .endmacro
+
+; byte to decimal string (followed by comma, or not)
+.define BDC(n_) ('0'+((n_)/100)),('0'+(((n_)/10) .mod 10)),('0'+((n_) .mod 10)),",",
+.define BDL(n_) ('0'+((n_)/100)),('0'+(((n_)/10) .mod 10)),('0'+((n_) .mod 10))
 
 BOOT  = $0300 ; some free space to stash our loader
 READ0 = __MAIN_START__
@@ -35,29 +41,29 @@ READ1 = __MAIN_LAST__ - 1
 BLINE 10  ; 10 PRINT "LOADING A2P PROGRAM..."
 .byte $BA,'"',"LOADING A2P PROGRAM...",'"',0
 BLINE 20  ; 20 DATA ...
-.byte $83,.sprintf(" %d,%d,%d,%d,%d",         $A9,$24,$48,$A9,<READ0),0
+.byte $83," ", BDC {$A9} BDC {$24} BDC {$48} BDC {$A9} BDL {<READ0} ,0
 BLINE 30  ; 30 DATA ...
-.byte $83,.sprintf(" %d,%d,%d,%d,%d,%d",  $A2,>READ0,$85,$3C,$86,$3D),0
+.byte $83," ", BDC {$A2} BDC {>READ0} BDC {$85} BDC {$3C} BDL {$86} ,0 
 BLINE 40  ; 40 DATA ...
-.byte $83,.sprintf(" %d,%d,%d,%d",             $A9,<READ1,$A2,>READ1),0
+.byte $83," ", BDC {$3D} BDC {$A9} BDC {<READ1} BDC {$A2} BDL {>READ1} ,0
 BLINE 50  ; 50 DATA ...
-.byte $83,.sprintf(" %d,%d,%d,%d,%d,%d",     $85,$3E,$86,$3F,$A0,$00),0
+.byte $83," ", BDC {$85} BDC {$3E} BDC {$86} BDC {$3F} BDL {$A0} ,0
 BLINE 60  ; 60 DATA ...
-.byte $83,.sprintf(" %d,%d,%d,%d,%d,%d",     $20,$FD,$FE,$68,$C5,$24),0
+.byte $83," ", BDC {$00} BDC {$20} BDC {$FD} BDC {$FE} BDL {$68} ,0
 BLINE 70  ; 70 DATA ...
-.byte $83,.sprintf(" %d,%d,%d,%d,%d",            $F0,$03,$4C,$69,$FF),0
+.byte $83," ", BDC {$C5} BDC {$24} BDC {$F0} BDC {$03} BDL {$4C} ,0
 BLINE 80  ; 80 DATA ...
-.byte $83,.sprintf(" %d,%d,%d",                    $4C,<start,>start),0
+.byte $83," ", BDC {$69} BDC {$FF} BDC {$4C} BDC {<start} BDL {>start} ,0
 BLINE 90  ; 90 FOR I = 0 TO 34
 .byte $81,"I",$D0,"0",$C1,"34",0
 BLINE 100 ; 100 READ D
 .byte $87,"D",0
 BLINE 110 ; 110 POKE 768 + I,D
-.byte $B9,.sprintf("%d",BOOT),$C8,"I,D",0
+.byte $B9, BDL {BOOT} ,$C8,"I,D",0
 BLINE 120 ; 120 NEXT
 .byte $82,0
 BLINE 130 ; 130 CALL 768
-.byte $8C,.sprintf("%d",BOOT),0
+.byte $8C, BDL {BOOT} ,0
 BLINE 140 ; 140 END
 .byte $80,0
 BEND 150

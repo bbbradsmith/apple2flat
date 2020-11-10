@@ -5,8 +5,9 @@ temp/*.s
 temp/*.dbg
 temp/*.map
 temp/*.lst
-temp/*.SYM
+temp/*.sym
 temp/*.bin
 temp/*.dsk
+temp/*.wav
 *.lnk
 run*.bat
