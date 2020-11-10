@@ -56,7 +56,7 @@ def decode_tape(filein):
     S1H = (SH + S0) / 2 # average of 1/H
     S01 = (S0 + S1) / 2 # average of 0/1
     SHX = SH + (SH - S1H) # high tolerance for header
-    HEADLOCK = 5 # this many samples in a row will be considered the header
+    HEADLOCK = 100 # this many samples in a row will be considered the header
     # decode packets
     packets = 0
     p = 0
