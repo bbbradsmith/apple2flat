@@ -12,8 +12,8 @@
 
 .segment "TAPEBOOT0"
 .word __TAPEBOOT1_SIZE__ - 1
-;.byte $D5 ; lock BASIC program and auto-run
-.byte $55 ; unlocked for testing
+.byte $D5 ; lock BASIC program and auto-run
+;.byte $55 ; unlocked for testing
 
 .segment "TAPEBOOT1"
 
@@ -41,7 +41,7 @@ READ1 = __MAIN_LAST__ - 1
 BLINE 10  ; 10 PRINT "LOADING A2P PROGRAM..."
 .byte $BA,'"',"LOADING A2P PROGRAM...",'"',0
 BLINE 20  ; 20 DATA ...
-.byte $83," ", BDC {$A9} BDC {$24} BDC {$48} BDC {$A9} BDL {<READ0} ,0
+.byte $83," ", BDC {$A5} BDC {$24} BDC {$48} BDC {$A9} BDL {<READ0} ,0
 BLINE 30  ; 30 DATA ...
 .byte $83," ", BDC {$A2} BDC {>READ0} BDC {$85} BDC {$3C} BDL {$86} ,0 
 BLINE 40  ; 40 DATA ...
@@ -69,7 +69,7 @@ BLINE 140 ; 140 END
 BEND 150
 
 ; DATA:
-; A9 24      LDA $24     ; CH is COUT horizontal position
+; A5 24      LDA $24     ; CH is COUT horizontal position
 ; 48         PHA
 ; A9 ..      LDA #<READ0
 ; A2 ..      LDX #>READ0
