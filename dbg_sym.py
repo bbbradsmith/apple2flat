@@ -64,5 +64,5 @@ def dbg_sym(filein,fileout):
     open(fileout,"wt").write(s)
     print("%d symbols exported." % (len(labels)))
 
-if __name__ == "__main__":
+if __name__ == "__main__" and 'idlelib' not in sys.modules:
     dbg_sym(sys.argv[1],sys.argv[2])

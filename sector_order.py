@@ -25,6 +25,5 @@ def reorder(filein,fileout):
     open(fileout,"wb").write(bo)
     print("%d tracks reordered." % (tracks))
 
-if __name__ == "__main__":
-    print (sys.version)
+if __name__ == "__main__" and 'idlelib' not in sys.modules:
     reorder(sys.argv[1],sys.argv[2])
