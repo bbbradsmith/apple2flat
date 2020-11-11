@@ -1,3 +1,4 @@
+; TODO A2F library public interface
 
 DISK_ERROR_FIND    = $01 ; could not find sector
 DISK_ERROR_DATA    = $02 ; found sector, but could not find data field

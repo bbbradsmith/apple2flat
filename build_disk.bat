@@ -5,9 +5,13 @@
 @del temp\a2f_demo.dbg
 @del temp\a2f_demo.map
 
-cc65\bin\ca65 -o temp\a2f_demo.o -D A2F_DISK -g a2f_demo.s || @goto error
+cc65\bin\cc65 -o temp\a2f_demo.c.s -g -O a2f_demo.c || @goto error
 
-cc65\bin\ld65 -o temp\a2f_demo.bin -m temp\a2f_demo.map --dbgfile temp\a2f_demo.dbg -C a2f_disk.cfg temp\a2f_demo.o temp\a2f_disk.lib || @goto error
+cc65\bin\ca65 -o temp\a2f_demo.c.o -g temp\a2f_demo.c.s || @goto error
+
+cc65\bin\ca65 -o temp\a2f_demo.o -g a2f_demo.s || @goto error
+
+cc65\bin\ld65 -o temp\a2f_demo.bin -m temp\a2f_demo.map --dbgfile temp\a2f_demo.dbg -C a2f_disk.cfg temp\a2f_demo.o temp\a2f_demo.c.o temp\a2f_disk.lib temp\cc65.lib || @goto error
 
 python sector_order.py temp\a2f_demo.bin temp\a2f_demo.dsk || @goto error
 

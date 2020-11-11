@@ -1,5 +1,7 @@
 cc65/
-temp/runtime/
+temp/cc65_lib/
+temp/a2f_disk_lib/
+temp/a2f_tape_lib/
 temp/*.o
 temp/*.s
 temp/*.dbg

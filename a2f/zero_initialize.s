@@ -6,7 +6,7 @@
 ;   LOWRAM
 ;   RAM
 ;   MAIN region following code
-;   DISKREAD region following code
+;   DISKREAD region following code (if A2F_DISK)
 ; Does not initialize stack, since it must RTS.
 
 .segment "CODE"
@@ -18,7 +18,7 @@ ZI_END   = $02
 	ldx #0
 	ldy #0
 region:
-	cpx REGION_END
+	cpx #REGION_END
 	bcs finish
 	lda region_table, X
 	inx
@@ -55,20 +55,27 @@ finish:
 		bne :-
 	rts
 ; table of regions to clear
-.import __LOWRAM_START__
-.import __LOWRAM_SIZE__
-.import __RAM_START__
-.import __RAM_SIZE__
-.import __MAIN_LAST__
-.import __DISKLOAD_START__
-.import __DISKLOAD_SIZE__
-.import __DISKREAD_RUN__
-.import __DISKREAD_SIZE__
 region_table:
+	.import __LOWRAM_START__
+	.import __LOWRAM_SIZE__
+	.import __RAM_START__
+	.import __RAM_SIZE__
+	.import __MAIN_START__
+	.import __MAIN_LAST__
+	.import __MAIN_SIZE__
 	.word __LOWRAM_START__, __LOWRAM_START__ + __LOWRAM_SIZE__
 	.word __RAM_START__, __RAM_START__ + __RAM_SIZE__
+
+	.ifndef A2F_DISK
+	.word __MAIN_LAST__, __MAIN_START__ + __MAIN_SIZE__
+	.else
+	.import __DISKLOAD_START__
+	.import __DISKLOAD_SIZE__
+	.import __DISKREAD_RUN__
+	.import __DISKREAD_SIZE__
 	.word __MAIN_LAST__, __DISKLOAD_START__
 	.word __DISKREAD_RUN__ + __DISKREAD_SIZE__, __DISKLOAD_START__ + __DISKLOAD_SIZE__
+	.endif
+
 REGION_END = * - region_table
 .endproc
-
