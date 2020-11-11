@@ -6,13 +6,13 @@ cd..
 @del temp\a2f_seek.dbg
 @del temp\a2f_seek.map
 
-cc65\bin\ca65 -o temp\disksys_boot.o -g a2f\disksys_boot.s
+cc65\bin\ca65 -o temp\disk_boot.o -g a2f\disk_boot.s
 @IF ERRORLEVEL 1 GOTO error
 
 cc65\bin\ca65 -o temp\a2f_seek.o -g tests\a2f_seek.s
 @IF ERRORLEVEL 1 GOTO error
 
-cc65\bin\ld65 -o temp\a2f_seek.bin -m temp\a2f_seek.map --dbgfile temp\a2f_seek.dbg -C a2f_disk.cfg temp\disksys_boot.o temp\a2f_seek.o
+cc65\bin\ld65 -o temp\a2f_seek.bin -m temp\a2f_seek.map --dbgfile temp\a2f_seek.dbg -C a2f_disk.cfg temp\disk_boot.o temp\a2f_seek.o
 @IF ERRORLEVEL 1 GOTO error
 
 python sector_order.py temp\a2f_seek.bin temp\a2f_seek.dsk
