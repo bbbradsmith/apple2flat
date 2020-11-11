@@ -13,13 +13,10 @@
 .export __BOOT__ : absolute = 1
 .endif
 
-; ZEROPAGE imports (defined elsewhere so they can be reused)
-.importzp disk_ptr ; 2-bytes: pointer to read ouput
-.importzp disk_temp ; 2-bytes
-
 ; DISKREAD public exports
 
 .export disk_error ; byte: last error code
+.exportzp disk_ptr ; parameter for disk read, alias of a2f_temp
 
 .export disk_read
 ; Reads contiguous 256-byte sectors from disk:
@@ -58,19 +55,15 @@
 .export disk_seek_prewait
 .export disk_sector_index
 
-; DISKBOOT has a COUT-string that you could use if you never clear that memory
-.ifdef A2F_DISK
-.export boot_couts
-.endif
-
 ;
 ; RAM usage outside code block
 ;
 
 .segment "ZEROPAGE"
-disk_nibble   = disk_temp+0
-disk_checksum = disk_temp+1
-disk_nidx     = disk_nibble ; not used at the same time as nibble
+disk_ptr      = a2f_temp+0
+disk_nibble   = a2f_temp+2
+disk_nidx     = a2f_temp+2 ; not used at the same time as disk_nibble
+disk_checksum = a2f_temp+3
 
 ;
 ; DISKBOOT

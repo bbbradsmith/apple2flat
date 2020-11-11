@@ -6,19 +6,17 @@
 ; Jumps between tracks in a zipper pattern: 0, 34, 1, 33, 2, 32, etc.
 ; The jumping tests longer seeks across the disk.
 
-.export start
-.exportzp disk_ptr
-.exportzp disk_temp
+.include "../a2f.inc"
 
-.import disk_read
-.import disk_error
-.import boot_couts
+.export start
+.exportzp a2f_temp
+
 .import A2F_MPOS
 .import A2F_BSEC
 
-.segment "ZEROPAGE"
-disk_ptr: .res 2
-disk_temp: .res 2
+a2f_temp = $06 ; 4 bytes monitor COUT won't use
+
+SECTORS = 35 * 16
 
 .segment "LOWRAM"
 test_buf: .res 256
@@ -26,12 +24,10 @@ read_seg: .res 1
 read_track: .res 1
 read_combo: .res 2
 
-SECTORS = 35 * 16
-
 .macro MESSAGE msg_
 	lda #<(msg_)
 	ldx #>(msg_)
-	jsr boot_couts
+	jsr debug_couts
 .endmacro
 
 .segment "ALIGN"
@@ -118,6 +114,23 @@ msg_start:
 	.byte "  00 ERROR (SHOULD BE 00)", 0
 msg_fail:  .asciiz "FAIL!"
 msg_pass:  .asciiz "PASS"
+
+.proc debug_couts
+; X:A = pointer to 0-terminated ASCII string
+ptr = a2f_temp
+	sta ptr+0
+	stx ptr+1
+	ldy #0
+	:
+		lda (ptr), Y
+		beq :+
+		ora #$80
+		jsr $FDED ; COUT monitor output character
+		iny
+		jmp :-
+	:
+	jmp $FD8E ; CROUT monitor output newline
+.endproc
 
 ; fill rest of MAIN with sector number
 .align 256
