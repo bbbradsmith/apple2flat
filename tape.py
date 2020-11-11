@@ -33,7 +33,7 @@ def decode_tape(filein):
     else: # 16-bit signed, little endian
         ws = [x[0] for x in struct.iter_unpack("<h",wb)]
     w.close()
-    # NOTE: we could use a highpass filter here to improve the signal?
+    # NOTE: should we use a highpass filter here to improve the signal?
     # set threshold
     peak = max(max(ws), -min(ws))
     t = int(DECODE_THRESHOLD * peak)
@@ -165,7 +165,6 @@ def encode_tape(fileout,filesin,wrate=SAMPLERATE):
         add(V1,int(wrate*SILENCE1)) # final flip to terminate the last bit
         first = False
     add(V1,int(wrate*(SILENCE0-SILENCE1))) # extra trailing silence
-    
     # NOTE: would a lowpass filter be appropriate?
     # output
     print("%s: %d samples, %d Hz" % (fileout, len(bd), wrate))
