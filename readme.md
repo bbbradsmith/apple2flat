@@ -1,4 +1,4 @@
-# Apple2Primer
+# Apple2Flat
 
 This is a CC65 framework for building C or Assembly programs to run on the Apple II.
 
