@@ -164,7 +164,7 @@ inc_dst: ; shared increment for smaller code
 	:
 	rts
 msg_boot1:
-	.asciiz "LOADING A2P PROGRAM..."
+	.asciiz "LOADING A2F PROGRAM..."
 msg_error:
 	.asciiz "LOAD ERROR"
 msg_run:

@@ -38,8 +38,8 @@ BOOT  = $0300 ; some free space to stash our loader
 READ0 = __MAIN_START__
 READ1 = __MAIN_LAST__ - 1
 
-BLINE 10  ; 10 PRINT "LOADING A2P PROGRAM..."
-.byte $BA,'"',"LOADING A2P PROGRAM...",'"',0
+BLINE 10  ; 10 PRINT "LOADING A2F PROGRAM..."
+.byte $BA,'"',"LOADING A2F PROGRAM...",'"',0
 BLINE 20  ; 20 DATA ...
 .byte $83," ", BDC {$A5} BDC {$24} BDC {$48} BDC {$A9} BDL {<READ0} ,0
 BLINE 30  ; 30 DATA ...
