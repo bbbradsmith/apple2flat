@@ -1,17 +1,17 @@
 
 .export start
-.exportzp disksys_ptr
-.exportzp disksys_temp
+.exportzp disk_ptr
+.exportzp disk_temp
 
-.import disksys_read
-.import disksys_error
+.import disk_read
+.import disk_error
 .import boot_couts
 .import MPOS
 .import BSEC
 
 .segment "ZEROPAGE"
-disksys_ptr: .res 2
-disksys_temp: .res 2
+disk_ptr: .res 2
+disk_temp: .res 2
 
 .segment "LOWRAM"
 

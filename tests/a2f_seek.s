@@ -7,18 +7,18 @@
 ; The jumping tests longer seeks across the disk.
 
 .export start
-.exportzp disksys_ptr
-.exportzp disksys_temp
+.exportzp disk_ptr
+.exportzp disk_temp
 
-.import disksys_read
-.import disksys_error
+.import disk_read
+.import disk_error
 .import boot_couts
 .import MPOS
 .import BSEC
 
 .segment "ZEROPAGE"
-disksys_ptr: .res 2
-disksys_temp: .res 2
+disk_ptr: .res 2
+disk_temp: .res 2
 
 .segment "LOWRAM"
 test_buf: .res 256
@@ -92,18 +92,18 @@ test:
 	jsr $FE84 ; SETNORM
 	; read the sector
 	lda #<test_buf
-	sta disksys_ptr+0
+	sta disk_ptr+0
 	lda #>test_buf
-	sta disksys_ptr+1
+	sta disk_ptr+1
 	lda read_combo+0
 	ldx read_combo+1
 	ldy #1
-	jsr disksys_read
+	jsr disk_read
 	lda test_buf+0
 	jsr $FDDA
-	lda disksys_error
+	lda disk_error
 	jsr $FDDA
-	lda disksys_error
+	lda disk_error
 	bne fail
 	rts
 fail:

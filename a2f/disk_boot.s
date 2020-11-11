@@ -1,4 +1,4 @@
-; DISKBOOT & DISKSYS
+; DISKBOOT & DISKREAD
 ;  These are routines for creating a bootable 16-sector disk.
 ;  The read routines will let you load/save 256-byte sectors from the disk, instead of using the DOS file system.
 ;  It is is informed by, but simpler than, the RWST-16 routines from Apple DOS 3.3.
@@ -9,49 +9,49 @@
 .import start
 
 ; ZEROPAGE imports (defined elsewhere so they can be reused)
-.importzp disksys_ptr ; 2-bytes: pointer to read ouput
-.importzp disksys_temp ; 2-bytes
+.importzp disk_ptr ; 2-bytes: pointer to read ouput
+.importzp disk_temp ; 2-bytes
 
-; DISKSYS public exports
+; DISKREAD public exports
 
-.export disksys_error ; byte: last error code
+.export disk_error ; byte: last error code
 
-.export disksys_read
+.export disk_read
 ; Reads contiguous 256-byte sectors from disk:
 ;   X:A = (track * 16) + sector
 ;   Y = count of sectors to read
-;   disksys_ptr = data out location
-; Returns: disksys_error in A/flags (0 on success)
+;   disk_ptr = data out location
+; Returns: disk_error in A/flags (0 on success)
 
-; DISKSYS variables (exported for access via optional DISKSYS write procedures)
-.export disksys_slot ; 
-.export disksys_track
-.export disksys_drive
-.export disksys_driveto
-.export disksys_sector
-.export disksys_seekto
-.export disksys_remain
-.export disksys_retryseek
-.export disksys_retryfind
-.export disksys_retryread
-.export disksys_counter
-.export disksys_field ; 4 bytes
-.export disksys_partial
-.export disksys_nibbles1 ; 86 bytes, temporary buffer for 2+2+2 nibbles
+; DISKREAD variables (exported for access via optional disk write procedures)
+.export disk_slot ; 
+.export disk_track
+.export disk_drive
+.export disk_driveto
+.export disk_sector
+.export disk_seekto
+.export disk_remain
+.export disk_retryseek
+.export disk_retryfind
+.export disk_retryread
+.export disk_counter
+.export disk_field ; 4 bytes
+.export disk_partial
+.export disk_nibbles1 ; 86 bytes, temporary buffer for 2+2+2 nibbles
 
-; DISKSYS internal procedures (exported for optional DISKSYS write procedures)
-.export disksys_delay_10ms
-.export disksys_read_address
-.export disksys_denibble
-.export disksys_read_sector
-.export disksys_start
-.export disksys_stop
-.export disksys_seek
-.export disksys_seek0
-.export disksys_find_sector
-.export disksys_read_unpack
-.export disksys_seek_prewait
-.export disksys_sector_index
+; DISKREAD internal procedures (exported for optional disk write procedures)
+.export disk_delay_10ms
+.export disk_read_address
+.export disk_denibble
+.export disk_read_sector
+.export disk_start
+.export disk_stop
+.export disk_seek
+.export disk_seek0
+.export disk_find_sector
+.export disk_read_unpack
+.export disk_seek_prewait
+.export disk_sector_index
 
 ; DISKBOOT has a COUT-string that you could use if you never clear that memory
 .export boot_couts
@@ -61,9 +61,9 @@
 ;
 
 .segment "ZEROPAGE"
-disksys_nibble   = disksys_temp+0
-disksys_checksum = disksys_temp+1
-disksys_nidx     = disksys_nibble ; not used at the same time as nibble
+disk_nibble   = disk_temp+0
+disk_checksum = disk_temp+1
+disk_nidx     = disk_nibble ; not used at the same time as nibble
 
 ;
 ; DISKBOOT
@@ -71,21 +71,21 @@ disksys_nidx     = disksys_nibble ; not used at the same time as nibble
 
 .segment "DISKBOOT"
 
-.import __DISKSYS_LOAD__ ; disk image location of DISKSYS
-.import __DISKSYS_RUN__ ; memory destination of DISKSYS
-.import __DISKSYS_SIZE__
-
-.import __DISKREAD_START__ ; memory reserved for DISKSYS (to ensure space for disksys_nibbles1)
-.import __DISKREAD_LAST__
+.import __DISKREAD_LOAD__ ; disk image location of DISKREAD
+.import __DISKREAD_RUN__ ; memory destination of DISKREAD
 .import __DISKREAD_SIZE__
+
+.import __DISKLOAD_START__ ; memory reserved for DISKREAD (to ensure space for disk_nibbles1)
+.import __DISKLOAD_LAST__
+.import __DISKLOAD_SIZE__
 
 .import __MAIN_START__ ; memory destination of MAIN
 .import __MAIN_LAST__
 .import BSEC ; sector where MAIN begins
 
-DISKSYS_BOOT_START = __DISKSYS_LOAD__ + $800 ; where boot0 loads DISKSYS into memory temporarily
-DISKSYS_BOOT_OFFSET = __DISKSYS_RUN__ - DISKSYS_BOOT_START
-DISKSYS_END = __DISKSYS_RUN__ + __DISKSYS_SIZE__ ; end of code in DISKSYS run location
+DISKREAD_BOOT_START = __DISKREAD_LOAD__ + $800 ; where boot0 loads DISKREAD into memory temporarily
+DISKREAD_BOOT_OFFSET = __DISKREAD_RUN__ - DISKREAD_BOOT_START
+DISKREAD_END = __DISKREAD_RUN__ + __DISKREAD_SIZE__ ; end of code in DISKREAD run location
 
 boot_slot = $2B ; device slot used by disk boot0 (i.e. what peripheral slot booted this disk)
 
@@ -94,14 +94,14 @@ boot_slot = $2B ; device slot used by disk boot0 (i.e. what peripheral slot boot
 
 ; the first byte of the boot sector indicates how many pages must be loaded at boot
 boot_sector_count:
-	.byte >(__DISKSYS_LOAD__ + __DISKSYS_SIZE__ + 255)
+	.byte >(__DISKREAD_LOAD__ + __DISKREAD_SIZE__ + 255)
 
 ; $801 is the boot entry
 .proc boot1
 src = $06
 dst = $08
 	lda $2B ; (slot * 16) used by disk boot device
-	sta disksys_slot - DISKSYS_BOOT_OFFSET
+	sta disk_slot - DISKREAD_BOOT_OFFSET
 	jsr $FE89 ; SETKBD initialize monitor keyboard handler
 	jsr $FE93 ; SETVID initialize monitor video and text output handler
 	jsr $FB2F ; INIT initialize monitor
@@ -109,17 +109,17 @@ dst = $08
 	lda #<msg_boot1
 	ldx #>msg_boot1
 	jsr boot_couts
-	; copy DISKSYS to its permanent run location
-	lda #<DISKSYS_BOOT_START
+	; copy DISKREAD to its permanent run location
+	lda #<DISKREAD_BOOT_START
 	sta src+0
-	lda #>DISKSYS_BOOT_START
+	lda #>DISKREAD_BOOT_START
 	sta src+1
-	lda #<__DISKSYS_RUN__
+	lda #<__DISKREAD_RUN__
 	sta dst+0
-	lda #>__DISKSYS_RUN__
+	lda #>__DISKREAD_RUN__
 	sta dst+1
 	ldy #0
-copy_disksys:
+copy_diskread:
 	lda (src), Y
 	sta (dst), Y
 	inc src+0
@@ -128,21 +128,21 @@ copy_disksys:
 	:
 	jsr inc_dst
 	lda dst+0
-	cmp #<DISKSYS_END
-	bne copy_disksys
+	cmp #<DISKREAD_END
+	bne copy_diskread
 	lda dst+1
-	sbc #>DISKSYS_END
-	bcc copy_disksys
-	; use DISKSYS read to load MAIN
+	sbc #>DISKREAD_END
+	bcc copy_diskread
+	; use DISKREAD read to load MAIN
 read_main:
 	lda #<__MAIN_START__
-	sta disksys_ptr+0
+	sta disk_ptr+0
 	lda #>__MAIN_START__
-	sta disksys_ptr+1
+	sta disk_ptr+1
 	lda #<BSEC ; MAIN sector start
 	ldx #>BSEC
 	ldy #>((__MAIN_LAST__ - __MAIN_START__) + 255) ; MAIN sector count
-	jsr disksys_read
+	jsr disk_read
 	bne error
 	; Success!
 	lda #<msg_run
@@ -153,7 +153,7 @@ error:
 	lda #<msg_error
 	ldx #>msg_error
 	jsr boot_couts
-	;lda disksys_error
+	;lda disk_error
 	;jsr $FDDA ; PRBYTE (if you want to know the specific reason the read failed)
 	;jsr $FD8E ; CROUT
 	jmp $FF69 ; MONZ monitor * prompt, for debugging
@@ -189,10 +189,10 @@ ptr = $06 ; any 2 ZP bytes not used by COUT
 .endproc
 
 ;
-; DISKSYS
+; DISKREAD
 ;
 
-.segment "DISKSYS"
+.segment "DISKREAD"
 
 SPIN_DETECT_ATTEMPTS = 8
 SEEK_ATTEMPTS = 2 ; if address not found after 1 reseek, a second probably won't help
@@ -230,34 +230,34 @@ Q7H          = $C08F
 .endmacro
 
 .align 256
-; Some procedures in DISKSYS require alignment to avoid page-crossing branches,
+; Some procedures in DISKREAD require alignment to avoid page-crossing branches,
 ; or page-crossing indexed memory access, which alters the cycle timing.
 
-; DISKSYS aligned page 0:
-; - disksys_read_address (branch alignment)
-; - disksys_denibble (table aligned at $96)
+; DISKREAD aligned page 0:
+; - disk_read_address (branch alignment)
+; - disk_denibble (table aligned at $96)
 ; No alignment needed, but used to fill the otherwise unused space:
-; - disksys_delay_10ms
+; - disk_delay_10ms
 ; - variables
-DISKSYS_PAGE_0 = *
+DISKREAD_PAGE_0 = *
 
 ; variables
-disksys_error:     .byte 0          ; error flags of last operation
-disksys_slot:      .byte 6<<4       ; disk peripheral slot * 16
-disksys_drive:     .byte 0          ; drive in use
-disksys_driveto:   .byte 0          ; drive requested
-disksys_track:     .byte 0          ; track position
-disksys_seekto:    .byte 0          ; track requested
-disksys_sector:    .byte 0          ; sector requested
-disksys_remain:    .byte 0          ; sectors left to read
-disksys_retryseek: .byte 0          ; retries left for a failed seek
-disksys_retryfind: .byte 0          ; retries left to find a sector address
-disksys_retryread: .byte 0          ; retries left to read a sector
-disksys_counter:   .byte 0          ; nibble tests left to find start of sector address/data
-disksys_field:     .byte 0, 0, 0, 0 ; last read address field
-disksys_partial:   .byte 0          ; temporary error if last attempt was a partial read
+disk_error:     .byte 0          ; error flags of last operation
+disk_slot:      .byte 6<<4       ; disk peripheral slot * 16
+disk_drive:     .byte 0          ; drive in use
+disk_driveto:   .byte 0          ; drive requested
+disk_track:     .byte 0          ; track position
+disk_seekto:    .byte 0          ; track requested
+disk_sector:    .byte 0          ; sector requested
+disk_remain:    .byte 0          ; sectors left to read
+disk_retryseek: .byte 0          ; retries left for a failed seek
+disk_retryfind: .byte 0          ; retries left to find a sector address
+disk_retryread: .byte 0          ; retries left to read a sector
+disk_counter:   .byte 0          ; nibble tests left to find start of sector address/data
+disk_field:     .byte 0, 0, 0, 0 ; last read address field
+disk_partial:   .byte 0          ; temporary error if last attempt was a partial read
 
-.proc disksys_delay_10ms
+.proc disk_delay_10ms
 	; A * 10 = ms to delay (approximate, at least), A >= 1
 	; clobbers A/Y = 0
 	sec
@@ -281,15 +281,15 @@ disksys_partial:   .byte 0          ; temporary error if last attempt was a part
 	rts
 .endproc
 
-.proc disksys_read_address
-	; X = disksys_slot (kept)
-	; Clobbers: disksys_counter=0, disksys_checksum
+.proc disk_read_address
+	; X = disk_slot (kept)
+	; Clobbers: disk_counter=0, disk_checksum
 	; Return: C = 0 if a valid address field was read
-	;         disksys_field = the information read (4 bytes)
+	;         disk_field = the information read (4 bytes)
 	; After a success, there should be about 250 cycles of gap/sync before we must start reading its following sector.
 	lda #>FIND_NIBBLE_ATTEMPTS
 	.assert <FIND_NIBBLE_ATTEMPTS = 0, error, "Low byte of FIND_NIBBLE_ATTEMPTS is ignored, should be zero."
-	sta disksys_counter
+	sta disk_counter
 	ldy #0
 	; 1. find D5 AA 96 address field indicator
 	; 2. read Volume Track Sector Checksum from address field
@@ -297,7 +297,7 @@ disksys_partial:   .byte 0          ; temporary error if last attempt was a part
 find_restart: ; when returning here, ensure <32 cycles between reads to avoid skipping a byte
 	iny
 	bne read_D5
-	dec disksys_counter
+	dec disk_counter
 	beq find_error
 read_D5:
 	lda Q6L, X
@@ -320,19 +320,19 @@ read_96:
 	ldy #3
 	lda #0
 read_fields:
-	sta z:disksys_checksum
+	sta z:disk_checksum
 read_field0:
 	lda Q6L, X
 	BP bpl, read_field0
 	sec
 	rol
-	sta z:disksys_nibble
+	sta z:disk_nibble
 read_field1:
 	lda Q6L, X
 	BP bpl, read_field1
-	and z:disksys_nibble
-	sta disksys_field, Y
-	eor z:disksys_checksum
+	and z:disk_nibble
+	sta disk_field, Y
+	eor z:disk_checksum
 	dey
 	bpl read_fields ; 25 cycles to next read (<32)
 	cmp #0 ; EOR checksum should be 0
@@ -361,7 +361,7 @@ find_error:
 .res 11 ; padding
 
 ; Generated by notes/nibble.py
-disksys_denibble_suffix:
+disk_denibble_suffix:
 .byte                         $00,$01,$00,$00,$02,$03,$00,$04,$05,$06
 .byte $00,$00,$00,$00,$00,$00,$07,$08,$00,$00,$00,$09,$0A,$0B,$0C,$0D
 .byte $00,$00,$0E,$0F,$10,$11,$12,$13,$00,$14,$15,$16,$17,$18,$19,$1A
@@ -370,22 +370,22 @@ disksys_denibble_suffix:
 .byte $00,$00,$00,$00,$00,$29,$2A,$2B,$00,$2C,$2D,$2E,$2F,$30,$31,$32
 .byte $00,$00,$33,$34,$35,$36,$37,$38,$00,$39,$3A,$3B,$3C,$3D,$3E,$3F
 
-disksys_denibble = disksys_denibble_suffix - $96
-.assert (<disksys_denibble_suffix)=$96, error, .sprintf("disksys_denibble_suffix out of alignment: $96 != $%02X", disksys_denibble_suffix - DISKSYS_PAGE_0)
+disk_denibble = disk_denibble_suffix - $96
+.assert (<disk_denibble_suffix)=$96, error, .sprintf("disk_denibble_suffix out of alignment: $96 != $%02X", disk_denibble_suffix - DISKREAD_PAGE_0)
 
-; DISKSYS aligned page 1:
-; - disksys_read_sector (branch alignment)
+; DISKREAD aligned page 1:
+; - disk_read_sector (branch alignment)
 ; No alignment required:
 ; - everything else...
 
-.proc disksys_read_sector
+.proc disk_read_sector
 	lda #0
-	sta disksys_partial
+	sta disk_partial
 	lda #SECTOR_READ_ATTEMPTS
-	sta disksys_retryread
+	sta disk_retryread
 retry_read_sector:
-	ldx disksys_slot
-	jsr disksys_find_sector
+	ldx disk_slot
+	jsr disk_find_sector
 	bcc :+
 		jmp find_error
 	:
@@ -419,29 +419,29 @@ read_AD:
 	lda #0
 read_nibbles1: ; 86 bytes (reverse order)
 	dey
-	sty z:disksys_nidx
+	sty z:disk_nidx
 read_nibble1:
 	ldy Q6L, X
 	BP bpl, read_nibble1
-	eor disksys_denibble, Y
-	ldy z:disksys_nidx
-	sta disksys_nibbles1, Y
+	eor disk_denibble, Y
+	ldy z:disk_nidx
+	sta disk_nibbles1, Y
 	bne read_nibbles1 ; 26 cycles to next read (<32)
 	;ldy #0
 read_nibbles0: ; 256 bytes (forward order)
-	sty z:disksys_nidx
+	sty z:disk_nidx
 read_nibble0:
 	ldy Q6L, X
 	BP bpl, read_nibble0
-	eor disksys_denibble, Y
-	ldy z:disksys_nidx
-	sta (disksys_ptr), Y
+	eor disk_denibble, Y
+	ldy z:disk_nidx
+	sta (disk_ptr), Y
 	iny
 	bne read_nibbles0 ; 27 cycles to next read (<32)
 read_checksum:
 	ldy Q6L, X
 	BP bpl, read_checksum
-	cmp disksys_denibble, Y
+	cmp disk_denibble, Y
 	bne data_error
 read_DE:
 	lda Q6L, X
@@ -454,44 +454,44 @@ read_AA_again:
 	BP bpl, read_AA_again
 	cmp #$AA
 	bne data_error
-	jmp disksys_read_unpack ; finished reading, copy data to destination!
+	jmp disk_read_unpack ; finished reading, copy data to destination!
 ; errors
 data_error: ; CRC or footer failed: unpack partially-corrupt data and retry (start of segment data may be valid?)
-	lda #DISKSYS_ERROR_PARTIAL
-	sta disksys_partial ; note that partial data was decoded
-	jsr disksys_read_unpack
-	dec disksys_retryread
+	lda #DISK_ERROR_PARTIAL
+	sta disk_partial ; note that partial data was decoded
+	jsr disk_read_unpack
+	dec disk_retryread
 	bne common_retry
-	lda #DISKSYS_ERROR_PARTIAL
+	lda #DISK_ERROR_PARTIAL
 	jmp common_error
 head_error: ; sector header corrupt/missing: retry
-	dec disksys_retryread
+	dec disk_retryread
 	bne common_retry
-	lda #DISKSYS_ERROR_DATA
+	lda #DISK_ERROR_DATA
 	jmp common_error
 find_error: ; could not find address: give up
-	lda #DISKSYS_ERROR_FIND
+	lda #DISK_ERROR_FIND
 common_error:
-	ora disksys_error
-	ora disksys_partial ; partial data was retrieved in a previous attempt
-	sta disksys_error
+	ora disk_error
+	ora disk_partial ; partial data was retrieved in a previous attempt
+	sta disk_error
 	rts
 common_retry:
 	jmp retry_read_sector
 .endproc
 
-.proc disksys_start
+.proc disk_start
 	; A = drive to select
 	; Return: C = motor is still spinning up
-	; Return: X = disksys_slot
+	; Return: X = disk_slot
 	; Selects the requested drive and spins up its motor.
 	ldx #0
-	stx disksys_error ; clear errors
+	stx disk_error ; clear errors
 	and #1
-	cmp disksys_drive
-	sta disksys_drive
+	cmp disk_drive
+	sta disk_drive
 	php ; Z = drive changed
-	ldx disksys_slot
+	ldx disk_slot
 	; check if motor is already spinning
 	lda Q7L, X ; read mode
 	lda Q6L, X
@@ -521,44 +521,44 @@ common_retry:
 	lda MOTOR_ON, X ; drive motor on
 	txa
 	clc
-	adc disksys_drive
+	adc disk_drive
 	tay
 	lda DRIVE_ENABLE, Y ; RWST-16 does enable after motor
 	plp
 	bcs :+
 		lda #SEEK_WAIT ; wait before doing seek to avoid voltage spike from motor start
-		jsr disksys_delay_10ms
+		jsr disk_delay_10ms
 		clc
 	:
 	rts ; C = 0 if motor needs spinup
 .endproc
 
-.proc disksys_stop
-	ldx disksys_slot
+.proc disk_stop
+	ldx disk_slot
 	lda Q7L, X ; read mode (just in case)
 	lda MOTOR_OFF, X
-	lda disksys_error
+	lda disk_error
 	rts
 .endproc
 
-.proc disksys_seek
-	; Return: X = disksys_slot
+.proc disk_seek
+	; Return: X = disk_slot
 	; Drives stepper motor to the seekto track.
 	; RWST-16 used a complicated acceleration curve with overlapping phases.
 	; This uses a simpler but slower fixed wait per single phase.
-	lda disksys_seekto
-	cmp disksys_track
+	lda disk_seekto
+	cmp disk_track
 	bne :+
-	ldx disksys_slot
+	ldx disk_slot
 	rts ; already on the right track
 seek_loop:
-	lda disksys_seekto
-	cmp disksys_track
+	lda disk_seekto
+	cmp disk_track
 	bne :+
 		; track = seekto, wait for an additional settle
-		ldx disksys_slot
+		ldx disk_slot
 		lda #SETTLE_WAIT
-		jmp disksys_delay_10ms
+		jmp disk_delay_10ms
 	:
 	php
 	jsr index
@@ -567,11 +567,11 @@ seek_loop:
 	bcc seek_out
 seek_in: ; seekto > track
 	jsr half ; +1/2
-	inc disksys_track
+	inc disk_track
 	jsr index
 	jmp seek_next
 seek_out: ; seekto < track
-	dec disksys_track
+	dec disk_track
 	jsr index
 	jsr half ; -1/2
 	;jmp seek_next
@@ -581,16 +581,16 @@ seek_next:
 	jmp seek_loop ; loop until seekto = track
 ; subroutines
 index: ; places X index at phase 0 or phase 2 based on current track
-	lda disksys_track
+	lda disk_track
 	and #$01
 	asl
 	asl
-	ora disksys_slot
+	ora disk_slot
 	tax
 	rts
 hold: ; waits for the drive to reach the next phase
 	lda #PHASE_WAIT
-	jmp disksys_delay_10ms
+	jmp disk_delay_10ms
 half: ; steps through half-track (index+1 = odd phases)
 	lda PHASE1_ON, X
 	jsr hold
@@ -598,51 +598,51 @@ half: ; steps through half-track (index+1 = odd phases)
 	rts
 .endproc
 
-.proc disksys_seek0
-	; Return: X = disksys_slot, disksys_track=0
+.proc disk_seek0
+	; Return: X = disk_slot, disk_track=0
 	; Steps outward 80x to realign at track 0 against the outer stop.
-	lda disksys_seekto
+	lda disk_seekto
 	pha
 	lda #0
-	sta disksys_seekto
+	sta disk_seekto
 	lda #40
-	sta disksys_track
-	jsr disksys_seek
+	sta disk_track
+	jsr disk_seek
 	pla
-	sta disksys_seekto
+	sta disk_seekto
 	rts
 .endproc
 
-.proc disksys_find_sector
-	; X = disksys_slot (kept)
-	; Clobbers: disksys_retryseek, disksys_retryfind
+.proc disk_find_sector
+	; X = disk_slot (kept)
+	; Clobbers: disk_retryseek, disk_retryfind
 	; Return: C = 0 if the sectors address could be found
 	; After a success, we have about 200 cycles to start looking for the sector data.
 	lda #SEEK_ATTEMPTS
-	sta disksys_retryseek
+	sta disk_retryseek
 retry_seek:
-	jsr disksys_seek
+	jsr disk_seek
 	lda #FIND_ATTEMPTS
-	sta disksys_retryfind
+	sta disk_retryfind
 retry_address:
-	jsr disksys_read_address
+	jsr disk_read_address
 	bcc found_address
-	dec disksys_retryfind
+	dec disk_retryfind
 	bne retry_address
 	; no valid address found on this track, try re-seeking from 0
 reset_seek:
-	dec disksys_retryseek
+	dec disk_retryseek
 	beq seek_error
-	jsr disksys_seek0
+	jsr disk_seek0
 	jmp retry_seek
 found_address:
-	lda disksys_seekto
-	cmp disksys_field + FIELD_TRK
+	lda disk_seekto
+	cmp disk_field + FIELD_TRK
 	bne reset_seek ; address field says we're on the wrong track, do a reseek
-	lda disksys_sector
-	cmp disksys_field + FIELD_SEC
+	lda disk_sector
+	cmp disk_field + FIELD_SEC
 	beq found_sector
-	dec disksys_retryfind
+	dec disk_retryfind
 	bne retry_address
 seek_error:
 	sec
@@ -652,30 +652,30 @@ found_sector:
 	rts
 .endproc
 
-.proc disksys_read_unpack
+.proc disk_read_unpack
 	ldy #0
 outer: ; 3 passes over X = 85-0
 	ldx #86
 inner: ; 1 pass over Y = 0-255
 	dex
 	bmi outer
-	lda (disksys_ptr), Y
-	lsr disksys_nibbles1, X
+	lda (disk_ptr), Y
+	lsr disk_nibbles1, X
 	rol
-	lsr disksys_nibbles1, X
+	lsr disk_nibbles1, X
 	rol A
-	sta (disksys_ptr), Y
+	sta (disk_ptr), Y
 	iny
 	bne inner
 	rts
 .endproc
 
-.proc disksys_seek_prewait
+.proc disk_seek_prewait
 	; Motor is spinning up, but we can seek while it happens.
 	; Predict the first seek time, and wait any remaining motor spinup time.
-	lda disksys_seekto
+	lda disk_seekto
 	sec
-	sbc disksys_track
+	sbc disk_track
 	beq motor_wait ; no seek, do full motor wait
 	bcs :+
 		eor #$FF ; seek distance was negative, invert
@@ -685,7 +685,7 @@ inner: ; 1 pass over Y = 0-255
 	; A = tracks to seek
 	asl
 	asl ; 40 ms per track
-	.assert PHASE_WAIT = 2, error, "DISKSYS track seek calculation assumes 20ms per step"
+	.assert PHASE_WAIT = 2, error, "DISKREAD track seek calculation assumes 20ms per step"
 	clc
 	adc #SETTLE_WAIT ; settling time
 	; subtract predicted seek time from remaining motor spinup time
@@ -696,67 +696,67 @@ motor_wait:
 	clc
 	adc #MOTOR_WAIT
 	bmi :+ ; seek is already longer than MOTOR_WAIT
-		jmp disksys_delay_10ms
+		jmp disk_delay_10ms
 	:
 	rts
 .endproc
 
-.proc disksys_sector_index
+.proc disk_sector_index
 	; X:A = (track * 16) + sector
-	sta disksys_seekto
+	sta disk_seekto
 	and #15
-	sta disksys_sector
+	sta disk_sector
 	txa
 	lsr
-	ror disksys_seekto
+	ror disk_seekto
 	lsr
-	ror disksys_seekto
-	lsr disksys_seekto
-	lsr disksys_seekto
+	ror disk_seekto
+	lsr disk_seekto
+	lsr disk_seekto
 	rts
 .endproc
 
-.proc disksys_read
+.proc disk_read
 	; X:A = (track * 16) + sector
 	; Y = count of sectors to read
 	; ptr = data out ptr
-	sty disksys_remain
-	jsr disksys_sector_index
+	sty disk_remain
+	jsr disk_sector_index
 	; spin up the drive
-	lda disksys_driveto
-	jsr disksys_start ; X = disksys_slot
+	lda disk_driveto
+	jsr disk_start ; X = disk_slot
 	bcs sector_loop ; drive is already spinning, start reading sectors
-	jsr disksys_seek_prewait
+	jsr disk_seek_prewait
 sector_loop:
-	lda disksys_remain
+	lda disk_remain
 	bne :+
-		jmp disksys_stop ; done
+		jmp disk_stop ; done
 	:
-	dec disksys_remain
-	jsr disksys_read_sector
-	ldy disksys_sector
+	dec disk_remain
+	jsr disk_read_sector
+	ldy disk_sector
 	iny
 	cpy #16
 	bcc :+
-		inc disksys_seekto
+		inc disk_seekto
 		ldy #0
 	:
-	sty disksys_sector
-	inc disksys_ptr+1
+	sty disk_sector
+	inc disk_ptr+1
 	jmp sector_loop
 .endproc
 
 ; There's empty space on the last page, so it's a reasonable place for this 2+2+2 nibbles buffer.
 ; Space is not reserved here so that we can share space in sector 0 with BOOT,
 ; but a few asserts here verify that the needed space will exist after it's copied into place.
-disksys_nibbles1:
+disk_nibbles1:
 ;.res 86
-.assert __DISKREAD_LAST__ = disksys_nibbles1, error, "disksys_boot.o must be the last module in DISKBOOT"
-.assert (__DISKREAD_SIZE__ - (disksys_nibbles1 - __DISKREAD_START__)) >= 86, error, "Not enough trailing space in DISKREAD for disksys_nibbles1"
+.assert __DISKLOAD_LAST__ = disk_nibbles1, error, "disk_boot.o must be the last module in DISKLOAD"
+.assert (__DISKLOAD_SIZE__ - (disk_nibbles1 - __DISKLOAD_START__)) >= 86, error, "Not enough trailing space in DISKLOAD for disk_nibbles1"
 
 ; Also, if this crosses a page there's an inconsistent +1 cycle penalty when accessing it.
 ; This is within tolerance for reading, but a fixed timing is essential when writing.
-.assert (>(disksys_nibbles1+85))=(>disksys_nibbles1), error, "disksys_nibbles1 may not cross a page."
+.assert (>(disk_nibbles1+85))=(>disk_nibbles1), error, "disk_nibbles1 may not cross a page."
 
 ; There's more than 100 bytes free here at the end of the reserved page.
 ; This is probably not significant, but could be used if we were really in a pinch.

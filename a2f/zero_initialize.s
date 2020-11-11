@@ -60,15 +60,15 @@ finish:
 .import __RAM_START__
 .import __RAM_SIZE__
 .import __MAIN_LAST__
-.import __DISKREAD_START__
+.import __DISKLOAD_START__
+.import __DISKLOAD_SIZE__
+.import __DISKREAD_RUN__
 .import __DISKREAD_SIZE__
-.import __DISKSYS_RUN__
-.import __DISKSYS_SIZE__
 region_table:
 	.word __LOWRAM_START__, __LOWRAM_START__ + __LOWRAM_SIZE__
 	.word __RAM_START__, __RAM_START__ + __RAM_SIZE__
-	.word __MAIN_LAST__, __DISKREAD_START__
-	.word __DISKSYS_RUN__ + __DISKSYS_SIZE__, __DISKREAD_START__ + __DISKREAD_SIZE__
+	.word __MAIN_LAST__, __DISKLOAD_START__
+	.word __DISKREAD_RUN__ + __DISKREAD_SIZE__, __DISKLOAD_START__ + __DISKLOAD_SIZE__
 REGION_END = * - region_table
 .endproc
 
