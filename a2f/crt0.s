@@ -42,18 +42,19 @@ start:
 	; call int main()
 	jsr _main
 _exit:
-	; TODO this prints only @s once we've done zero_initialize. How can we restore normal monitor text?
 	pha
 	txa
 	pha
-	jsr $FE89 ; SETKBD
-	jsr $FE93 ; SETVID
+	; the original monitor RESET calls these 4 routines
+	jsr $FE84 ; SETNORM
 	jsr $FB2F ; INIT
+	jsr $FE93 ; SETVID
+	jsr $FE89 ; SETKBD
+	; newline, then print exit code and enter monitor * prompt
 	jsr $FD8E ; CROUT newline
-	; print exit code and enter monitor * prompt
 	pla
 	jsr $FDDA ; PRBYTE hex display
 	pla
 	jsr $FDDA
 	jsr $FD8E
-	jmp $FF69 ; MONZ
+	jmp $FF69 ; MONZ monitor * prompt
