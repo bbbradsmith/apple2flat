@@ -5,26 +5,19 @@
 @del temp\a2f_demo.dbg
 @del temp\a2f_demo.map
 
-cc65\bin\ca65 -o temp\disk_boot.o -g a2f\disk_boot.s
-@IF ERRORLEVEL 1 GOTO error
+cc65\bin\ca65 -o temp\a2f_demo.o -D A2F_DISK -g a2f_demo.s || @goto error
 
-cc65\bin\ca65 -o temp\a2f_demo.o -g a2f_demo.s
-@IF ERRORLEVEL 1 GOTO error
+cc65\bin\ld65 -o temp\a2f_demo.bin -m temp\a2f_demo.map --dbgfile temp\a2f_demo.dbg -C a2f_disk.cfg temp\a2f_demo.o temp\a2f_disk.lib || @goto error
 
-cc65\bin\ld65 -o temp\a2f_demo.bin -m temp\a2f_demo.map --dbgfile temp\a2f_demo.dbg -C a2f_disk.cfg temp\disk_boot.o temp\a2f_demo.o
-@IF ERRORLEVEL 1 GOTO error
+python sector_order.py temp\a2f_demo.bin temp\a2f_demo.dsk || @goto error
 
-python sector_order.py temp\a2f_demo.bin temp\a2f_demo.dsk
-@IF ERRORLEVEL 1 GOTO error
-
-python dbg_sym.py temp\a2f_demo.dbg temp\a2f_demo.sym
-@IF ERRORLEVEL 1 GOTO error
+python dbg_sym.py temp\a2f_demo.dbg temp\a2f_demo.sym || @goto error
 
 @echo.
 @echo.
 @echo Build successful!
 @pause
-@GOTO end
+@goto end
 :error
 @echo.
 @echo.

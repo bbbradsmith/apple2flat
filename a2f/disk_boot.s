@@ -8,6 +8,11 @@
 ; DISKBOOT will jump here on successful startup
 .import start
 
+.ifdef A2F_DISK
+; Ensure this module is always included
+.export __BOOT__ : absolute = 1
+.endif
+
 ; ZEROPAGE imports (defined elsewhere so they can be reused)
 .importzp disk_ptr ; 2-bytes: pointer to read ouput
 .importzp disk_temp ; 2-bytes
@@ -54,7 +59,9 @@
 .export disk_sector_index
 
 ; DISKBOOT has a COUT-string that you could use if you never clear that memory
+.ifdef A2F_DISK
 .export boot_couts
+.endif
 
 ;
 ; RAM usage outside code block
@@ -68,6 +75,7 @@ disk_nidx     = disk_nibble ; not used at the same time as nibble
 ;
 ; DISKBOOT
 ;
+.ifdef A2F_DISK
 
 .segment "DISKBOOT"
 
@@ -188,11 +196,20 @@ ptr = $06 ; any 2 ZP bytes not used by COUT
 	jmp $FD8E ; CROUT monitor output newline
 .endproc
 
+.endif ; A2F_DISK
+
 ;
 ; DISKREAD
 ;
 
+.ifdef A2F_DISK
+; Read routines are placed in a special segment at the end of main RAM space,
+; so they can be used to load MAIN during boot.
 .segment "DISKREAD"
+.else
+; If not needed for booting, they can just go in the aligned segment within MAIN.
+.segment "ALIGN"
+.endif
 
 SPIN_DETECT_ATTEMPTS = 8
 SEEK_ATTEMPTS = 2 ; if address not found after 1 reseek, a second probably won't help
@@ -746,11 +763,13 @@ sector_loop:
 	jmp sector_loop
 .endproc
 
+.ifdef A2F_DISK
+
 ; There's empty space on the last page, so it's a reasonable place for this 2+2+2 nibbles buffer.
 ; Space is not reserved here so that we can share space in sector 0 with BOOT,
 ; but a few asserts here verify that the needed space will exist after it's copied into place.
 disk_nibbles1:
-;.res 86
+
 .assert __DISKLOAD_LAST__ = disk_nibbles1, error, "disk_boot.o must be the last module in DISKLOAD"
 .assert (__DISKLOAD_SIZE__ - (disk_nibbles1 - __DISKLOAD_START__)) >= 86, error, "Not enough trailing space in DISKLOAD for disk_nibbles1"
 
@@ -760,3 +779,7 @@ disk_nibbles1:
 
 ; There's more than 100 bytes free here at the end of the reserved page.
 ; This is probably not significant, but could be used if we were really in a pinch.
+
+.else ; if not booting from disk, just reserve it:
+disk_nibbles1: .res 86
+.endif

@@ -6,11 +6,17 @@
 ; TAPEBOOT will jump here on successful load
 .import start
 
+.ifdef A2F_TAPE
+; Ensure this module is always included
+.export __BOOT__ : absolute = 1
+.endif
+
 .import __TAPEBOOT1_SIZE__
 .import __MAIN_START__
 .import __MAIN_LAST__
 
 .segment "TAPEBOOT0"
+
 .word __TAPEBOOT1_SIZE__ - 1
 .byte $D5 ; lock BASIC program and auto-run
 ;.byte $55 ; unlocked for testing
