@@ -89,7 +89,7 @@ disk_nidx     = disk_nibble ; not used at the same time as nibble
 
 .import __MAIN_START__ ; memory destination of MAIN
 .import __MAIN_LAST__
-.import BSEC ; sector where MAIN begins
+.import A2F_BSEC ; sector where MAIN begins
 
 DISKREAD_BOOT_START = __DISKREAD_LOAD__ + $800 ; where boot0 loads DISKREAD into memory temporarily
 DISKREAD_BOOT_OFFSET = __DISKREAD_RUN__ - DISKREAD_BOOT_START
@@ -147,8 +147,8 @@ read_main:
 	sta disk_ptr+0
 	lda #>__MAIN_START__
 	sta disk_ptr+1
-	lda #<BSEC ; MAIN sector start
-	ldx #>BSEC
+	lda #<A2F_BSEC ; MAIN sector start
+	ldx #>A2F_BSEC
 	ldy #>((__MAIN_LAST__ - __MAIN_START__) + 255) ; MAIN sector count
 	jsr disk_read
 	bne error

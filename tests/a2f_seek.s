@@ -13,8 +13,8 @@
 .import disk_read
 .import disk_error
 .import boot_couts
-.import MPOS
-.import BSEC
+.import A2F_MPOS
+.import A2F_BSEC
 
 .segment "ZEROPAGE"
 disk_ptr: .res 2
@@ -123,7 +123,7 @@ msg_pass:  .asciiz "PASS"
 .align 256
 .repeat 90, I
 	.repeat 256, J
-		.byte <(((*-MPOS)>>8)+BSEC)
+		.byte <(((*-A2F_MPOS)>>8)+A2F_BSEC)
 	.endrepeat
 .endrepeat
 
