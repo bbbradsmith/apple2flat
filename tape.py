@@ -10,8 +10,11 @@ import struct
 CPU_SPEED = 1020484 # Apple II average CPU speed (accounting for 1/64 cycle delay)
 
 SAMPLERATE = 44100 # default encoding samplerate
-SILENCE = 2 # seconds of silence between packets
-HEADTIME = 10 # seconds of header tone
+SILENCE0 = 2 # seconds of silence at start and end
+SILENCE1 = 1 # seconds of silence between packets
+HEAD0TIME = 10 # seconds of first header tone
+HEAD1TIME = 5 # seconds of subsequent header tone
+# NOTE: Monitor READ requires at least 3.7s of header tone
 
 DECODE_THRESHOLD = 0.2 # bit flip threshold relative to waveform peak
 DECODE_CHECKSUM = False # append checksum byte to output
@@ -124,12 +127,14 @@ def encode_tape(fileout,filesin,wrate=SAMPLERATE):
     SS = int(200 * wrate / CPU_SPEED) # samples per first half of sync
     S0 = int(250 * wrate / CPU_SPEED) # samples per 0 bit flip
     S1 = int(500 * wrate / CPU_SPEED) # samples per 1 bit flip
-    HW = int((wrate * HEADTIME) / SH) # header half-wave count
+    HW0 = int((wrate * HEAD0TIME) / SH) # header half-wave count
+    HW1 = int((wrate * HEAD1TIME) / SH)
     # byte array
     bd = bytearray()
     def add(s,c):
-        for i in range(c):
-            bd.append(s)
+        if (c > 0):
+            for i in range(c):
+                bd.append(s)
     def addbyte(s):
         for i in range(8):
             if (s & 0x80):
@@ -139,9 +144,11 @@ def encode_tape(fileout,filesin,wrate=SAMPLERATE):
                 add(V1,S0)
                 add(V0,S0)
             s = (s << 1) & 0xFF
-    add(VS,int(wrate*SILENCE))
+    add(VS,int(wrate*SILENCE0))
+    first = True
     for filein in filesin:
         # header
+        HW = HW0 if first else HW1 # first header is full length
         for i in range(HW//2):
             add(V1,SH)
             add(V0,SH)
@@ -155,7 +162,10 @@ def encode_tape(fileout,filesin,wrate=SAMPLERATE):
             esum ^= b
             addbyte(b)
         addbyte(esum)
-        add(V1,int(wrate*SILENCE)) # final flip to terminate the last bit
+        add(V1,int(wrate*SILENCE1)) # final flip to terminate the last bit
+        first = False
+    add(V1,int(wrate*(SILENCE0-SILENCE1))) # extra trailing silence
+    
     # NOTE: would a lowpass filter be appropriate?
     # output
     print("%s: %d samples, %d Hz" % (fileout, len(bd), wrate))
