@@ -1,17 +1,14 @@
-; TODO A2F library public interface
+; A2F library public interface
 
-; disk_error codes
-DISK_ERROR_FIND    = $01 ; could not find sector
-DISK_ERROR_DATA    = $02 ; found sector, but could not find data field
-DISK_ERROR_PARTIAL = $04 ; sector read but only partially correct (checksum fail)
+; 4 bytes of temporary space on zero-page
+.globalzp a2f_temp
 
-.globalzp a2f_temp ; 4 bytes of temporary space on zero-page
-.globalzp disk_ptr ; parameter for disk_read, alias of a2f_temp
-.global disk_error ; last error code from disk routine
+;
+; System
+;
 
 .global exit ; X:A = exit code, prints error code and enters monitor * prompt
 .global zero_intialize ; call at start to clear uninitialized RAM regions (not including stack, use STACK_INITIALIZE instead)
-.global disk_read ; X:A = segment to read, Y = segment count, disk_ptr = destination, returns disk_error
 
 ; user after zero_initialize to set up the stack
 .macro STACK_INITIALIZE
@@ -24,3 +21,69 @@ DISK_ERROR_PARTIAL = $04 ; sector read but only partially correct (checksum fail
 	dex ; $FF
 	txs
 .endmacro
+
+;
+; Floppy disk
+;
+
+DISK_ERROR_FIND    = $01 ; could not find sector
+DISK_ERROR_DATA    = $02 ; found sector, but could not find data field
+DISK_ERROR_PARTIAL = $04 ; sector read but only partially correct (checksum fail)
+
+.globalzp disk_ptr ; parameter for disk_read, alias of a2f_temp
+.global disk_error ; last error code from disk routine
+
+.global disk_read ; X:A = segment to read, Y = segment count, disk_ptr = destination, returns disk_error
+
+;
+; Video
+;
+
+; constants
+CLS_LOW0  = 0 ; text 40 / low-res first page
+CLS_LOW1  = 1 ;                   second page
+CLS_HIGH0 = 2 ; high-res
+CLS_HIGH1 = 3
+
+; variables
+.global video_text_x    ; text_out position
+.global video_text_y
+.global video_text_w    ; right side of text area (x wrap)
+.global video_text_h    ; bottom of text area (y wrap)
+.global video_text_xr   ; left side of text area (after x wrap)
+.global video_text_yr   ; top of text area (after y wrap)
+.global video_page_w    ; page to write/draw: 00 page 1, FF page 2
+.global video_page_r    ; page to read/display
+.global text_inverse    ; $80 = normal text, $00 = inverse text
+
+; select video mode driver
+.global video_mode_text
+.global video_mode_low
+.global video_mode_low_mixed
+.global video_mode_high
+.global video_mode_high_mixed
+
+.global video_cls ; clear current write screen with an appropriate value
+.global video_cls_page ; X = screen, A = fill value. clear one of the 4 screen memory areas
+.global video_page ; select write and read page
+.global video_page_flip
+.global video_page_copy
+
+.global draw_pixel
+.global draw_getpixel
+.global draw_hline
+.global draw_vline
+.global draw_rect
+.global draw_box
+.global draw_ellipse
+
+.global text_printf
+.global text_out
+.global text_scroll
+.global text_inverse
+.global text_charset
+
+.global blit_tile
+.global blit_coarse
+.global blit_fine
+.global blit_mask

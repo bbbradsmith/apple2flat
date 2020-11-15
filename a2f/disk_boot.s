@@ -40,6 +40,7 @@
 .export disk_field ; 4 bytes
 .export disk_partial
 .export disk_nibbles1 ; 86 bytes, temporary buffer for 2+2+2 nibbles
+.export disk_volume ; alias of disk_field + FIELD_VOL
 
 ; DISKREAD internal procedures (exported for optional disk write procedures)
 .export disk_delay_10ms
@@ -266,6 +267,7 @@ disk_retryread: .byte 0          ; retries left to read a sector
 disk_counter:   .byte 0          ; nibble tests left to find start of sector address/data
 disk_field:     .byte 0, 0, 0, 0 ; last read address field
 disk_partial:   .byte 0          ; temporary error if last attempt was a partial read
+disk_volume = disk_field + FIELD_VOL
 
 .proc disk_delay_10ms
 	; A * 10 = ms to delay (approximate, at least), A >= 1
