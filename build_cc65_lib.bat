@@ -15,7 +15,7 @@ del temp\cc65.lib
 for %%X in (cc65\libsrc\runtime\*.s) do cc65\bin\ca65.exe %%X -g -o temp\cc65_lib\%%~nX.o || @goto error
 for %%X in (cc65\libsrc\common\*.s) do  cc65\bin\ca65.exe %%X -g -o temp\cc65_lib\%%~nX.o || @goto error
 for %%X in (cc65\libsrc\common\*.c) do  cc65\bin\cc65.exe %%X -g -O -W error -o temp\cc65_lib\%%~nX.s || @goto error
-for %%X in (temp\cc65_lib\*.s) do       cc65\bin\ca65.exe %%X -g -o temp\cc65_lib\%%~nX.s || @goto error
+for %%X in (temp\cc65_lib\*.s) do       cc65\bin\ca65.exe %%X -g -o temp\cc65_lib\%%~nX.o || @goto error
 for %%X in (temp\cc65_lib\*.o) do       cc65\bin\ar65.exe a temp\cc65.lib %%X || @goto error
 
 @echo.
