@@ -82,6 +82,7 @@ blit_mask:     jmp a:video_null
 VIDEO_FUNCTION_MAX = *-video_function_table
 .assert VIDEO_FUNCTION_MAX<256, error, "video_function_table too large?"
 ; TODO video_bound, video_bound_coarse to check screen bounds as a boolean?
+; TODO video_page_flip, video_page_copy
 
 .proc video_null ; empty function for unimplemented/unimplementable video functions
 	rts
@@ -175,7 +176,7 @@ clear:
 	; Advances text out position.
 	cmp #$20 ; first 32 values are considered control codes
 	bcs ready
-	cmp #13 ; newline
+	cmp #10 ; newline
 	bne :+
 		lda video_text_xr
 		sta video_text_x

@@ -4,8 +4,8 @@
 
 md temp\a2f_disk_lib
 md temp\a2f_tape_lib
-del temp\a2f_disk\*.o
-del temp\a2f_tape\*.o
+del temp\a2f_disk_lib\*.o
+del temp\a2f_tape_lib\*.o
 del temp\a2f_disk.lib
 del temp\a2f_tape.lib
 

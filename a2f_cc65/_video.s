@@ -16,6 +16,7 @@
 .export _video_cls_page
 .export _text_out
 .export _text_scroll
+.export _text_window
 .export _draw_pixel
 .export _draw_getpixel
 .export _draw_hline
@@ -73,6 +74,11 @@ _text_out = text_out
 
 ; void text_scroll(sint8 lines)
 _text_scroll = text_scroll
+
+.proc _text_window
+	; TODO
+	rts
+.endproc
 
 ; void video_cls_page(uint8 page, uint8 fill)
 _video_cls_page:
