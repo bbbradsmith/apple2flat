@@ -201,13 +201,27 @@ ready:
 	cpx video_text_w
 	bcc :+ ; wrap to next line
 		ldx video_text_xr
+		stx video_text_x
 		inc video_text_y
 	:
 	ldy video_text_y
 	cpy video_text_h
-	bcc :+ ; wrap to top
-		ldy video_text_yr
+	bcc :+ ; scroll and keep to bottom
+		ldy video_text_h
+		dey
 		sty video_text_y
+		pha
+		txa
+		pha
+		tya
+		pha
+		lda #1
+		jsr text_scroll
+		pla
+		tay
+		pla
+		tax
+		pla
 	:
 	jsr text_out_
 	inc video_text_x

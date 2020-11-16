@@ -22,7 +22,14 @@
 .import VIDEO_FUNCTION_MAX
 
 .import text_inverse
+.import draw_y
+.import draw_y0
+.import draw_y1
 .importzp draw_ptr
+.importzp draw_ptr0
+.importzp draw_ptr1
+
+TEXT_CLEAR = $A0 ; space, normal
 
 .proc video_mode_text
 	lda #<table
@@ -55,7 +62,7 @@ _video_mode_text = video_mode_text
 	and #1
 	eor #CLS_LOW0
 	tax
-	lda #$A0 ; space, normal
+	lda #TEXT_CLEAR
 	jmp video_cls_page
 .endproc
 
@@ -79,7 +86,7 @@ draw_pixel_text:
 	sta (draw_ptr), Y
 	rts
 
-draw_getpixel_text:
+.proc draw_getpixel_text
 	; X/Y = coordinate
 	lda video_page_w
 	and #$0C
@@ -92,8 +99,116 @@ draw_getpixel_text:
 	sta draw_ptr+0
 	lda (draw_ptr), Y
 	rts
+.endproc
+
+.proc text_copy_row_text
+	; X = copy to
+	; Y = copy from
+	lda video_page_w
+	and #$0C
+	eor #$04
+	ora video_rowpos1, X
+	sta draw_ptr0+1
+	lda video_rowpos0, X
+	sta draw_ptr0+0
+	lda video_page_w
+	and #$0C
+	eor #$04
+	ora video_rowpos1, Y
+	sta draw_ptr1+1
+	lda video_rowpos0, Y
+	sta draw_ptr1+0
+	ldy video_text_xr
+	:
+		cpy video_text_w
+		bcs :+
+		lda (draw_ptr1), Y
+		sta (draw_ptr0), Y
+		iny
+		jmp :-
+	:
+	rts
+.endproc
+
+.proc text_clear_row_text
+	; X = row to clear
+	lda video_page_w
+	and #$0C
+	eor #$04
+	ora video_rowpos1, X
+	sta draw_ptr+1
+	lda video_rowpos0, X
+	sta draw_ptr+0
+	lda #TEXT_CLEAR
+	ldy video_text_xr
+	:
+		cpy video_text_w
+		bcs :+
+		sta (draw_ptr), Y
+		iny
+		jmp :-
+	:
+	rts
+.endproc
 
 .proc text_scroll_text
-	; TODO
+	; A = number of lines to scroll (signed)
+lines = draw_y1
+	sta lines
+	cmp #0
+	beq scroll_none
+	bmi scroll_up
+scroll_down:
+	lda video_text_yr
+	sta draw_y0
+	:
+		ldx draw_y0
+		txa
+		clc
+		adc lines
+		cmp video_text_h
+		bcs :+
+		tay
+		jsr text_copy_row_text
+		inc draw_y0
+		jmp :-
+	:
+	ldx video_text_h
+	dex
+	stx draw_y0
+	:
+		ldx draw_y0
+		jsr text_clear_row_text
+		dec draw_y0
+		dec lines
+		bne :-
+	;rts
+scroll_none:
+	rts
+scroll_up:
+	ldx video_text_h
+	dex
+	stx draw_y0
+	:
+		ldx draw_y0
+		txa
+		clc
+		adc lines
+		bmi :+ ; in case yr=0
+		cmp video_text_yr
+		bcc :+
+		tay
+		jsr text_copy_row_text
+		dec draw_y0
+		jmp :-
+	:
+	ldx video_text_yr
+	stx draw_y0
+	:
+		ldx draw_y0
+		jsr text_clear_row_text
+		inc draw_y0
+		inc lines ; count up to 0
+		bne :-
 	rts
 .endproc

@@ -52,7 +52,7 @@ extern void text_out(char c);
 extern void text_scroll(sint8 lines);
 extern void draw_pixel(uint16 x, uint8 y, uint8 c);
 extern uint8 draw_getpixel(uint16 x, uint8 y, uint8 c);
-extern void draw_hline(uint16 x0, uint16, x1, uint8, y, uint8 c);
+extern void draw_hline(uint16 x0, uint16 x1, uint8 y, uint8 c);
 extern void draw_vline(uint16 x, uint8 y0, uint8 y1, uint8 c);
 extern void draw_box(uint16 x0, uint16 x1, uint8 y0, uint8 y1, uint8 c);
 extern void draw_fillbox(uint16 x0, uint16 x1, uint8 y0, uint8 y1, uint8 c);
