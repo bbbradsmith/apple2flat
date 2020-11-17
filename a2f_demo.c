@@ -6,7 +6,8 @@ int main()
 {
 	int i;
 	video_mode_text();
-	video_cls();
+	video_cls_page(CLS_LOW0,'+');
+	text_window(3,4,38,19);
 	for (i=0;i<10000;i++)
 	{
 		printf("%d_",i);

@@ -75,8 +75,32 @@ _text_out = text_out
 ; void text_scroll(sint8 lines)
 _text_scroll = text_scroll
 
+; void text_window(uint8 x0, uint8 y0, uint8 x1, uint8 y1)
 .proc _text_window
-	; TODO
+	sta video_text_h
+	jsr popa
+	sta video_text_w
+	jsr popa
+	sta video_text_yr
+	jsr popa
+	sta video_text_xr
+	; make sure within bounds
+	lda video_text_x
+	cmp video_text_xr
+	bcc reset_position
+	cmp video_text_w
+	bcs reset_position
+	lda video_text_y
+	cmp video_text_yr
+	bcc reset_position
+	cmp video_text_h
+	bcs reset_position
+	rts
+reset_position:
+	lda video_text_xr
+	sta video_text_x
+	lda video_text_yr
+	sta video_text_y
 	rts
 .endproc
 
