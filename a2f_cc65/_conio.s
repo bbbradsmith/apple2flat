@@ -6,6 +6,7 @@
 .export _clrscr
 .export _gotox
 .export _gotoy
+.export gotoxy
 .export _gotoxy
 .export _wherex
 .export _wherey
@@ -39,11 +40,12 @@ _clrscr = video_cls
 .endproc
 
 ; void gotoxy (unsigned char x, unsigned char y)
-.proc _gotoxy
+gotoxy:
+	jsr popa ; cc65 internal gotoxy expects Y on stack
+_gotoxy:
 	sta video_text_y
 	jsr popa
 	jmp _gotox
-.endproc
 
 ; unsigned char wherex (void)
 .proc _wherex
@@ -135,10 +137,6 @@ _cputc = text_out
 
 ;void __fastcall__ screensize (unsigned char* x, unsigned char* y);
 ; Return the current screen size.
-
-;void __fastcall__ cputhex8 (unsigned char val);
-;void __fastcall__ cputhex16 (unsigned val);
-; These shouldn't be here?
 
 ; Macros (see comment in conio.h about these?)
 ;#ifdef _textcolor
