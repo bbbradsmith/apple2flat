@@ -1,7 +1,28 @@
 ; _conio
-
+;
 ; C interface for conio.h
-; TODO very incomplete
+;
+; Caveats:
+;   cpeekc - will be invalid if current X position is past the edge of screen, only valid in text mode
+;   cpeeks - only valid across a single line, maximum length <=40, only valid in text mode
+; Unimplemented:
+;   cpeekcolor
+;   cursor
+;   textcolor
+;   bgcolor
+;   bordercolor
+;   chline
+;   cvline
+;   chlinexy
+;   cvlinexy
+;   cclear
+;   cclearxy
+;   screensize
+; Input functions not yet implemented:
+;   kbhit
+;   cgetc
+;   cscanf (depends on cgetc)
+;   vscanf (depends on cgetc)
 
 .export _clrscr
 .export _gotox
@@ -12,20 +33,31 @@
 .export _wherey
 .export _cputc
 .export _cputcxy
+.export _cpeekc
+.export _cpeekrevers
+.export _cpeeks
+.export _revers
 
 .import video_cls
+.import draw_getpixel
 .import text_out
 
+.import text_inverse
 .import video_text_x
 .import video_text_y
 
 .import popa
+.import popptr1
+.importzp ptr1
+.importzp tmp1
+.importzp tmp2
+.importzp tmp3
 
 ; void clrscr (void)
 _clrscr = video_cls
 
 ; unsigned char kbhit (void)
-; TODO
+; TODO input
 
 ; internal gotoxy: X,Y on C-stack
 gotoxy:
@@ -44,8 +76,6 @@ _gotox:
 	sta video_text_y
 	rts
 .endproc
-
-	jmp _gotox
 
 ; unsigned char wherex (void)
 .proc _wherex
@@ -76,82 +106,76 @@ _cputc = text_out
 .endproc
 
 ; char cgetc (void)
-; TODO
+; TODO input
 
 ; char cpeekc (void)
-; TODO ?
-; Return the character from the current cursor position
-
-; unsigned char cpeekcolor (void)
-.proc _cpeekcolor
+.proc _cpeekc
+	ldx video_text_x
+	ldy video_text_y
+	jsr draw_getpixel
+	and #$7F
 	ldx #0
-	txa
 	rts
 .endproc
 
 ; unsigned char cpeekrevers (void)
-; TODO ?
+.proc _cpeekrevers
+	ldx video_text_x
+	ldy video_text_y
+	jsr draw_getpixel
+	ldx #0
+	rol
+	rol
+	eor #1
+	and #1 ; high bit clear indicates reverse or flashing
+	rts
+.endproc
 
-;void __fastcall__ cpeeks (char* s, unsigned int length);
-; Return a string of the characters that start at the current cursor position.
-; Put the string into the buffer to which "s" points.  The string will have
-; "length" characters, then will be 0-terminated.
+;void cpeeks (char* s, unsigned int length)
+.proc _cpeeks
+	; ptr1 = s
+	; tmp1 = length
+	; tmp3 = current position
+	; tmp2 = current X
+	sta tmp1
+	jsr popptr1
+	lda video_text_x
+	sta tmp2
+	lda tmp1
+	beq :++
+	ldy #0
+	:
+		sty tmp3
+		ldx tmp2
+		ldy video_text_y
+		jsr draw_getpixel
+		and #$7F
+		ldy tmp3
+		sta (ptr1), Y
+		inc tmp2
+		iny
+		cpy tmp1
+		bcc :-
+	:
+	lda #0
+	sta (ptr1), Y
+	rts
+.endproc
 
-;unsigned char __fastcall__ cursor (unsigned char onoff);
-; If onoff is 1, a cursor is displayed when waiting for keyboard input. If
-; onoff is 0, the cursor is hidden when waiting for keyboard input. The
-; function returns the old cursor setting.
-; TODO "_cursor" is implemented in a shared lib, "cursor" is a data byte to store the state
-
-;unsigned char __fastcall__ revers (unsigned char onoff);
-; Enable/disable reverse character display. This may not be supported by
-; the output device. Return the old setting.
-
-;unsigned char __fastcall__ textcolor (unsigned char color);
-; Set the color for text output. The old color setting is returned.
-
-;unsigned char __fastcall__ bgcolor (unsigned char color);
-; Set the color for the background. The old color setting is returned.
-
-;unsigned char __fastcall__ bordercolor (unsigned char color);
-; Set the color for the border. The old color setting is returned.
-
-;void __fastcall__ chline (unsigned char length);
-; Output a horizontal line with the given length starting at the current
-; cursor position.
-
-;void __fastcall__ chlinexy (unsigned char x, unsigned char y, unsigned char length);
-; Same as gotoxy (x, y); chline (length);
-
-;void __fastcall__ cvline (unsigned char length);
-; Output a vertical line with the given length at the current cursor
-; position.
-
-;void __fastcall__ cvlinexy (unsigned char x, unsigned char y, unsigned char length);
-; Same as gotoxy (x, y); cvline (length);
-
-;void __fastcall__ cclear (unsigned char length);
-; Clear part of a line (write length spaces).
-
-;void __fastcall__ cclearxy (unsigned char x, unsigned char y, unsigned char length);
-; Same as gotoxy (x, y); cclear (length);
-
-;void __fastcall__ screensize (unsigned char* x, unsigned char* y);
-; Return the current screen size.
-
-; Macros (see comment in conio.h about these?)
-;#ifdef _textcolor
-;#  define textcolor(color)      _textcolor(color)
-;#endif
-;#ifdef _bgcolor
-;#  define bgcolor(color)        _bgcolor(color)
-;#endif
-;#ifdef _bordercolor
-;#  define bordercolor(color)    _bordercolor(color)
-;#endif
-;#ifdef _cpeekcolor
-;#  define cpeekcolor()          _cpeekcolor()
-;#endif
-;#ifdef _cpeekrevers
-;#  define cpeekrevers()         _cpeekrevers()
-;#endif
+;unsigned char revers (unsigned char onoff)
+.proc _revers
+	pha
+	lda text_inverse
+	eor #$80
+	rol
+	pla
+	beq :+
+		lda #$80
+	:
+	eor #$80
+	sta text_inverse
+	lda #0
+	tax
+	rol
+	rts
+.endproc

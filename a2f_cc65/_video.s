@@ -38,8 +38,8 @@
 .import draw_getpixel
 .import draw_hline
 .import draw_vline
-.import draw_rect
 .import draw_box
+.import draw_fillbox
 .import blit_tile
 .import blit_coarse
 .import blit_fine

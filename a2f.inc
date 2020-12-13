@@ -58,32 +58,31 @@ CLS_HIGH1 = 3
 
 ; select video mode driver
 .global video_mode_text
-.global video_mode_low
-.global video_mode_low_mixed
-.global video_mode_high
-.global video_mode_high_mixed
+.global video_mode_low ; TODO
+.global video_mode_low_mixed ; TODO
+.global video_mode_high ; TODO
+.global video_mode_high_mixed ; TODO
 
 .global video_cls ; clear current write screen with an appropriate value
 .global video_cls_page ; X = screen, A = fill value. clear one of the 4 screen memory areas
-.global video_page ; select write and read page
-.global video_page_flip
-.global video_page_copy
+.global video_page ; TODO ; select write and read page
+.global video_page_flip ; TODO
+.global video_page_copy ; TODO
 
 .global draw_pixel
 .global draw_getpixel
-.global draw_hline
-.global draw_vline
-.global draw_rect
-.global draw_box
-.global draw_ellipse
+.global draw_hline ; TODO
+.global draw_vline ; TODO
+.global draw_box ; TODO
+.global draw_fillbox ; TODO
+.global draw_ellipse ; TODO
 
-.global text_printf
+.global text_printf ; TODO
 .global text_out
 .global text_scroll
-.global text_inverse
-.global text_charset
+.global text_charset ; TODO
 
-.global blit_tile
-.global blit_coarse
-.global blit_fine
-.global blit_mask
+.global blit_tile ; TODO
+.global blit_coarse ; TODO
+.global blit_fine ; TODO
+.global blit_mask ; TODO
