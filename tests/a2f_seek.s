@@ -127,7 +127,7 @@ ptr = a2f_temp
 		ora #$80
 		jsr $FDED ; COUT monitor output character
 		iny
-		jmp :-
+		bne :-
 	:
 	jmp $FD8E ; CROUT monitor output newline
 .endproc

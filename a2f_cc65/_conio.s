@@ -27,11 +27,17 @@ _clrscr = video_cls
 ; unsigned char kbhit (void)
 ; TODO
 
+; internal gotoxy: X,Y on C-stack
+gotoxy:
+	jsr popa ; cc65 internal gotoxy expects Y on stack
+; void gotoxy (unsigned char x, unsigned char y)
+_gotoxy:
+	sta video_text_y
+	jsr popa
 ; void gotox (unsigned char x)
-.proc _gotox
+_gotox:
 	sta video_text_x
 	rts
-.endproc
 
 ; void gotoy (unsigned char y)
 .proc _gotoy
@@ -39,12 +45,6 @@ _clrscr = video_cls
 	rts
 .endproc
 
-; void gotoxy (unsigned char x, unsigned char y)
-gotoxy:
-	jsr popa ; cc65 internal gotoxy expects Y on stack
-_gotoxy:
-	sta video_text_y
-	jsr popa
 	jmp _gotox
 
 ; unsigned char wherex (void)
@@ -101,6 +101,7 @@ _cputc = text_out
 ; If onoff is 1, a cursor is displayed when waiting for keyboard input. If
 ; onoff is 0, the cursor is hidden when waiting for keyboard input. The
 ; function returns the old cursor setting.
+; TODO "_cursor" is implemented in a shared lib, "cursor" is a data byte to store the state
 
 ;unsigned char __fastcall__ revers (unsigned char onoff);
 ; Enable/disable reverse character display. This may not be supported by

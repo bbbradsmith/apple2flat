@@ -71,6 +71,10 @@ text_out_text:
 draw_pixel_text:
 	; X/Y = coordinate
 	; A = value
+	cpx #40
+	bcs :+
+	cpy #24
+	bcs :+
 	pha
 	lda video_page_w
 	and #$0C
@@ -84,6 +88,7 @@ draw_pixel_text:
 	ldy #0
 	pla
 	sta (draw_ptr), Y
+:
 	rts
 
 .proc draw_getpixel_text

@@ -9,6 +9,22 @@ typedef uint8_t  uint8;
 typedef int8_t   sint8;
 
 //
+// System
+//
+
+// exits to monitor with program counter display
+#define FATAL() { asm ("BRK"); }
+
+// ASSERT that acts like a conditional FATAL with a custom message
+// Define NDEBUG to remove asserts for a release build.
+#ifdef NDEBUG
+#define ASSERT(condition_,message_) {}
+#else
+extern void prepare_assert(const char* message);
+#define ASSERT(condition_,message_) { if(!(condition_)) { prepare_assert((message_)); FATAL(); } }
+#endif
+
+//
 // Floppy disk
 //
 

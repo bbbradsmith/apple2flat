@@ -15,16 +15,20 @@
 .exportzp a2f_temp
 
 .export _exit
+.export brkv
 .export __STARTUP__ : absolute = 1 ; CC65 will forceimport this from main()
 
 .import __STACKSIZE__
 .import zero_initialize
 .import _main
 .import exit
+.import brk_fatal
 
 .segment "ZEROPAGE"
-a2f_temp = ptr3
-.assert ptr4 = (ptr3+2), error, "cc65 zeropage variable ptr4 not contiguous with ptr3?"
+a2f_temp: .res 4
+
+.segment "BRKV" ; vector for BRK
+brkv: .res 2
 
 .segment "CODE"
 
@@ -37,6 +41,11 @@ start:
 	ldx #>($100 + __STACKSIZE__)
 	sta sp+0
 	stx sp+1
+	; set BRK handler
+	lda #<brk_fatal
+	sta brkv+0
+	lda #>brk_fatal
+	sta brkv+1
 	; NOTES vs standard cc65 crt0:
 	;  zerobss - already taken care of by zero_initialize
 	;  initlib/donelib - CONDES features not needed
