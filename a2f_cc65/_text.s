@@ -15,6 +15,7 @@
 .export _text_printf
 .export _text_vprintf
 .export _text_scroll
+.export _text_xy
 .export _text_window
 
 .import popa
@@ -58,6 +59,13 @@ _text_vprintf = _vcprintf
 
 ; void text_scroll(sint8 lines)
 _text_scroll = text_scroll
+
+; void text_xy(uint8 x, uint8 y)
+_text_xy:
+	sta video_text_y
+	jsr popa
+	sta video_text_x
+	rts
 
 ; void text_window(uint8 x0, uint8 y0, uint8 x1, uint8 y1)
 .proc _text_window

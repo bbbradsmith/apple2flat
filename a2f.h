@@ -47,7 +47,7 @@ char kb_last(); // last pressed keycode (doesn't matter if kb_new was cancelled)
 // TODO function to extract non-ctrl/shift character from keypress (table in assembly version)
 
 // extern uint8 kb_field_cursor // TODO tile to use for field cursor
-// extern uint8 kb_field_cursor_blink_rate // TODO make cursor blink after certain number of polls?
+// extern uint8 kb_field_cursor_blink_rate // TODO make cursor blink after x<<8 number of polls? 0 for never
 void kb_field(char* field, uint8 len); // TODO display cursor and take input with esc/delete/enter/left-right special cases, len should be 1 more than field width to allow terminal 0
 
 //
@@ -102,6 +102,7 @@ extern void text_printf(const char* format, ...);
 extern void text_vprintf(const char* format, va_list ap);
 extern void text_scroll(sint8 lines); // positive: shift text up, clear bottom, negative: shift text down, clear top
 // TODO text_charset
+extern void text_xy(uint8 x, uint8 y);
 extern void text_window(uint8 x0, uint8 y0, uint8 x1, uint8 y1); // confine text to x0<=x<x1, y0<=y<y1
 extern void draw_pixel(uint16 x, uint8 y, uint8 c);
 extern uint8 draw_getpixel(uint16 x, uint8 y, uint8 c);
@@ -109,6 +110,7 @@ extern uint8 draw_getpixel(uint16 x, uint8 y, uint8 c);
 //extern void draw_vline(uint16 x, uint8 y0, uint8 y1, uint8 c);
 //extern void draw_box(uint16 x0, uint8 y0, uint16 x1, uint8 y1, uint8 c);
 //extern void draw_fillbox(uint16 x0, uint8 y0, uint16 x1, uint8 y1, uint8 c);
+//extern void draw_line(uint16x, uint8 y,
 //blit_tile
 //blit_coarse
 //blit_fine
