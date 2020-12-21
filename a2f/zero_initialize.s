@@ -9,8 +9,6 @@
 ;   DISKREAD region following code (if A2F_DISK)
 ; Does not initialize stack, since it must RTS.
 
-.segment "CODE"
-
 .proc zero_initialize
 ZI_START = $00
 ZI_END   = $02

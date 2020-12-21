@@ -12,6 +12,14 @@ typedef int8_t   sint8;
 // System
 //
 
+// system type detected at startup
+#define SYSTEM_UNKNOWN     = 0
+#define SYSTEM_APPLE2      = 1
+#define SYSTEM_APPLE2_PLUS = 2
+#define SYSTEM_APPLE2E     = 3
+#define SYSTEM_APPLE2C     = 4
+extern uint8 system_type;
+
 // exits to monitor with program counter display
 #define FATAL() { asm ("BRK"); }
 

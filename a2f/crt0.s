@@ -23,6 +23,7 @@
 .import _main
 .import exit
 .import brk_fatal
+.import system_detect
 
 .segment "ZEROPAGE"
 a2f_temp: .res 4
@@ -46,6 +47,7 @@ start:
 	sta brkv+0
 	lda #>brk_fatal
 	sta brkv+1
+	jsr system_detect ; detect system
 	; NOTES vs standard cc65 crt0:
 	;  zerobss - already taken care of by zero_initialize
 	;  initlib/donelib - CONDES features not needed
