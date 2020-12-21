@@ -21,8 +21,10 @@ LIB_CC65 = $(OUTDIR)/a2f_cc65.lib
 CSRC = $(wildcard *.c)
 SRC = $(wildcard *.s)
 
-CSSRC = $(CSRC:.c=.c.s)
-OBJ = $(addprefix $(OUTDIR)/,$(SRC:.s=.o) $(CSRC:.c=.c.o))
+OUTCDIR = $(OUTDIR)/c
+CSSRC = $(addprefix $(OUTCDIR)/,$(CSRC:.c=.c.s))
+OBJ = $(addprefix $(OUTDIR)/,$(SRC:.s=.o))
+OBJ := $(addprefix $(OUTCDIR)/,$(CSRC:.c=.c.o))
 
 CLEAN = $(OBJ) $(CSSRC) \
 	$(DSK_DISK) $(BIN_DISK) $(MAP_DISK) $(DBG_DISK) $(SYM_DISK) \
@@ -34,17 +36,19 @@ all: $(DSK_DISK) $(WAV_TAPE)
 disk: $(DSK_DISK) $(SYM_DISK)
 tape: $(WAV_TAPE)
 
-$(OUTDIR)/%.c.s: %.c a2f.h
+$(OUTCDIR)/%.c.s: %.c a2f.h
 	$(CC65) -o $@ -g -O $<
-$(OUTDIR)/%.c.o: $(OUTDIR)/%.c.s
+$(OUTCDIR)/%.c.o: $(OUTCDIR)/%.c.s
 	$(CA65) -o $@ -g $<
 
 $(OUTDIR)/%.o: %.s a2f.inc
 	$(CA65) -o $@ -g $<
 
-$(BIN_DISK): | $(OUTDIR)
-$(BIN_TAPE): | $(OUTDIR)
+$(CLEAN): | $(OUTDIR)
+$(CSSRC): | $(OUTCDIR)
 $(OUTDIR):
+	$(MKDIR) $(subst /,$(DS),$@)
+$(OUTCDIR):
 	$(MKDIR) $(subst /,$(DS),$@)
 
 $(LIB_DISK) $(LIB_TAPE):

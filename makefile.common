@@ -6,8 +6,17 @@ LD65 = $(DP)cc65/bin/ld65
 AR65 = $(DP)cc65/bin/ar65
 MAKE = $(DP)make
 PYTHON = python
-RM = del /Q /F
 MKDIR = mkdir
-DS = $(subst /,\,/)# i.e. a single backslash
-
 OUTDIR = $(DP)temp
+
+ifeq ($(OS),Windows_NT)
+
+RM = del /Q /F
+DS = $(subst /,\,/)# a single backslash
+
+else
+
+RM = rm -f
+DS = /
+
+endif
