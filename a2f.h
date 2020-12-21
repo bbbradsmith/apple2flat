@@ -76,9 +76,9 @@ extern void video_cls_page(uint8 page, uint8 fill);
 // TODO video_page_flip
 // TODO video_page_copy
 extern void text_out(char c); // output one character at the current position
+extern void text_outs(const char* s); // output a null-terminated string
+extern void test_outf(const char* format, ...); // TODO printf-style output
 extern void text_scroll(sint8 lines); // positive: shift text up, clear bottom, negative: shift text down, clear top
-// TODO texts string
-// TODO text_printf
 // TODO text_charset
 extern void text_window(uint8 x0, uint8 y0, uint8 x1, uint8 y1); // confine text to x0<=x<x1, y0<=y<y1
 extern void draw_pixel(uint16 x, uint8 y, uint8 c);

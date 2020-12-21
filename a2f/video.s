@@ -6,7 +6,6 @@
 .include "../a2f.inc"
 
 .export video_cls_page
-.export text_out
 
 .export video_cls
 .export text_out_
@@ -34,7 +33,8 @@
 .exportzp draw_ptr
 .exportzp draw_ptr0
 .exportzp draw_ptr1
-.export text_inverse
+.export video_page_w
+.export video_page_r
 .export draw_xh
 .export draw_x0
 .export draw_x1
@@ -50,15 +50,9 @@ draw_ptr1 = a2f_temp+2
 
 .segment "CODE"
 
-video_text_x:  .byte 0
-video_text_y:  .byte 0
-video_text_w:  .byte 40
-video_text_h:  .byte 24
-video_text_xr: .byte 0
-video_text_yr: .byte 0
 video_page_w:  .byte 0
 video_page_r:  .byte 0
-text_inverse:  .byte $80
+
 draw_x0: .byte 2 ; draw parameter / temporaries
 draw_x1: .byte 2
 draw_y0: .byte 1
@@ -165,64 +159,4 @@ clear:
 	sta ptr+1
 	pla
 	jmp @group
-.endproc
-
-.proc text_out
-	; A = ASCII character to print
-	;     13 = newline
-	;     14 = shift to normal
-	;     15 = shift to inverse
-	; Advances text out position.
-	cmp #$20 ; first 32 values are considered control codes
-	bcs ready
-	cmp #10 ; newline
-	bne :+
-		lda video_text_xr
-		sta video_text_x
-		inc video_text_y
-		rts
-	:
-	cmp #14 ; normal
-	bne :+
-		lda #$80
-		sta text_inverse
-		rts
-	:
-	cmp #15 ; inverse
-	bne :+
-		lda #$00
-		sta text_inverse
-		rts
-	:
-	; allow other control codes to pass through?
-ready:
-	ldx video_text_x
-	cpx video_text_w
-	bcc :+ ; wrap to next line
-		ldx video_text_xr
-		stx video_text_x
-		inc video_text_y
-	:
-	ldy video_text_y
-	cpy video_text_h
-	bcc :+ ; scroll and keep to bottom
-		ldy video_text_h
-		dey
-		sty video_text_y
-		pha
-		txa
-		pha
-		tya
-		pha
-		lda #1
-		jsr text_scroll
-		pla
-		tay
-		pla
-		tax
-		pla
-	:
-	jsr text_out_
-	inc video_text_x
-	rts
 .endproc
