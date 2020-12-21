@@ -1,0 +1,13 @@
+# define DP as a directory prefix to the project root
+
+CC65 = $(DP)cc65/bin/cc65
+CA65 = $(DP)cc65/bin/ca65
+LD65 = $(DP)cc65/bin/ld65
+AR65 = $(DP)cc65/bin/ar65
+MAKE = $(DP)make
+PYTHON = python
+RM = del /Q /F
+MKDIR = mkdir
+DS = $(subst /,\,/)# i.e. a single backslash
+
+OUTDIR = $(DP)temp

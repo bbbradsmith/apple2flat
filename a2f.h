@@ -102,7 +102,7 @@ extern void text_printf(const char* format, ...);
 extern void text_vprintf(const char* format, va_list ap);
 extern void text_scroll(sint8 lines); // positive: shift text up, clear bottom, negative: shift text down, clear top
 // TODO text_charset
-extern void text_xy(uint8 x, uint8 y);
+extern void text_xy(uint8 x, uint8 y); // set text output location (faster to set video_text_x/y directly, though)
 extern void text_window(uint8 x0, uint8 y0, uint8 x1, uint8 y1); // confine text to x0<=x<x1, y0<=y<y1
 extern void draw_pixel(uint16 x, uint8 y, uint8 c);
 extern uint8 draw_getpixel(uint16 x, uint8 y, uint8 c);

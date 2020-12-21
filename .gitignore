@@ -13,3 +13,7 @@ temp/*.dsk
 temp/*.wav
 *.lnk
 run*.bat
+# Make for Windows: http://gnuwin32.sourceforge.net/packages/make.htm
+make.exe
+libiconv2.dll
+libintl3.dll
