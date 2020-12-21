@@ -32,7 +32,9 @@ CLEAN = $(OBJ) $(CSSRC) \
 
 .PHONY: all disk tape clean
 
-all: $(DSK_DISK) $(WAV_TAPE)
+# only make disk by default
+all: disk
+#all: disk tape
 disk: $(DSK_DISK) $(SYM_DISK)
 tape: $(WAV_TAPE)
 
