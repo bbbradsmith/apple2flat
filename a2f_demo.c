@@ -1,16 +1,24 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <conio.h>
 #include "a2f.h"
 
 int main()
 {
 	int i;
 	video_mode_text();
-	video_cls_page(CLS_LOW0,'+');
-	text_window(3,4,38,19);
-	for (i=0;i<10000;i++)
+	text_window(0,5,40,20);
+	printf("SYSTEM: %d\n",system_type);
+	printf("PRESS Q TO QUIT\n");
+	cputc(cgetc());
+	cputs("..");
+	while(1)
 	{
-		printf("%d_",i);
+		char c;
+		while (!kbhit());
+		c = cgetc();
+		cputc(c);
+		if (c == 'Q') break;
 	}
 	return 0x1234;
 }

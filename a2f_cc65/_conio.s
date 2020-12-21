@@ -18,13 +18,11 @@
 ;   cclear
 ;   cclearxy
 ;   screensize
-; Input functions not yet implemented:
-;   kbhit
-;   cgetc
-;   cscanf (depends on cgetc)
-;   vscanf (depends on cgetc)
+
+.include "../a2f.inc"
 
 .export _clrscr
+.export _kbhit
 .export _gotox
 .export _gotoy
 .export gotoxy
@@ -33,6 +31,7 @@
 .export _wherey
 .export _cputc
 .export _cputcxy
+.export _cgetc
 .export _cpeekc
 .export _cpeekrevers
 .export _cpeeks
@@ -57,7 +56,13 @@
 _clrscr = video_cls
 
 ; unsigned char kbhit (void)
-; TODO input
+_kbhit:
+	lda KBDATA
+	rol
+	lda #0
+	tax
+	rol
+	rts
 
 ; internal gotoxy: X,Y on C-stack
 gotoxy:
@@ -106,7 +111,14 @@ _cputc = text_out
 .endproc
 
 ; char cgetc (void)
-; TODO input
+_cgetc:
+:
+	lda KBDATA
+	bpl :- ; wait until new keypress
+	bit KBSTAT ; clear new key flag
+	ldx #0
+	and #$7F ; return low 7 data bits as keypress
+	rts
 
 ; char cpeekc (void)
 .proc _cpeekc

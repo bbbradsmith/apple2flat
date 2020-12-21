@@ -33,19 +33,11 @@ SYSTEM_APPLE2C     = 4
 .endmacro
 
 ;
-; Floppy disk
+; Keyboard
 ;
 
-.enum
-DISK_ERROR_FIND    = $01 ; could not find sector
-DISK_ERROR_DATA    = $02 ; found sector, but could not find data field
-DISK_ERROR_PARTIAL = $04 ; sector read but only partially correct (checksum fail)
-.endenum
-
-.globalzp disk_ptr ; parameter for disk_read, alias of a2f_temp
-.global disk_error ; last error code from disk routine
-
-.global disk_read ; X:A = segment to read, Y = segment count, disk_ptr = destination, returns disk_error
+KBDATA = $C000 ; Read: bit 7 = new keypress, bits 6-0 = last key
+KBSTAT = $C010 ; Read: bit 7 = any keys down (IIc/IIe only), clears new keypress flag in $C000
 
 ;
 ; Video
@@ -98,3 +90,26 @@ CLS_HIGH1 = 3
 .global blit_coarse ; TODO
 .global blit_fine ; TODO
 .global blit_mask ; TODO
+
+;
+; Floppy disk
+;
+
+.enum
+DISK_ERROR_FIND    = $01 ; could not find sector
+DISK_ERROR_DATA    = $02 ; found sector, but could not find data field
+DISK_ERROR_PARTIAL = $04 ; sector read but only partially correct (checksum fail)
+.endenum
+
+.globalzp disk_ptr ; parameter for disk_read, alias of a2f_temp
+.global disk_error ; last error code from disk routine
+
+.global disk_read ; X:A = segment to read, Y = segment count, disk_ptr = destination, returns disk_error
+.global disk_write ; TODO write sector
+.global disk_format ; TODO format track
+
+;
+; Misc
+;
+
+.import vdelay ; delays for X:A cycles, minimum: 29 (includes jsr), A/X clobbered (X=0)
