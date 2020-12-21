@@ -11,6 +11,7 @@ temp/*.sym
 temp/*.bin
 temp/*.dsk
 temp/*.wav
+temp/c/
 *.lnk
 run*.bat
 # Make for Windows: http://gnuwin32.sourceforge.net/packages/make.htm
