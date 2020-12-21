@@ -42,6 +42,10 @@ int kb_any(); // 1 if any keys are currently held (only works on Apple IIe/IIc),
 char kb_get(); // wait for kb_new (if not already pending) and return keycode
 char kb_last(); // last pressed keycode (doesn't matter if kb_new was cancelled)
 
+// TODO enums for all keys
+// TODO function to extract ctrl/shift flags from keypress (table in assembly version)
+// TODO function to extract non-ctrl/shift character from keypress (table in assembly version)
+
 // extern uint8 kb_field_cursor // TODO tile to use for field cursor
 // extern uint8 kb_field_cursor_blink_rate // TODO make cursor blink after certain number of polls?
 void kb_field(char* field, uint8 len); // TODO display cursor and take input with esc/delete/enter/left-right special cases, len should be 1 more than field width to allow terminal 0
