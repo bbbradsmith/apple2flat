@@ -42,6 +42,10 @@ int kb_any(); // 1 if any keys are currently held (only works on Apple IIe/IIc),
 char kb_get(); // wait for kb_new (if not already pending) and return keycode
 char kb_last(); // last pressed keycode (doesn't matter if kb_new was cancelled)
 
+// extern uint8 kb_field_cursor // TODO tile to use for field cursor
+// extern uint8 kb_field_cursor_blink_rate // TODO make cursor blink after certain number of polls?
+void kb_field(char* field, uint8 len); // TODO display cursor and take input with esc/delete/enter/left-right special cases, len should be 1 more than field width to allow terminal 0
+
 //
 // Floppy disk
 //
@@ -76,6 +80,9 @@ extern uint8 video_text_yr;
 extern uint8 video_page_w;
 extern uint8 video_page_r;
 extern uint8 text_inverse;
+
+// TODO vysnc ; wait for next video frame (needs separate IIe/IIc implementation), assembly version: call system_detect first, otherwise uses fallback (or if not IIe/IIc)
+// TODO extern uint16 vsync_fallback ; for Apple II/II+ use a fixed timer instead of vsync, 12.5ms by default
 
 // video modes
 extern void video_mode_text();
