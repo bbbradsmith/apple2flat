@@ -2,6 +2,7 @@
 #define A2F_H
 
 #include <stdint.h>
+#include <stdarg.h>
 
 typedef uint16_t uint16;
 typedef int16_t  sint16;
@@ -77,7 +78,8 @@ extern void video_cls_page(uint8 page, uint8 fill);
 // TODO video_page_copy
 extern void text_out(char c); // output one character at the current position
 extern void text_outs(const char* s); // output a null-terminated string
-extern void test_outf(const char* format, ...); // TODO printf-style output
+extern void text_printf(const char* format, ...);
+extern void text_vprintf(const char* format, va_list ap);
 extern void text_scroll(sint8 lines); // positive: shift text up, clear bottom, negative: shift text down, clear top
 // TODO text_charset
 extern void text_window(uint8 x0, uint8 y0, uint8 x1, uint8 y1); // confine text to x0<=x<x1, y0<=y<y1

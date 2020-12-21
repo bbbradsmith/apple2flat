@@ -12,11 +12,15 @@
 
 .export _text_out
 .export _text_outs
+.export _text_printf
+.export _text_vprintf
 .export _text_scroll
 .export _text_window
 
 .import popa
 .import popax
+.import _cprintf ; from conio
+.import _vcprintf ; from conio
 .import text_out
 .import text_outs
 .import text_scroll
@@ -45,6 +49,12 @@ _text_out = text_out
 
 ; void text_outs(const char* s)
 _text_outs = text_outs
+
+; void text_printf(const char* format, ...)
+; void text_vprintf(const char* format, va_list ap);
+_text_printf = _cprintf
+_text_vprintf = _vcprintf
+; cprintf/vcprintf is borrowed from conio, but bypasses the need for conio.h
 
 ; void text_scroll(sint8 lines)
 _text_scroll = text_scroll

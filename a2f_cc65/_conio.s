@@ -29,7 +29,6 @@
 .export _gotoxy
 .export _wherex
 .export _wherey
-.export _cputc
 .export _cputcxy
 .export _cgetc
 .export _cpeekc
@@ -97,7 +96,8 @@ _gotox:
 .endproc
 
 ; void cputc (char c)
-_cputc = text_out
+;_cputc = text_out
+; Note: in separate _cputc module to avoid taking all of _conio for just cputc
 
 ; void cputcxy (unsigned char x, unsigned char y, char c)
 .proc _cputcxy

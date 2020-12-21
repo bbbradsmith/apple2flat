@@ -22,9 +22,6 @@
 .import popax
 .import video_cls
 .import video_cls_page
-.import text_out
-.import text_outs
-.import text_scroll
 .import draw_pixel
 .import draw_getpixel
 .import draw_hline
