@@ -34,6 +34,15 @@ extern void prepare_assert(const char* message);
 #endif
 
 //
+// Keyboard
+//
+
+int kb_new(); // 1 if a new key has been pressed
+int kb_any(); // 1 if any keys are currently held (only works on Apple IIe/IIc), also cancels any pending kb_new
+char kb_get(); // wait for kb_new (if not already pending) and return keycode
+char kb_last(); // last pressed keycode (doesn't matter if kb_new was cancelled)
+
+//
 // Floppy disk
 //
 

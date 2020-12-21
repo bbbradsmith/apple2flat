@@ -39,6 +39,8 @@
 .import video_cls
 .import draw_getpixel
 .import text_out
+.import _kb_new
+.import _kb_get
 
 .import text_inverse
 .import video_text_x
@@ -55,13 +57,7 @@
 _clrscr = video_cls
 
 ; unsigned char kbhit (void)
-_kbhit:
-	lda KBDATA
-	rol
-	lda #0
-	tax
-	rol
-	rts
+_kbhit = _kb_new
 
 ; internal gotoxy: X,Y on C-stack
 gotoxy:
@@ -111,14 +107,7 @@ _gotox:
 .endproc
 
 ; char cgetc (void)
-_cgetc:
-:
-	lda KBDATA
-	bpl :- ; wait until new keypress
-	bit KBSTAT ; clear new key flag
-	ldx #0
-	and #$7F ; return low 7 data bits as keypress
-	rts
+_cgetc = _kb_get
 
 ; char cpeekc (void)
 .proc _cpeekc

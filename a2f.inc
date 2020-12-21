@@ -37,7 +37,7 @@ SYSTEM_APPLE2C     = 4
 ;
 
 KBDATA = $C000 ; Read: bit 7 = new keypress, bits 6-0 = last key
-KBSTAT = $C010 ; Read: bit 7 = any keys down (IIc/IIe only), clears new keypress flag in $C000
+KBSTAT = $C010 ; Read: bit 7 = any keys down (IIe/IIc only), clears new keypress flag in $C000
 
 ;
 ; Video
