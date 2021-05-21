@@ -7,9 +7,10 @@
 .export _kb_new
 .export _kb_get
 .export _kb_last
+.export _kb_data
 .export _kb_any
 
-; int kb_new()
+; char kb_new()
 _kb_new:
 	lda KBDATA
 _kb_bit7_: ; transfer bit 7 to bit 0 (return 0/1)
@@ -35,7 +36,12 @@ _kb_last:
 	and #$7F
 	rts
 
-; int kb_any()
+; uint8 kb_data()
+_kb_data:
+	lda KBDATA
+	rts
+
+; char kb_any()
 _kb_any:
 	lda KBSTAT
 	jmp _kb_bit7_

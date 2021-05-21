@@ -37,10 +37,11 @@ extern void prepare_assert(const char* message);
 // Keyboard
 //
 
-int kb_new(); // 1 if a new key has been pressed
-int kb_any(); // 1 if any keys are currently held (only works on Apple IIe/IIc), also cancels any pending kb_new
+char kb_new(); // 1 if a new key has been pressed
 char kb_get(); // wait for kb_new (if not already pending) and return keycode
 char kb_last(); // last pressed keycode (doesn't matter if kb_new was cancelled)
+uint8 kb_data(); // direct read from $C000 (bit 7 = pending new, 6-0 = keycode)
+char kb_any(); // reads $C010, returns 1 if any keys are currently held (only works on Apple IIe/IIc), also cancels any pending kb_new
 
 // TODO enums for all keys
 // TODO function to extract ctrl/shift flags from keypress (table in assembly version)
