@@ -5,6 +5,24 @@
 
 char quit = 0;
 
+void system_info()
+{
+	const char* t = "UNKNOWN";
+	video_cls();
+	text_xy(0,2);
+	text_outs("  DETECTED SYSTEM:\n    ");
+	switch(system_type)
+	{
+	case SYSTEM_APPLE2:      t = "APPLE 2"; break;
+	case SYSTEM_APPLE2_PLUS: t = "APPLE 2 PLUS"; break;
+	case SYSTEM_APPLE2E:     t = "APPLE 2E"; break;
+	case SYSTEM_APPLE2C:     t = "APPLE 2C"; break;
+	default:                 break;
+	}
+	text_outs(t);
+	kb_get();
+}
+
 void unimplemented()
 {
 	video_mode_text();
@@ -50,6 +68,9 @@ void main_menu()
 	{
 	case 0x1B: quit = 1; return; // ESCAPE (TODO: keycode enums)
 
+	case 'I': system_info(); break;
+
+	// unimplemented
 	case '1':
 	case '2':
 	case '3':
@@ -63,7 +84,7 @@ void main_menu()
 	case 'J':
 	case 'D':
 	case 'S':
-	case 'I': unimplemented(); break;
+		unimplemented(); break;
 
 	default: break; // TODO beep
 	}
