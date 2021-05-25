@@ -56,7 +56,7 @@ void main_menu()
 		"  J - JOYSTICK *\n"
 		"  D - DISK *\n"
 		"  S - SOUND *\n"
-		"  I - SYSTEM INFO *\n"
+		"  I - SYSTEM INFO\n"
 		"\n"
 		" HTTPS://GITHUB.COM/\n"
 		"  BBBRADSMITH/APPLE2FLAT\n"
