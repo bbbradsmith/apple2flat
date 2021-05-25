@@ -52,10 +52,17 @@ char kb_any(); // reads $C010, returns 1 if any keys are currently held (only wo
 void kb_field(char* field, uint8 len); // TODO display cursor and take input with esc/delete/enter/left-right special cases, len should be 1 more than field width to allow terminal 0
 
 //
+// Joystick
+//
+
+// TODO
+
+//
 // Floppy disk
 //
 
 extern uint8_t disk_read(void* dest, uint16 sector, uint8 count);
+// extern uint8 disk_write(void* src, uint16 sector, uint8 count);
 extern uint8_t disk_error; // last disk error
 extern uint8_t disk_volume; // last disk volume
 
@@ -65,6 +72,12 @@ extern uint8_t disk_volume; // last disk volume
 // FIND = could not find sector on disk
 // DATA = sector address found, data field missing
 // PARTIAL = sector read but only partially correct (checksum fail)
+
+//
+// Tape
+//
+
+// TODO monitor read/write interface?
 
 //
 // Video
