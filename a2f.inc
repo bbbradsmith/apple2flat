@@ -60,7 +60,10 @@ PADDLE_B2 = $04
 
 ; paddle axis results are approximately 0-70, centred around 32
 ; 128 indicates a timeout, no paddle connected (avoid continually polling a disconnected paddle)
+; low/high are recommended thresholds
 PADDLE_CENTER = 32
+PADDLE_LOW    = 16
+PADDLE_HIGH   = 48
 
 ; variables updated by poll
 .global paddle_buttons

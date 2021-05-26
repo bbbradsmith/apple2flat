@@ -84,7 +84,10 @@ void kb_field(char* field, uint8 len); // TODO display cursor and take input wit
 
 // paddle axis results are approximately 0-70, centred around 32
 // 128 indicates a timeout, no paddle connected (avoid continually polling a disconnected paddle)
+// low/high are recommended thresholds
 #define PADDLE_CENTER        32
+#define PADDLE_LOW           16
+#define PADDLE_HIGH          48
 
 // paddle poll result
 extern uint8 paddle_buttons;

@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include "a2f.h"
 
 char quit = 0;
@@ -10,7 +11,7 @@ void keyboard_test()
 	video_cls();
 	text_xy(1,5);
 	text_outs(
-		"  DATA $C000:\n"
+		"  DATA $C000:    ' '\n"
 		"  ANY  $C010:\n"
 		"       COUNT:");
 	while(1)
@@ -22,8 +23,7 @@ void keyboard_test()
 			if ((d & 0x7F) == KB_ESC) break;
 			++count;
 		}
-		text_xy(15,5); text_printf("%02X ' '",d);
-		text_xy(19,5); text_out(d);
+		text_xy(15,5); text_printf("%02X",d); draw_pixel(19,5,d);
 		text_xy(15,6); text_printf("%02X",a);
 		text_xy(15,7); text_printf("%d",count);
 	}
@@ -31,6 +31,9 @@ void keyboard_test()
 
 void paddle_test()
 {
+	char j9[10];
+	uint8 jx,jy;
+
 	video_cls();
 	text_xy(1,5);
 	text_outs(
@@ -42,11 +45,39 @@ void paddle_test()
 	while(!kb_new() || kb_get() != KB_ESC)
 	{
 		paddle01_poll();
+
+		text_window(1,1,39,23);
 		text_xy(12,5); text_printf("%d %d %d",paddle_buttons & PADDLE_B0, paddle_buttons & PADDLE_B1, paddle_buttons & PADDLE_B2);
 		text_xy(12,6); text_printf("$%02X %3d",paddle0_x,paddle0_x);
 		text_xy(12,7); text_printf("$%02X %3d",paddle0_y,paddle0_y);
 		text_xy(12,8); text_printf("$%02X %3d",paddle1_x,paddle1_x);
 		text_xy(12,9); text_printf("$%02X %3d",paddle1_y,paddle1_y);
+
+		strcpy(j9,"    X    ");
+		if (paddle0_x < 128 && paddle0_y < 128)
+		{
+			jx = jy = 1;
+			if (paddle0_x <  PADDLE_LOW ) jx -= 1;
+			if (paddle0_x >= PADDLE_HIGH) jx += 1;
+			if (paddle0_y <  PADDLE_LOW ) jy -= 1;
+			if (paddle0_y >= PADDLE_HIGH) jy += 1;
+			j9[4] = 'O';
+			j9[jx+(jy*3)] = '1' ^ 0x80;
+		}
+		text_window(14,12,17,15); text_xy(14,12); text_outs(j9);
+
+		strcpy(j9,"    X    ");
+		if (paddle1_x < 128 && paddle1_y < 128)
+		{
+			jx = jy = 1;
+			if (paddle1_x <  PADDLE_LOW ) jx -= 1;
+			if (paddle1_x >= PADDLE_HIGH) jx += 1;
+			if (paddle1_y <  PADDLE_LOW ) jy -= 1;
+			if (paddle1_y >= PADDLE_HIGH) jy += 1;
+			j9[4] = 'O';
+			j9[jx+(jy*3)] = '2' ^ 0x80;
+		}
+		text_window(19,12,22,15); text_xy(19,12); text_outs(j9);
 	}
 }
 
