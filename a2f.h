@@ -93,8 +93,9 @@ extern uint8 paddle0_y;
 extern uint8 paddle1_x;
 extern uint8 paddle1_y;
 
-extern void paddle0_poll(); // update only paddle0 and buttons
-extern void paddle01_poll(); // update both paddles
+extern uint8 paddle_buttons_poll(); // update only paddle_buttons (and return)
+extern void paddle0_poll(); // update paddle0 and buttons
+extern void paddle01_poll(); // update both paddles and buttons
 
 //
 // Floppy disk

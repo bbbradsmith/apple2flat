@@ -37,7 +37,7 @@ SYSTEM_APPLE2C     = 4
 ;
 
 KBDATA = $C000 ; Read: bit 7 = new keypress, bits 6-0 = last key
-KBSTAT = $C010 ; Read: bit 0 = any keys down (IIe/IIc only), clears new keypress flag in $C000
+KBSTAT = $C010 ; Read: bit 7 = any keys down (IIe/IIc only), clears new keypress flag in $C000
 
 KB_ESC    = $1B
 KB_TAB    = $09
@@ -70,8 +70,9 @@ PADDLE_CENTER = 32
 .global paddle1_y
 
 ; poll routines
-.global paddle0_poll    ; poll only paddle 0
-.global paddle01_poll   ; poll both paddles
+.global paddle_buttons_poll ; poll only paddle_buttons, result loaded in A/flags
+.global paddle0_poll        ; poll paddle0 and buttons
+.global paddle01_poll       ; poll both paddles
 
 ;
 ; Video

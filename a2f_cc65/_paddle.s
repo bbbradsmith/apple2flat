@@ -10,6 +10,7 @@
 .export _paddle1_x
 .export _paddle1_y
 
+.export _paddle_buttons_poll
 .export _paddle0_poll
 .export _paddle01_poll
 
@@ -19,6 +20,7 @@
 .import paddle1_x
 .import paddle1_y
 
+.import paddle_buttons_poll
 .import paddle0_poll
 .import paddle01_poll
 
@@ -27,6 +29,9 @@ _paddle0_x = paddle0_x
 _paddle0_y = paddle0_y
 _paddle1_x = paddle1_x
 _paddle1_y = paddle1_y
+
+; uint8 paddle_buttons_poll()
+_paddle_buttons_poll = paddle_buttons_poll
 
 ; void paddle0_poll()
 _paddle0_poll = paddle0_poll

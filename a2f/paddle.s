@@ -2,8 +2,9 @@
 
 .include "../a2f.inc"
 
-.export paddle0_poll ; poll just paddle 0
-.export paddle01_poll ; poll both paddles
+.export paddle_buttons_poll ; poll just paddle buttons
+.export paddle0_poll ; poll paddle 0 + buttons
+.export paddle01_poll ; poll both paddles and buttons
 
 ; variables updated by polling
 .export paddle_buttons
@@ -56,11 +57,7 @@ paddle1_y: .byte 255
 
 .segment "CODE"
 
-paddle01_poll:
-	ldx #2
-	jsr paddle_poll_ ; poll axes 2,3 (X=2)
-paddle0_poll:
-	; poll buttons
+paddle_buttons_poll:
 	ldx #0
 	stx paddle_buttons
 	asl $C063
@@ -69,6 +66,14 @@ paddle0_poll:
 	rol paddle_buttons
 	asl $C061
 	rol paddle_buttons
+	lda paddle_buttons
+	rts
+
+paddle01_poll:
+	ldx #2
+	jsr paddle_poll_ ; poll axes 2,3 (X=2)
+paddle0_poll:
+	jsr paddle_buttons_poll ; NOTE: result X=0
 	; poll axes 0,1 (X=0)
 paddle_poll_:
 	; pre-charge read: make sure both axes have returned to 0 (or timeout)
