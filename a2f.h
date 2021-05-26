@@ -37,19 +37,26 @@ extern void prepare_assert(const char* message);
 // Keyboard
 //
 
-char kb_new(); // 1 if a new key has been pressed
+char kb_new(); // 1 if a new key has been pressed (does not cancel pending)
 char kb_get(); // wait for kb_new (if not already pending) and return keycode
 char kb_last(); // last pressed keycode (doesn't matter if kb_new was cancelled)
 uint8 kb_data(); // direct read from $C000 (bit 7 = pending new, 6-0 = keycode)
-char kb_any(); // reads $C010, returns 1 if any keys are currently held (only works on Apple IIe/IIc), also cancels any pending kb_new
+char kb_any(); // reads $C010, cancels any pending kb_new, returns 1 if any keys are currently held (only works on Apple IIe/IIc)
 
-// TODO enums for all keys
+#define KB_ESC    0x1B
+
+// TODO enums for all keys?
 // TODO function to extract ctrl/shift flags from keypress (table in assembly version)
 // TODO function to extract non-ctrl/shift character from keypress (table in assembly version)
 
 // extern uint8 kb_field_cursor // TODO tile to use for field cursor
 // extern uint8 kb_field_cursor_blink_rate // TODO make cursor blink after x<<8 number of polls? 0 for never
 void kb_field(char* field, uint8 len); // TODO display cursor and take input with esc/delete/enter/left-right special cases, len should be 1 more than field width to allow terminal 0
+// plan:
+//  takes input until ESC,Tab,Enter,Up or Down is pressed
+//  returns the last key pressed (allowing repeat until Enter, or other responses)
+//  otherwise it will start/resume with the cursor at the 0 point in the buffer (or len-1 if it's at len)
+//  should flip cursor every ??? iterations of waiting for key, maybe that's a uint16
 
 //
 // Joystick

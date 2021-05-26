@@ -5,6 +5,31 @@
 
 char quit = 0;
 
+void keyboard_test()
+{
+	unsigned int count = 0;
+	video_cls();
+	text_xy(1,5);
+	text_outs(
+		"  DATA $C000:\n"
+		"  ANY  $C010:\n"
+		"       COUNT:");
+	while(1)
+	{
+		uint8 d = kb_data(); // bit 7 = pending, bit 0-6 = key ($C000 read)
+		char  a = kb_any(); // clears pending flag, bit 1 = held key ($C010 read)
+		if (d & 0x80)
+		{
+			if ((d & 0x7F) == KB_ESC) break;
+			++count;
+		}
+		text_xy(15,5); text_printf("%02X ' '",d);
+		text_xy(19,5); text_out(d);
+		text_xy(15,6); text_printf("%02X",a);
+		text_xy(15,7); text_printf("%d",count);
+	}
+}
+
 void system_info()
 {
 	const char* t = "UNKNOWN";
@@ -28,9 +53,9 @@ void unimplemented()
 	video_mode_text();
 	video_cls();
 	text_xy(2,10);
-	text_outs("* NOT YET IMPLEMENTED\n");
+	text_outs("* NOT YET IMPLEMENTED\n  PRESS ESCAPE");
 	// TODO beep
-	kb_get();
+	while (kb_get() != KB_ESC);
 }
 
 void main_menu()
@@ -40,7 +65,7 @@ void main_menu()
 	text_window(1,1,39,23); // 1 space border
 	text_xy(1,1);
 	text_outs(
-		"      APPLE2FLAT DEMO\n"
+		"  APPLE2FLAT DEMO\n"
 		"\n"
 		"ESC - RETURN TO MENU\n"
 		"  1 - VIDEO: TEXT *\n"
@@ -52,23 +77,24 @@ void main_menu()
 		"  6 - VIDEO: DOUBLE HIRES COLOUR *\n"
 		"  7 - VIDEO: DOUBLE HIRES MONO *\n"
 		"  A - ANIMATION *\n"
-		"  K - KEYBOARD *\n"
+		"  K - KEYBOARD\n"
 		"  J - JOYSTICK *\n"
 		"  D - DISK *\n"
 		"  S - SOUND *\n"
+		"  T - TEXT INPUT *\n"
 		"  I - SYSTEM INFO\n"
+		"* = NOT YET READY\n"
 		"\n"
 		" HTTPS://GITHUB.COM/\n"
-		"  BBBRADSMITH/APPLE2FLAT\n"
-		"\n"
-		"  * = NOT YET READY\n"
+		"  BBBRADSMITH/APPLE2FLAT"
 	);
 
 	switch(kb_get())
 	{
-	case 0x1B: quit = 1; return; // ESCAPE (TODO: keycode enums)
+	case KB_ESC: quit = 1; return; // ESCAPE (TODO: keycode enums)
 
-	case 'I': system_info(); break;
+	case 'K': case 'k': keyboard_test(); break;
+	case 'I': case 'i': system_info(); break;
 
 	// unimplemented
 	case '1':
@@ -78,12 +104,11 @@ void main_menu()
 	case '5':
 	case '6':
 	case '7':
-	case 'A':
-	case 'B':
-	case 'K':
-	case 'J':
-	case 'D':
-	case 'S':
+	case 'A': case 'a':
+	case 'B': case 'b':
+	case 'J': case 'j':
+	case 'D': case 'd':
+	case 'S': case 's':
 		unimplemented(); break;
 
 	default: break; // TODO beep
@@ -95,7 +120,8 @@ int main()
 	while(!quit) main_menu();
 	video_mode_text();
 	video_cls();
-	text_xy(0,20);
-	text_outs("\n\nEXIT TO MONITOR:\n");
+	text_window(0,0,40,24);
+	text_xy(0,21);
+	text_outs("\n\nEXIT TO MONITOR:");
 	return 0x1234;
 }
