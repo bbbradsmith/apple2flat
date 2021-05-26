@@ -59,7 +59,7 @@ PADDLE_B1 = $02
 PADDLE_B2 = $04
 
 ; paddle axis results are approximately 0-70, centred around 32
-; 255 indicates a timeout, no paddle connected (avoid continually polling a disconnected paddle)
+; 128 indicates a timeout, no paddle connected (avoid continually polling a disconnected paddle)
 PADDLE_CENTER = 32
 
 ; variables updated by poll
@@ -71,8 +71,8 @@ PADDLE_CENTER = 32
 
 ; poll routines
 .global paddle_buttons_poll ; poll only paddle_buttons, result loaded in A/flags
-.global paddle0_poll        ; poll paddle0 and buttons (~1.5 to 3ms)
-.global paddle01_poll       ; poll both paddles (~3 to 6ms)
+.global paddle0_poll        ; poll paddle0 and buttons (avg 1.5ms, max 3ms, 5ms if timeout)
+.global paddle01_poll       ; poll both paddles and buttons (avg 3ms, max 6ms, 10ms if both timeout)
 
 ;
 ; Video
