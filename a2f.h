@@ -83,7 +83,7 @@ void kb_field(char* field, uint8 len); // TODO display cursor and take input wit
 #define PADDLE_B2            0x04
 
 // paddle axis results are approximately 0-70, centred around 32
-// 255 indicates a timeout, no paddle connected
+// 255 indicates a timeout, no paddle connected (avoid continually polling a disconnected paddle)
 #define PADDLE_CENTER        32
 
 // paddle poll result
@@ -94,8 +94,8 @@ extern uint8 paddle1_x;
 extern uint8 paddle1_y;
 
 extern uint8 paddle_buttons_poll(); // update only paddle_buttons (and return)
-extern void paddle0_poll(); // update paddle0 and buttons
-extern void paddle01_poll(); // update both paddles and buttons
+extern void paddle0_poll(); // update paddle0 and buttons (~1.5 to 3ms)
+extern void paddle01_poll(); // update both paddles and buttons (~3 to 6ms)
 
 //
 // Floppy disk
