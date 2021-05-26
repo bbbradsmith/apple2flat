@@ -60,11 +60,14 @@ paddle1_y: .byte 128
 paddle_buttons_poll:
 	ldx #0
 	stx paddle_buttons
-	asl $C063
+	lda $C063
+	asl
 	rol paddle_buttons
-	asl $C062
+	lda $C062
+	asl
 	rol paddle_buttons
-	asl $C061
+	lda $C061
+	asl
 	rol paddle_buttons
 	lda paddle_buttons
 	rts ; result in X:A for C calls
