@@ -14,10 +14,13 @@
 
 .segment "CODE"
 paddle_buttons: .byte 0
-paddle0_x: .byte 0
-paddle0_y: .byte 0
-paddle1_x: .byte 0
-paddle1_y: .byte 0
+paddle0_x: .byte 255
+paddle0_y: .byte 255
+paddle1_x: .byte 255
+paddle1_y: .byte 255
+
+.assert paddle1_x = paddle0_x + 2, error, "paddle1 result must be 2 bytes after paddle0"
+.assert paddle1_y = paddle0_y + 2, error, "paddle1 result must be 2 bytes after paddle0"
 
 .segment "ALIGN"
 
@@ -68,8 +71,10 @@ paddle0_poll:
 	; poll axes 0,1 (X=0)
 paddle_poll_:
 	; pre-charge read: make sure both axes have returned to 0 (or timeout)
-	ldy #0
+	ldy #1
 	jsr paddle_poll_aligned_
+	cpy #0
+	beq @timeout ; Y=0 indicates timeout, likely no paddle attached
 	; charge capacitors
 	lda $C070
 	; reset counters
@@ -83,5 +88,10 @@ paddle_poll_:
 	lda a2f_temp+0
 	sta paddle0_x, X
 	lda a2f_temp+1
+	sta paddle0_y, X
+	rts
+@timeout:
+	lda #255
+	sta paddle0_x, X
 	sta paddle0_y, X
 	rts
