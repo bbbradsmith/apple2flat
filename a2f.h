@@ -37,17 +37,32 @@ extern void prepare_assert(const char* message);
 // Keyboard
 //
 
+// some useful key codes
+
+#define KB_ESC    0x1B
+#define KB_TAB    0x09
+#define KB_DEL    0x7F
+#define KB_RETURN 0x0D
+#define KB_SPACE  0x20
+
+#define KB_LEFT   0x08
+#define KB_RIGHT  0x15
+#define KB_UP     0x0B
+#define KB_DOWN   0x0A
+
+// Other keycodes can be identified by their ASCII char, e.g. 'A' for A key.
+// Control, Shift and Capslock are not keypresses, but modify the result of other keys.
+// The modification depends on the key, but example for letters:
+//   K = 0x4B 'K'      (shift on)
+//   K = 0x6B 'k'      (shift off)
+//   K = 0x0B up arrow (control on)
+
 char kb_new(); // 1 if a new key has been pressed (does not cancel pending)
 char kb_get(); // wait for kb_new (if not already pending) and return keycode
 char kb_last(); // last pressed keycode (doesn't matter if kb_new was cancelled)
 uint8 kb_data(); // direct read from $C000 (bit 7 = pending new, 6-0 = keycode)
-char kb_any(); // reads $C010, cancels any pending kb_new, returns 1 if any keys are currently held (only works on Apple IIe/IIc)
-
-#define KB_ESC    0x1B
-
-// TODO enums for all keys?
-// TODO function to extract ctrl/shift flags from keypress (table in assembly version)
-// TODO function to extract non-ctrl/shift character from keypress (table in assembly version)
+char kb_any(); // reads $C010, cancels any pending kb_new, returns 1 if any keys are currently held
+// NOTE: kb_any always returns 0 on Apple II models prior to Apple IIe/IIc
 
 // extern uint8 kb_field_cursor // TODO tile to use for field cursor
 // extern uint8 kb_field_cursor_blink_rate // TODO make cursor blink after x<<8 number of polls? 0 for never
