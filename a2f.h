@@ -41,7 +41,7 @@ extern void prepare_assert(const char* message);
 
 #define KB_ESC    0x1B
 #define KB_TAB    0x09
-#define KB_DEL    0x7F
+#define KB_DELETE 0x7F
 #define KB_RETURN 0x0D
 #define KB_SPACE  0x20
 
@@ -74,10 +74,27 @@ void kb_field(char* field, uint8 len); // TODO display cursor and take input wit
 //  should flip cursor every ??? iterations of waiting for key, maybe that's a uint16
 
 //
-// Joystick
+// Paddle
 //
 
-// TODO
+// paddle_buttons mask
+#define PADDLE_B0            0x01
+#define PADDLE_B1            0x02
+#define PADDLE_B2            0x04
+
+// paddle axis results are approximately 0-70, centred around 32
+// 255 indicates a timeout, no paddle connected
+#define PADDLE_CENTER        32
+
+// paddle poll result
+extern uint8 paddle_buttons;
+extern uint8 paddle0_x;
+extern uint8 paddle0_y;
+extern uint8 paddle1_x;
+extern uint8 paddle1_y;
+
+extern void paddle0_poll(); // update only paddle0 and buttons
+extern void paddle01_poll(); // update both paddles
 
 //
 // Floppy disk

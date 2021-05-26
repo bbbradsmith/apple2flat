@@ -37,7 +37,41 @@ SYSTEM_APPLE2C     = 4
 ;
 
 KBDATA = $C000 ; Read: bit 7 = new keypress, bits 6-0 = last key
-KBSTAT = $C010 ; Read: bit 7 = any keys down (IIe/IIc only), clears new keypress flag in $C000
+KBSTAT = $C010 ; Read: bit 0 = any keys down (IIe/IIc only), clears new keypress flag in $C000
+
+KB_ESC    = $1B
+KB_TAB    = $09
+KB_DELETE = $7F
+KB_RETURN = $0D
+KB_SPACE  = $20
+KB_LEFT   = $08
+KB_RIGHT  = $15
+KB_UP     = $0B
+KB_DOWN   = $0A
+
+;
+; Paddle
+;
+
+; buttons
+PADDLE_B0 = $01
+PADDLE_B1 = $02
+PADDLE_B2 = $04
+
+; paddle axis results are approximately 0-70, centred around 32
+; 255 indicates a timeout, no paddle connected
+PADDLE_CENTER = 32
+
+; variables updated by poll
+.global paddle_buttons
+.global paddle0_x
+.global paddle0_y
+.global paddle1_x
+.global paddle1_y
+
+; poll routines
+.global paddle0_poll    ; poll only paddle 0
+.global paddle01_poll   ; poll both paddles
 
 ;
 ; Video

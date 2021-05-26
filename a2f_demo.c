@@ -1,6 +1,5 @@
 #include <stdlib.h>
 #include <stdio.h>
-//#include <conio.h>
 #include "a2f.h"
 
 char quit = 0;
@@ -30,6 +29,27 @@ void keyboard_test()
 	}
 }
 
+void paddle_test()
+{
+	video_cls();
+	text_xy(1,5);
+	text_outs(
+		"  BUTTONS:\n"
+		"       X0:\n"
+		"       Y0:\n"
+		"       X1:\n"
+		"       Y1:");
+	while(!kb_new() || kb_get() != KB_ESC)
+	{
+		paddle01_poll();
+		text_xy(12,5); text_printf("%d %d %d",paddle_buttons & PADDLE_B0, paddle_buttons & PADDLE_B1, paddle_buttons & PADDLE_B2);
+		text_xy(12,6); text_printf("$%02X %3d",paddle0_x,paddle0_x);
+		text_xy(12,7); text_printf("$%02X %3d",paddle0_y,paddle0_y);
+		text_xy(12,8); text_printf("$%02X %3d",paddle1_x,paddle1_x);
+		text_xy(12,9); text_printf("$%02X %3d",paddle1_y,paddle1_y);
+	}
+}
+
 void system_info()
 {
 	const char* t = "UNKNOWN";
@@ -52,8 +72,8 @@ void unimplemented()
 {
 	video_mode_text();
 	video_cls();
-	text_xy(2,10);
-	text_outs("* NOT YET IMPLEMENTED\n  PRESS ESCAPE");
+	text_xy(1,10);
+	text_outs(" * NOT YET IMPLEMENTED\n   PRESS ESCAPE");
 	// TODO beep
 	while (kb_get() != KB_ESC);
 }
@@ -78,7 +98,7 @@ void main_menu()
 		"  7 - VIDEO: DOUBLE HIRES MONO *\n"
 		"  A - ANIMATION *\n"
 		"  K - KEYBOARD\n"
-		"  J - JOYSTICK *\n"
+		"  P - PADDLES\n"
 		"  D - DISK *\n"
 		"  S - SOUND *\n"
 		"  T - TEXT INPUT *\n"
@@ -94,6 +114,7 @@ void main_menu()
 	case KB_ESC: quit = 1; return; // ESCAPE (TODO: keycode enums)
 
 	case 'K': case 'k': keyboard_test(); break;
+	case 'P': case 'p': paddle_test(); break;
 	case 'I': case 'i': system_info(); break;
 
 	// unimplemented
@@ -106,7 +127,6 @@ void main_menu()
 	case '7':
 	case 'A': case 'a':
 	case 'B': case 'b':
-	case 'J': case 'j':
 	case 'D': case 'd':
 	case 'S': case 's':
 		unimplemented(); break;

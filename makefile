@@ -59,7 +59,7 @@ $(LIB_CC65):
 	$(MAKE) -C a2f_cc65
 
 $(BIN_DISK) $(DBG_DISK): $(OBJ) $(LIB_DISK) $(LIB_CC65) a2f_disk.cfg
-	$(LD65) -o $@ -m $(MAP_DISK) --dbgfile $(DBG_DISK) -C a2f_disk.cfg $(OBJ) $(LIB_DISK) $(LIB_CC65)
+	$(LD65) -o $@ -m $(MAP_DISK) --dbgfile $(DBG_DISK) -C a2f_disk.cfg $(OBJ) $(LIB_CC65) $(LIB_DISK)
 
 $(DSK_DISK): $(BIN_DISK)
 	$(PYTHON) sector_order.py $< $@
@@ -68,7 +68,7 @@ $(SYM_DISK): $(DBG_DISK)
 	$(PYTHON) dbg_sym.py $< $@
 
 $(BIN_TAPE) $(TAPEBOOT0) $(TAPEBOOT1): $(OBJ) $(LIB_TAPE) $(LIB_CC65)
-	$(LD65) -o $@ -m $(MAP_TAPE) --dbgfile $(DBG_TAPE) -C a2f_tape.cfg $(OBJ) $(LIB_TAPE) $(LIB_CC65)
+	$(LD65) -o $@ -m $(MAP_TAPE) --dbgfile $(DBG_TAPE) -C a2f_tape.cfg $(OBJ) $(LIB_CC65) $(LIB_TAPE)
 
 $(WAV_TAPE): $(TAPEBOOT0) $(TAPEBOOT1) $(BIN_TAPE)
 	$(PYTHON) tape.py $@ $^
