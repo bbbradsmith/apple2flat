@@ -49,6 +49,7 @@ paddle1_y: .byte 255
 	bne @loop
 	.assert >(@loop) = >*, error, "Page crossed!"
 	.assert (*-@loop)<32, error, "paddle_poll_aligned_ loop may not cross 32 byte alignment."
+	; NOTE: alignment isn't critical for this to work, but it gives a tiny bit of extra consistency
 @finish:
 	rts
 .endproc
