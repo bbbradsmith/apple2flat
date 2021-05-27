@@ -7,19 +7,12 @@
 .export video_mode_text
 .export _video_mode_text
 
-.export video_cls_text
-.export text_out_text
-.export text_scroll_text
-.export text_charset
-.export draw_pixel_text
-.export draw_getpixel_text
-
 .import video_cls_page
 
 .import video_rowpos0
 .import video_rowpos1
 .import video_null
-.import video_function_table_copy
+.import video_mode_setup
 .import VIDEO_FUNCTION_MAX
 
 .import text_inverse
@@ -33,13 +26,17 @@
 TEXT_CLEAR = $A0 ; space, normal
 
 .proc video_mode_text
+	lda #40
+	sta video_text_xr
+	lda #24
+	sta video_text_yr
 	lda #<table
 	ldx #>table
-	jsr video_function_table_copy
-	; TODO set video registers
-	rts
+	jmp video_mode_setup
 table:
 	.word video_cls_text
+	.word video_page_text
+	.word video_page_copy_text
 	.word text_out_text
 	.word text_scroll_text
 	.word draw_pixel_text
@@ -65,6 +62,28 @@ _video_mode_text = video_mode_text
 	tax
 	lda #TEXT_CLEAR
 	jmp video_cls_page
+.endproc
+
+.proc video_page_text
+	lda video_page_r
+	and #1
+	tax
+	; TODO: disable IIe double resolution features
+	;sta $C00C ; 40-column display (80COL)
+	;sta $C000 ; disable 80-column paging (80STORE)
+	;sta $C05F ; disable double resolution
+	; TODO: what dpes IOUDIS do?
+	; set text mode
+	sta $C052 ; non-mixed (MIXED)
+	sta $C051 ; text mode (TEXT)
+	; apply page
+	sta $C054, X ; (PAGE2)
+	rts
+.endproc
+
+.proc video_page_copy_text
+	; TODO copy r to w page
+	rts
 .endproc
 
 text_out_text:
@@ -216,12 +235,5 @@ scroll_up:
 		inc draw_y0
 		inc lines ; count up to 0
 		bne :-
-	rts
-.endproc
-
-.proc text_charset
-	and #1
-	tax
-	sta $C00E, X
 	rts
 .endproc

@@ -124,10 +124,14 @@ DISK_ERROR_PARTIAL = $04 ; sector read but only partially correct (checksum fail
 ;
 
 ; constants
-CLS_LOW0  = 0 ; text 40 / low-res first page
-CLS_LOW1  = 1 ;                   second page
-CLS_HIGH0 = 2 ; high-res
-CLS_HIGH1 = 3
+CLS_LOW0   = 0 ; text 40 / low-res first page
+CLS_LOW1   = 1 ;                   second page
+CLS_HIGH0  = 2 ; high-res
+CLS_HIGH1  = 3
+CLS_DLOW0  = 4 ; IIe double resolutions (TODO)
+CLS_DLOW1  = 5
+CLS_DHIGH0 = 6
+CLS_DHIGH1 = 7
 
 ; variables
 .global video_text_x    ; text_out position
@@ -149,9 +153,9 @@ CLS_HIGH1 = 3
 
 .global video_cls ; clear current write screen with an appropriate value
 .global video_cls_page ; X = screen, A = fill value. clear one of the 4 screen memory areas
-;.global video_page ; TODO ; select write and read page
-;.global video_page_flip ; TODO
-;.global video_page_copy ; TODO
+.global video_page ; applies  video_page_r / video_page_w
+.global video_page_flip ; flips and applies video_page_r / video_page_w
+.global video_page_copy ; copies video_page_r to video_page_w
 
 .global draw_pixel
 .global draw_getpixel

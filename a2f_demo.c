@@ -11,11 +11,15 @@ void video_test_text()
 	char alt = 0;
 
 	video_cls();
-	text_xy( 1,1); text_outs("VIDEO: TEXT");
-	text_xy(4,12); text_outs("CHARACTER SET: (C TO SWITCH)");
-	text_xy(2, 3); text_outs("-- WINDOW --");
-	text_xy(2, 9); text_outs("------------");
-	text_window(2,4,14,9);
+	text_xy( 1, 1); text_outs("VIDEO: TEXT  (F FOR PAGE 2)");
+	text_xy( 4,12); text_outs("CHARACTER SET: (C TO SWITCH)");
+	text_xy( 2, 3); text_outs("-- WINDOW --");
+	text_xy( 2, 9); text_outs("------------");
+
+	video_cls_page(CLS_LOW1,' '^0x80); // clear second page
+	video_page_select(0,1); // write to second page
+	text_xy( 5,10); text_outs("PAGE 2! PRESS F FOR PAGE 1.");
+	video_page_select(0,0); // write/view first page
 
 	do
 	{
@@ -23,20 +27,22 @@ void video_test_text()
 		++c;
 	} while (c!=0);
 
+	text_window(2,4,14,9);
 	while(1)
 	{
 		if (kb_new())
 		{
 			c = kb_get();
-			if (c == KB_ESC) return;
-			if (c == 'C' || c == 'c')
+			if      (c == KB_ESC) return;
+			else if (c == 'F' || c == 'f') video_page_flip();
+			else if (c == 'C' || c == 'c')
 			{
 				alt ^= 1;
 				text_charset(alt);
 			}
 			c = 0;
 		}
-		else
+		else if (video_page_w == 0)
 		{
 			if      (c == 0x00) text_outs("LOW RAM");
 			else if (c == 0x80) text_outs(" CHECKSUM...");
@@ -142,7 +148,7 @@ void system_info()
 	default:                 break;
 	}
 	text_outs(t);
-	kb_get();
+	while (kb_get() != KB_ESC);
 }
 
 void unimplemented()
@@ -158,6 +164,7 @@ void unimplemented()
 void main_menu()
 {
 	video_mode_text();
+	video_page_select(0,0);
 	video_cls();
 	text_window(1,1,39,23); // 1 space border
 	text_xy(1,1);

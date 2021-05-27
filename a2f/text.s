@@ -3,9 +3,11 @@
 ; Some shared routines for text output.
 ;   text_out
 ;   text_outs
+;   text_charset
 
 .export text_out
 .export text_outs
+.export text_charset
 
 .export video_text_x
 .export video_text_y
@@ -115,5 +117,12 @@ ready:
 		bne @loop
 	pla
 	pla
+	rts
+.endproc
+
+.proc text_charset
+	and #1
+	tax
+	sta $C00E, X
 	rts
 .endproc

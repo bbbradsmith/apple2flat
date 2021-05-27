@@ -25,7 +25,7 @@
 .export video_rowpos1
 .export video_null
 .export video_function_table
-.export video_function_table_copy
+.export video_mode_setup
 .export VIDEO_FUNCTION_MAX
 .export video_rowpos0
 .export video_rowpos1
@@ -60,28 +60,33 @@ draw_y1: .byte 1
 draw_xh = draw_x0+1
 
 video_function_table:
-video_cls:     jmp a:video_null
-text_out_:     jmp a:video_null
-text_scroll:   jmp a:video_null
-draw_pixel:    jmp a:video_null
-draw_getpixel: jmp a:video_null
-draw_hline:    jmp a:video_null
-draw_vline:    jmp a:video_null
-draw_box:      jmp a:video_null
-draw_fillbox:  jmp a:video_null
-blit_tile:     jmp a:video_null
-blit_coarse:   jmp a:video_null
-blit_fine:     jmp a:video_null
-blit_mask:     jmp a:video_null
+video_cls:       jmp a:video_null
+video_page:      jmp a:video_null
+video_page_copy: jmp a:video_null
+text_out_:       jmp a:video_null
+text_scroll:     jmp a:video_null
+draw_pixel:      jmp a:video_null
+draw_getpixel:   jmp a:video_null
+draw_hline:      jmp a:video_null
+draw_vline:      jmp a:video_null
+draw_box:        jmp a:video_null
+draw_fillbox:    jmp a:video_null
+blit_tile:       jmp a:video_null
+blit_coarse:     jmp a:video_null
+blit_fine:       jmp a:video_null
+blit_mask:       jmp a:video_null
 VIDEO_FUNCTION_MAX = *-video_function_table
 .assert VIDEO_FUNCTION_MAX<256, error, "video_function_table too large?"
-; TODO video_page_flip, video_page_copy
 
 .proc video_null ; empty function for unimplemented/unimplementable video functions
 	rts
 .endproc
 
-.proc video_function_table_copy
+; sets up common video mode stuff:
+; 1. copies function table
+; 2. resets text window and text position to 0,0 (but not w/h)
+; 3. calls video_page to display the page
+.proc video_mode_setup ; X:A = pointer to function table
 	sta draw_ptr+0
 	stx draw_ptr+1
 	ldx #1
@@ -98,7 +103,12 @@ VIDEO_FUNCTION_MAX = *-video_function_table
 		inx
 		cpx #VIDEO_FUNCTION_MAX
 		bcc :-
-	rts
+	lda #0
+	sta video_text_x
+	sta video_text_y
+	sta video_text_xr
+	sta video_text_yr
+	jmp video_page
 .endproc
 
 ; lookup tables for Apple II video layout in 8 x 3-row groups
@@ -114,6 +124,7 @@ video_rowpos1:
 .proc video_cls_page
 ; A = fill value
 ; X = page select (CLS_LOW0, CLS_LOW1, CLS_HIGH0, etc.)
+; TODO handle IIe double resolutions... (probably just a register set + call cls_page twice)
 ptr = a2f_temp+0
 	cpx #CLS_HIGH0
 	bcc low
@@ -159,4 +170,14 @@ clear:
 	sta ptr+1
 	pla
 	jmp @group
+.endproc
+
+.proc video_page_flip
+	lda video_page_w
+	eor #$FF
+	sta video_page_w
+	lda video_page_r
+	eor #$FF
+	sta video_page_r
+	jmp video_page
 .endproc

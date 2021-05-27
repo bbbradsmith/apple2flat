@@ -132,10 +132,15 @@ extern uint8_t disk_volume; // last disk volume
 //
 
 // page definitions for video_cls_page
+// TODO D-versions
 #define CLS_LOW0    0
 #define CLS_LOW1    1
 #define CLS_HIGH0   2
 #define CLS_HIGH1   3
+#define CLS_DLOW0   4
+#define CLS_DLOW1   5
+#define CLS_DHIGH0  6
+#define CLS_DHIGH1  7
 
 extern uint8 video_text_x;
 extern uint8 video_text_y;
@@ -143,7 +148,7 @@ extern uint8 video_text_w;
 extern uint8 video_text_h;
 extern uint8 video_text_xr;
 extern uint8 video_text_yr;
-extern uint8 video_page_w;
+extern uint8 video_page_w; // $00 (page 1) or $FF (page 2)
 extern uint8 video_page_r;
 extern uint8 text_inverse;
 
@@ -155,9 +160,12 @@ extern void video_mode_text();
 
 extern void video_cls();
 extern void video_cls_page(uint8 page, uint8 fill);
-// TODO video_page
-// TODO video_page_flip
-// TODO video_page_copy
+extern void video_page(); // applies video page selection immediately (probably use flip/select instead)
+extern void video_page_flip(); // flips the two selected video pages
+extern void video_page_copy(); // copies read page into write page
+extern void video_page_select(uint8 read, uint8 write); // sets and applies pages: 0 = page 1, 1 = page 2
+// read page is what is visible onscreen, write page is what draw/text operations work on
+
 extern void text_out(char c); // output one character at the current position
 extern void text_outs(const char* s); // output a null-terminated string
 extern void text_printf(const char* format, ...);
