@@ -5,6 +5,48 @@
 
 char quit = 0;
 
+void video_test_text()
+{
+	uint8 c = 0;
+	char alt = 0;
+
+	video_cls();
+	text_xy( 1,1); text_outs("VIDEO: TEXT");
+	text_xy(4,12); text_outs("CHARACTER SET: (C TO SWITCH)");
+	text_xy(2, 3); text_outs("-- WINDOW --");
+	text_xy(2, 9); text_outs("------------");
+	text_window(2,4,14,9);
+
+	do
+	{
+		draw_pixel(4+(c%32),14+(c/32),c);
+		++c;
+	} while (c!=0);
+
+	while(1)
+	{
+		if (kb_new())
+		{
+			c = kb_get();
+			if (c == KB_ESC) return;
+			if (c == 'C' || c == 'c')
+			{
+				alt ^= 1;
+				text_charset(alt);
+			}
+			c = 0;
+		}
+		else
+		{
+			if      (c == 0x00) text_outs("LOW RAM");
+			else if (c == 0x80) text_outs(" CHECKSUM...");
+			delay(1);
+			++c;
+		}
+	}
+}
+
+
 void keyboard_test()
 {
 	unsigned int count = 0;
@@ -23,9 +65,10 @@ void keyboard_test()
 			if ((d & 0x7F) == KB_ESC) break;
 			++count;
 		}
-		text_xy(15,5); text_printf("%02X",d); draw_pixel(19,5,d);
+		text_xy(15,5); text_printf("%02X",d); draw_pixel(19,5,d ^ 0x80);
 		text_xy(15,6); text_printf("%02X",a);
 		text_xy(15,7); text_printf("%d",count);
+		delay(30); // 30ms delay to reduce flicker
 	}
 }
 
@@ -122,7 +165,7 @@ void main_menu()
 		"  APPLE2FLAT DEMO\n"
 		"\n"
 		"ESC - RETURN TO MENU\n"
-		"  1 - VIDEO: TEXT *\n"
+		"  1 - VIDEO: TEXT\n"
 		"  2 - VIDEO: LORES *\n" // video tests should each have a MIXED variation to try
 		"  3 - VIDEO: HIRES COLOUR *\n"
 		"  4 - VIDEO: HIRES MONO *\n"
@@ -147,12 +190,12 @@ void main_menu()
 	{
 	case KB_ESC: quit = 1; return; // ESCAPE (TODO: keycode enums)
 
+	case '1': video_test_text(); break;
 	case 'K': case 'k': keyboard_test(); break;
 	case 'P': case 'p': paddle_test(); break;
 	case 'I': case 'i': system_info(); break;
 
 	// unimplemented
-	case '1':
 	case '2':
 	case '3':
 	case '4':

@@ -1,4 +1,6 @@
 ; paddles
+;
+; paddle axis and buttons
 
 .include "../a2f.inc"
 

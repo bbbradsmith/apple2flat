@@ -32,6 +32,10 @@ SYSTEM_APPLE2C     = 4
 	txs
 .endmacro
 
+; Average rate of CPU cycle (14,318,180 Hz divided by 14 on 64/65 cycles, and 16 on the 65th)
+; Reference: Understanding the Apple II, Jim Sather 1983. Section 3-3.
+CPU_RATE = 1020484
+
 ;
 ; Keyboard
 ;
@@ -49,11 +53,26 @@ KB_RIGHT  = $15
 KB_UP     = $0B
 KB_DOWN   = $0A
 
+; kb_field control variables
+.global kb_field_cursor ; tile to use for field cursor
+.global kb_field_cursor_rate ; blink speed for field cursor (lower = faster)
+
+; kb_field text input field subroutine
+.global kb_field ; Y = len, a2f_temp+0,1 = buffer pointer
+; buffer is of size len, to be null terminated. len-1 characters will be shown for editing.
+; All normal characters are accepted.
+; Left and Right will move through the input. Delete will move the cursor left and truncate.
+; Escape, Return, Tab, Up, or Down will all return with the relevant keycode.
+; (You could use the return value to switch to another field, decide to accept or cancel, etc.
+; and if you only want to accept e.g. Return you could loop kb_field until you get Return.)
+; This will only work with single-buffered video: make sure the write and display pages are the same.
+
 ;
 ; Paddle
 ;
 
 ; buttons
+; NOTE: PADDLE_B2 is likely to always report as set if unconnected
 PADDLE_B0 = $01
 PADDLE_B1 = $02
 PADDLE_B2 = $04
@@ -78,6 +97,29 @@ PADDLE_HIGH   = 48
 .global paddle01_poll       ; poll both paddles and buttons (avg 3ms, max 6ms, 10ms if both timeout)
 
 ;
+; Floppy disk
+;
+
+.enum
+DISK_ERROR_FIND    = $01 ; could not find sector
+DISK_ERROR_DATA    = $02 ; found sector, but could not find data field
+DISK_ERROR_PARTIAL = $04 ; sector read but only partially correct (checksum fail)
+.endenum
+
+.globalzp disk_ptr ; parameter for disk_read, alias of a2f_temp
+.global disk_error ; last error code from disk routine
+
+.global disk_read ; X:A = segment to read, Y = segment count, disk_ptr = destination, returns disk_error
+.global disk_write ; TODO write sector
+.global disk_format ; TODO format track
+
+;
+; Tape
+;
+
+; TODO
+
+;
 ; Video
 ;
 
@@ -100,51 +142,33 @@ CLS_HIGH1 = 3
 
 ; select video mode driver
 .global video_mode_text
-.global video_mode_low ; TODO
-.global video_mode_low_mixed ; TODO
-.global video_mode_high ; TODO
-.global video_mode_high_mixed ; TODO
+;.global video_mode_low ; TODO
+;.global video_mode_low_mixed ; TODO
+;.global video_mode_high ; TODO
+;.global video_mode_high_mixed ; TODO
 
 .global video_cls ; clear current write screen with an appropriate value
 .global video_cls_page ; X = screen, A = fill value. clear one of the 4 screen memory areas
-.global video_page ; TODO ; select write and read page
-.global video_page_flip ; TODO
-.global video_page_copy ; TODO
+;.global video_page ; TODO ; select write and read page
+;.global video_page_flip ; TODO
+;.global video_page_copy ; TODO
 
 .global draw_pixel
 .global draw_getpixel
-.global draw_hline ; TODO
-.global draw_vline ; TODO
-.global draw_box ; TODO
-.global draw_fillbox ; TODO
-.global draw_ellipse ; TODO
+;.global draw_hline ; TODO
+;.global draw_vline ; TODO
+;.global draw_box ; TODO
+;.global draw_fillbox ; TODO
+;.global draw_ellipse ; TODO
 
-.global text_printf ; TODO
 .global text_out
 .global text_scroll
-.global text_charset ; TODO
+.global text_charset ; A = 0 primary character set, 1 alternate character set (IIe)
 
-.global blit_tile ; TODO
-.global blit_coarse ; TODO
-.global blit_fine ; TODO
-.global blit_mask ; TODO
-
-;
-; Floppy disk
-;
-
-.enum
-DISK_ERROR_FIND    = $01 ; could not find sector
-DISK_ERROR_DATA    = $02 ; found sector, but could not find data field
-DISK_ERROR_PARTIAL = $04 ; sector read but only partially correct (checksum fail)
-.endenum
-
-.globalzp disk_ptr ; parameter for disk_read, alias of a2f_temp
-.global disk_error ; last error code from disk routine
-
-.global disk_read ; X:A = segment to read, Y = segment count, disk_ptr = destination, returns disk_error
-.global disk_write ; TODO write sector
-.global disk_format ; TODO format track
+;.global blit_tile ; TODO
+;.global blit_coarse ; TODO
+;.global blit_fine ; TODO
+;.global blit_mask ; TODO
 
 ;
 ; Misc

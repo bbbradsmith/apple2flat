@@ -10,6 +10,7 @@
 .export video_cls_text
 .export text_out_text
 .export text_scroll_text
+.export text_charset
 .export draw_pixel_text
 .export draw_getpixel_text
 
@@ -215,5 +216,12 @@ scroll_up:
 		inc draw_y0
 		inc lines ; count up to 0
 		bne :-
+	rts
+.endproc
+
+.proc text_charset
+	and #1
+	tax
+	sta $C00E, X
 	rts
 .endproc

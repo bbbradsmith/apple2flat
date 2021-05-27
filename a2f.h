@@ -64,20 +64,25 @@ uint8 kb_data(); // direct read from $C000 (bit 7 = pending new, 6-0 = keycode)
 char kb_any(); // reads $C010, cancels any pending kb_new, returns 1 if any keys are currently held
 // NOTE: kb_any always returns 0 on Apple II models prior to Apple IIe/IIc
 
-// extern uint8 kb_field_cursor // TODO tile to use for field cursor
-// extern uint8 kb_field_cursor_blink_rate // TODO make cursor blink after x<<8 number of polls? 0 for never
-void kb_field(char* field, uint8 len); // TODO display cursor and take input with esc/delete/enter/left-right special cases, len should be 1 more than field width to allow terminal 0
-// plan:
-//  takes input until ESC,Tab,Enter,Up or Down is pressed
-//  returns the last key pressed (allowing repeat until Enter, or other responses)
-//  otherwise it will start/resume with the cursor at the 0 point in the buffer (or len-1 if it's at len)
-//  should flip cursor every ??? iterations of waiting for key, maybe that's a uint16
+// TODO not implemented yet
+// kb_field text input field
+extern uint8 kb_field_cursor; // tile to use for field cursor
+extern uint8 kb_field_cursor_rate; // blink speed for field cursor (lower = faster)
+char kb_field(char* field, uint8 len);
+// field is a buffer of size len, to be null terminated. len-1 characters will be shown for editing.
+// All normal characters are accepted.
+// Left and Right will move through the input. Delete will move the cursor left and truncate.
+// Escape, Return, Tab, Up, or Down will all return with the relevant keycode.
+// (You could use the return value to switch to another field, decide to accept or cancel, etc.
+// and if you only want to accept e.g. Return you could loop kb_field until you get Return.)
+// This will only work with single-buffered video: make sure the write and display pages are the same.
 
 //
 // Paddle
 //
 
 // paddle_buttons mask
+// NOTE: PADDLE_B2 is likely to always report as set if unconnected
 #define PADDLE_B0            0x01
 #define PADDLE_B1            0x02
 #define PADDLE_B2            0x04
@@ -158,7 +163,7 @@ extern void text_outs(const char* s); // output a null-terminated string
 extern void text_printf(const char* format, ...);
 extern void text_vprintf(const char* format, va_list ap);
 extern void text_scroll(sint8 lines); // positive: shift text up, clear bottom, negative: shift text down, clear top
-// TODO text_charset
+extern void text_charset(char alt); // 0 = primary character set, 1 = alternat character set (IIe)
 extern void text_xy(uint8 x, uint8 y); // set text output location (faster to set video_text_x/y directly, though)
 extern void text_window(uint8 x0, uint8 y0, uint8 x1, uint8 y1); // confine text to x0<=x<x1, y0<=y<y1
 extern void draw_pixel(uint16 x, uint8 y, uint8 c);
@@ -172,5 +177,11 @@ extern uint8 draw_getpixel(uint16 x, uint8 y, uint8 c);
 //blit_coarse
 //blit_fine
 //blit_mask
+
+//
+// Misc
+//
+
+void delay(unsigned int ms); // delays roughly this number of milliseconds
 
 #endif
