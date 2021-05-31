@@ -7,13 +7,22 @@
 .export video_mode_text
 .export _video_mode_text
 
+; shared for mixed modes
+.export text_out_text
+.export text_scroll_text
+
 .import video_cls_page
+.import video_page_copy_low
+.import video_page_apply
 
 .import video_rowpos0
 .import video_rowpos1
 .import video_null
 .import video_mode_setup
 .import VIDEO_FUNCTION_MAX
+.import draw_hline_generic
+.import draw_vline_generic
+.import draw_fillbox_generic
 
 .import text_inverse
 .import draw_y
@@ -27,25 +36,23 @@ TEXT_CLEAR = $A0 ; space, normal
 
 .proc video_mode_text
 	lda #40
-	sta video_text_xr
+	sta video_text_w
 	lda #24
-	sta video_text_yr
+	sta video_text_h
 	lda #<table
 	ldx #>table
 	jmp video_mode_setup
 table:
-	.word video_cls_text
 	.word video_page_text
-	.word video_page_copy_text
+	.word video_page_copy_low
+	.word video_cls_text
 	.word text_out_text
 	.word text_scroll_text
 	.word draw_pixel_text
 	.word draw_getpixel_text
-	.word video_null ; draw_hline
-	.word video_null ; draw_vline
-	.word video_null ; draw_box
-	.word video_null ; draw_fillbox
-	.word video_null ; blit_tile
+	.word draw_hline_generic
+	.word draw_vline_generic
+	.word draw_fillbox_generic
 	.word video_null ; blit_coarse
 	.word video_null ; blit_fine
 	.word video_null ; blit_mask
@@ -54,6 +61,18 @@ table:
 
 ; void video_mode_text()
 _video_mode_text = video_mode_text
+
+.proc video_page_text
+	; TODO: disable IIe double resolution features
+	;sta $C00C ; 40-column display (80COL)
+	;sta $C000 ; disable 80-column paging (80STORE)
+	;sta $C05F ; disable double resolution
+	; TODO: what dpes IOUDIS do?
+	; set text mode
+	sta $C052 ; non-mixed (MIXED)
+	sta $C051 ; text mode (TEXT)
+	jmp video_page_apply
+.endproc
 
 .proc video_cls_text
 	lda video_page_w
@@ -64,37 +83,11 @@ _video_mode_text = video_mode_text
 	jmp video_cls_page
 .endproc
 
-.proc video_page_text
-	lda video_page_r
-	and #1
-	tax
-	; TODO: disable IIe double resolution features
-	;sta $C00C ; 40-column display (80COL)
-	;sta $C000 ; disable 80-column paging (80STORE)
-	;sta $C05F ; disable double resolution
-	; TODO: what dpes IOUDIS do?
-	; set text mode
-	sta $C052 ; non-mixed (MIXED)
-	sta $C051 ; text mode (TEXT)
-	; apply page
-	sta $C054, X ; (PAGE2)
-	rts
-.endproc
-
-.proc video_page_copy_text
-	; TODO copy r to w page
-	rts
-.endproc
-
 text_out_text:
 	eor text_inverse
 draw_pixel_text:
 	; X/Y = coordinate
 	; A = value
-	cpx #40
-	bcs :+
-	cpy #24
-	bcs :+
 	pha
 	lda video_page_w
 	and #$0C
@@ -122,6 +115,7 @@ draw_pixel_text:
 	clc
 	adc video_rowpos0, Y
 	sta draw_ptr+0
+	ldy #0
 	lda (draw_ptr), Y
 	rts
 .endproc

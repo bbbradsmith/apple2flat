@@ -14,9 +14,7 @@
 .export draw_getpixel
 .export draw_hline
 .export draw_vline
-.export draw_box
 .export draw_fillbox
-.export blit_tile
 .export blit_coarse
 .export blit_fine
 .export blit_mask
@@ -35,11 +33,11 @@
 .exportzp draw_ptr1
 .export video_page_w
 .export video_page_r
-.export draw_xh
 .export draw_x0
 .export draw_x1
 .export draw_y0
 .export draw_y1
+.export draw_xh
 
 .importzp a2f_temp
 
@@ -53,25 +51,23 @@ draw_ptr1 = a2f_temp+2
 video_page_w:  .byte 0
 video_page_r:  .byte 0
 
-draw_x0: .byte 2 ; draw parameter / temporaries
-draw_x1: .byte 2
-draw_y0: .byte 1
-draw_y1: .byte 1
-draw_xh = draw_x0+1
+draw_x0: .byte 0,0 ; draw parameter / temporaries
+draw_x1: .byte 0,0
+draw_y0: .byte 0
+draw_y1: .byte 0
+draw_xh = draw_x0+1 ; alias
 
 video_function_table:
-video_cls:       jmp a:video_null
 video_page:      jmp a:video_null
 video_page_copy: jmp a:video_null
+video_cls:       jmp a:video_null
 text_out_:       jmp a:video_null
 text_scroll:     jmp a:video_null
 draw_pixel:      jmp a:video_null
 draw_getpixel:   jmp a:video_null
 draw_hline:      jmp a:video_null
 draw_vline:      jmp a:video_null
-draw_box:        jmp a:video_null
 draw_fillbox:    jmp a:video_null
-blit_tile:       jmp a:video_null
 blit_coarse:     jmp a:video_null
 blit_fine:       jmp a:video_null
 blit_mask:       jmp a:video_null

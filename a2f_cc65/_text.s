@@ -36,7 +36,6 @@
 .import video_page_w
 .import video_page_r
 .import text_inverse
-.import draw_xh
 
 _video_text_x = video_text_x
 _video_text_y = video_text_y

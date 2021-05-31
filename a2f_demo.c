@@ -11,16 +11,21 @@ void video_test_text()
 	char alt = 0;
 
 	video_cls();
-	text_xy( 1, 1); text_outs("VIDEO: TEXT  (F FOR PAGE 2)");
+	text_xy( 1, 1); text_outs("VIDEO: TEXT PAGE 1 (F FOR PAGE 2)");
 	text_xy( 4,12); text_outs("CHARACTER SET: (C TO SWITCH)");
 	text_xy( 2, 3); text_outs("-- WINDOW --");
 	text_xy( 2, 9); text_outs("------------");
 
 	video_cls_page(CLS_LOW1,' '^0x80); // clear second page
 	video_page_select(0,1); // write to second page
-	text_xy( 5,10); text_outs("PAGE 2! PRESS F FOR PAGE 1.");
-	video_page_select(0,0); // write/view first page
+	text_xy( 1, 1); text_outs("VIDEO: TEXT PAGE 2 (F FOR PAGE 1)");
+	draw_box(2,4,7,7,'+'^0x80);
+	draw_hline(4,7,3,'-'^0x80);
+	draw_vline(5,6,3,'|'^0x80);
+	draw_fillbox(12,5,6,5,draw_getpixel(4,1));
 
+	video_page_select(0,0); // write/view first page
+	//c = 0;
 	do
 	{
 		draw_pixel(4+(c%32),14+(c/32),c);

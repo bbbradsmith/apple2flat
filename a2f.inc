@@ -133,6 +133,34 @@ CLS_DLOW1  = 5
 CLS_DHIGH0 = 6
 CLS_DHIGH1 = 7
 
+; low/double resolution colours
+COL_BLACK       = 0
+COL_MAGENTA     = 1
+COL_BLUE_DARK   = 2
+COL_PURPLE      = 3
+COL_GREEN_DARK  = 4
+COL_GREY0       = 5
+COL_BLUE_MID    = 6
+COL_BLUE_LIGHT  = 7
+COL_BROWN       = 8
+COL_ORANGE      = 9
+COL_GREY1       = 10
+COL_PINK        = 11
+COL_GREEN_LIGHT = 12
+COL_YELLOW      = 13
+COL_AQUAMARINE  = 14
+COL_WHITE       = 15
+
+; high resolution colours
+COH_BLACK0      = $00
+COH_PURPLE      = $01
+COH_GREEN       = $02
+COH_WHITE0      = $03
+COH_BLACK1      = $80
+COH_ORANGE      = $82
+COH_BLUE        = $81
+COH_WHITE1      = $83
+
 ; variables
 .global video_text_x    ; text_out position
 .global video_text_y
@@ -143,13 +171,23 @@ CLS_DHIGH1 = 7
 .global video_page_w    ; page to write/draw: 00 page 1, FF page 2
 .global video_page_r    ; page to read/display
 .global text_inverse    ; $80 = normal text, $00 = inverse text
+.global draw_x0 ; parameters/temporaries for drawing functions
+.global draw_x1
+.global draw_y0
+.global draw_y1
+.global draw_xh ; high byte for draw_pixel, alias of: draw_x0+1
 
 ; select video mode driver
 .global video_mode_text
-;.global video_mode_low ; TODO
-;.global video_mode_low_mixed ; TODO
-;.global video_mode_high ; TODO
-;.global video_mode_high_mixed ; TODO
+.global video_mode_low
+.global video_mode_low_mixed
+.global video_mode_high ; TODO
+.global video_mode_high_mixed ; TODO
+.global video_mode_double_text ; TODO
+.global video_mode_double_low ; TODO
+.global video_mode_double_low_mixed ; TODO
+.global video_mode_double_high ; TODO
+.global video_mode_double_high_mixed ; TODO
 
 .global video_cls ; clear current write screen with an appropriate value
 .global video_cls_page ; X = screen, A = fill value. clear one of the 4 screen memory areas
@@ -157,22 +195,24 @@ CLS_DHIGH1 = 7
 .global video_page_flip ; flips and applies video_page_r / video_page_w
 .global video_page_copy ; copies video_page_r to video_page_w
 
-.global draw_pixel
-.global draw_getpixel
-;.global draw_hline ; TODO
-;.global draw_vline ; TODO
-;.global draw_box ; TODO
-;.global draw_fillbox ; TODO
-;.global draw_ellipse ; TODO
+.global vsync ; TODO
+
+.global draw_pixel ; A = color, h:X,Y = coordinate (draw_xh for high byte of X if needed)
+.global draw_getpixel ; X,Y = coordinate, returns value in A
+.global draw_hline ; draw_x0,y0 = left pixel, draw_x1 = right pixel + 1, A = color
+.global draw_vline
+.global draw_box
+.global draw_fillbox
+.global draw_line ; TODO
+.global draw_ellipse ; TODO
 
 .global text_out
 .global text_scroll
 .global text_charset ; A = 0 primary character set, 1 alternate character set (IIe)
 
-;.global blit_tile ; TODO
-;.global blit_coarse ; TODO
-;.global blit_fine ; TODO
-;.global blit_mask ; TODO
+.global blit_coarse ; TODO
+.global blit_fine ; TODO
+.global blit_mask ; TODO
 
 ;
 ; Misc

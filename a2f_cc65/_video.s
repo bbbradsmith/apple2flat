@@ -17,7 +17,6 @@
 .export _draw_vline
 .export _draw_box
 .export _draw_fillbox
-.export _blit_tile
 .export _blit_coarse
 .export _blit_fine
 .export _blit_mask
@@ -35,14 +34,19 @@
 .import draw_vline
 .import draw_box
 .import draw_fillbox
-.import blit_tile
 .import blit_coarse
 .import blit_fine
 .import blit_mask
 
 .import video_page_w
 .import video_page_r
+.import draw_x0
+.import draw_x1
+.import draw_y0
+.import draw_y1
 .import draw_xh
+
+.importzp a2f_temp
 
 _video_page_w = video_page_w
 _video_page_r = video_page_r
@@ -95,40 +99,103 @@ _draw_pixel:
 	pla
 	jmp draw_pixel
 
-; uint8 draw_getpixel(uint16 x, uint8 y, uint8 c)
+; uint8 draw_getpixel(uint16 x, uint8 y)
 _draw_getpixel:
-	pha
-	jsr popa
 	pha
 	jsr popax
 	stx draw_xh
 	tax
 	pla
 	tay
-	pla
 	jsr draw_getpixel
 	ldx #0 ; cc65 8-bit returns must have X=0
 	rts
 
+; void draw_hline(uint16 x, uint8 y, uint16 w, uint8 c)
 _draw_hline:
-	; TODO
-	rts
+	pha
+	jsr popax ; w
+	sta a2f_temp+0
+	stx a2f_temp+1
+	jsr popa ; y
+	sta draw_y0
+	jsr popax ; x
+	sta draw_x0+0
+	stx draw_x0+1
+	clc
+	adc a2f_temp+0
+	sta draw_x1+0 ; x+w
+	txa
+	adc a2f_temp+1
+	sta draw_x1+1
+	pla ; c
+	jmp draw_hline
 
+; void draw_vline(uint16 x, uint8 y, uint8 h, uint8 c)
 _draw_vline:
-	; TODO
-	rts
+	pha
+	jsr popa ; h
+	sta a2f_temp+0
+	jsr popa ; y
+	sta draw_y0
+	clc
+	adc a2f_temp+0
+	sta draw_y1
+	jsr popax ; x
+	sta draw_x0+0
+	stx draw_x0+1
+	pla ; c
+	jmp draw_vline
 
+; void draw_box(uint16 x, uint8 y, uint16 w, uint8 h, uint8 c)
 _draw_box:
-	; TODO
-	rts
+	pha
+	jsr popa ; h
+	sta a2f_temp+2
+	jsr popax ; w
+	sta a2f_temp+0
+	stx a2f_temp+1
+	jsr popa ;y
+	sta draw_y0
+	clc
+	adc a2f_temp+2
+	sta draw_y1 ; y+h
+	jsr popax ; x
+	sta draw_x0+0
+	stx draw_x0+1
+	clc
+	adc a2f_temp+0
+	sta draw_x1+0 ; x+w
+	txa
+	adc a2f_temp+1
+	sta draw_x1+1
+	pla ; c
+	jmp draw_box
 
+; void draw_fillbox(uint16 x, uint8 y, uint16 w, uint8 h, uint8 c)
 _draw_fillbox:
-	; TODO
-	rts
-
-_blit_tile:
-	; TODO
-	rts
+	pha
+	jsr popa ; h
+	sta a2f_temp+2
+	jsr popax ; w
+	sta a2f_temp+0
+	stx a2f_temp+1
+	jsr popa ;y
+	sta draw_y0
+	clc
+	adc a2f_temp+2
+	sta draw_y1 ; y+h
+	jsr popax ; x
+	sta draw_x0+0
+	stx draw_x0+1
+	clc
+	adc a2f_temp+0
+	sta draw_x1+0 ; x+w
+	txa
+	adc a2f_temp+1
+	sta draw_x1+1
+	pla ; c
+	jmp draw_fillbox
 
 _blit_coarse:
 	; TODO
