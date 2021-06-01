@@ -5,6 +5,15 @@
 
 char quit = 0;
 
+void cls_full() // clears both pages and sets 0,0
+{
+	video_page_select(video_page_r,0); // keep visible page while clearing page 0
+	video_cls();
+	video_page_select(0,1); // clear page 1 while viewing (clear) page 0
+	video_cls();
+	video_page_select(0,0); // switch to page 0 for read and write
+}
+
 void video_test_text()
 {
 	uint8 c = 0;
@@ -25,7 +34,6 @@ void video_test_text()
 	draw_fillbox(12,5,6,5,draw_getpixel(4,1));
 
 	video_page_select(0,0); // write/view first page
-	//c = 0;
 	do
 	{
 		draw_pixel(4+(c%32),14+(c/32),c);
@@ -48,6 +56,58 @@ void video_test_text()
 			c = 0;
 		}
 		else if (video_page_w == 0)
+		{
+			if      (c == 0x00) text_outs("LOW RAM");
+			else if (c == 0x80) text_outs(" CHECKSUM...");
+			delay(1);
+			++c;
+		}
+	}
+}
+
+void video_test_low()
+{
+	char mixed = 1;
+	char flip = 0;
+	uint8 c;
+
+redraw:
+	cls_full();
+	if (!mixed) video_mode_low();
+	else        video_mode_low_mixed();
+	cls_full();
+
+	text_outs(
+		"VIDEO: LOW RESOLUTION MIXED PAGE 1\n"
+		"       F FOR PAGE 2\n"
+		"       M FOR NON_MIXED"
+	);
+	draw_box(1,1,18,3,COL_WHITE);
+	for (c=0; c<16; ++c) draw_pixel(2+c,2,c);
+	draw_box(1,3,18,6,COL_WHITE);
+	for (c=0; c<16; ++c) draw_pixel(2+c,4,draw_getpixel(2+c,2)); // test getpixel for even->even
+	for (c=0; c<16; ++c) draw_pixel(2+c,5,draw_getpixel(2+c,2)); // even->odd
+	for (c=0; c<16; ++c) draw_pixel(2+c,6,draw_getpixel(2+c,5)); // odd->even
+	for (c=0; c<16; ++c) draw_pixel(2+c,7,draw_getpixel(2+c,5)); // odd->odd
+	draw_fillbox(2,11,6,7,COL_GREEN_DARK);
+
+	video_page_select(0,1);
+	draw_fillbox(1,1,34,34,COL_GREEN_LIGHT);
+	// TODO leyendecker blit?
+	// TODO fine blit? masked blit?
+
+	video_page_select(flip,flip);
+	while(1)
+	{
+		if (kb_new())
+		{
+			c = kb_get();
+			if      (c == KB_ESC) break;
+			else if (c == 'F' || c == 'f') { video_page_flip(); flip ^= 1; }
+			else if (c == 'M' || c == 'm') { mixed = !mixed; goto redraw; }
+			c = 0;
+		}
+		else if (video_page_w != 0)
 		{
 			if      (c == 0x00) text_outs("LOW RAM");
 			else if (c == 0x80) text_outs(" CHECKSUM...");
@@ -168,8 +228,8 @@ void unimplemented()
 
 void main_menu()
 {
+	cls_full();
 	video_mode_text();
-	video_page_select(0,0);
 	video_cls();
 	text_window(1,1,39,23); // 1 space border
 	text_xy(1,1);
@@ -178,7 +238,7 @@ void main_menu()
 		"\n"
 		"ESC - RETURN TO MENU\n"
 		"  1 - VIDEO: TEXT\n"
-		"  2 - VIDEO: LORES *\n" // video tests should each have a MIXED variation to try
+		"  2 - VIDEO: LORES\n"
 		"  3 - VIDEO: HIRES COLOUR *\n"
 		"  4 - VIDEO: HIRES MONO *\n"
 		"  5 - VIDEO: DOUBLE TEXT *\n"
@@ -203,12 +263,12 @@ void main_menu()
 	case KB_ESC: quit = 1; return; // ESCAPE (TODO: keycode enums)
 
 	case '1': video_test_text(); break;
+	case '2': video_test_low(); break;
 	case 'K': case 'k': keyboard_test(); break;
 	case 'P': case 'p': paddle_test(); break;
 	case 'I': case 'i': system_info(); break;
 
 	// unimplemented
-	case '2':
 	case '3':
 	case '4':
 	case '5':

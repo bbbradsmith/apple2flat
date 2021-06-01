@@ -133,6 +133,7 @@ extern uint8_t disk_volume; // last disk volume
 
 // page definitions for video_cls_page
 // TODO D-versions
+// TODO CLS_TEXT/DTEXT?
 #define CLS_LOW0    0
 #define CLS_LOW1    1
 #define CLS_HIGH0   2
@@ -141,6 +142,34 @@ extern uint8_t disk_volume; // last disk volume
 #define CLS_DLOW1   5
 #define CLS_DHIGH0  6
 #define CLS_DHIGH1  7
+
+// low/double resolution colours
+#define COL_BLACK       0
+#define COL_MAGENTA     1
+#define COL_BLUE_DARK   2
+#define COL_PURPLE      3
+#define COL_GREEN_DARK  4
+#define COL_GREY0       5
+#define COL_BLUE_MID    6
+#define COL_BLUE_LIGHT  7
+#define COL_BROWN       8
+#define COL_ORANGE      9
+#define COL_GREY1       10
+#define COL_PINK        11
+#define COL_GREEN_LIGHT 12
+#define COL_YELLOW      13
+#define COL_AQUAMARINE  14
+#define COL_WHITE       15
+
+// high resolution colours
+#define COH_BLACK0      0x00
+#define COH_PURPLE      0x01
+#define COH_GREEN       0x02
+#define COH_WHITE0      0x03
+#define COH_BLACK1      0x80
+#define COH_ORANGE      0x82
+#define COH_BLUE        0x81
+#define COH_WHITE1      0x83
 
 extern uint8 video_text_x;
 extern uint8 video_text_y;
@@ -193,6 +222,7 @@ extern void draw_fillbox(uint16 x, uint8 y, uint16 w, uint8 h, uint8 c);
 extern void draw_line(uint16 x0, uint8 y0, uint16 x1, uint8 y1); // TODO
 extern void draw_ellipse(uint16 x0, uint8 y0, uint16 w, uint8 h); // TODO
 
+// TODO these probably deserve to be per-mode, because they're large code
 extern void blit_coarse(uint16 x0, uint8 y0, const uint8* data, uint8 tw, uint8 th); // TODO
 extern void blit_fine(uint16 x0, uint8 y0, const uint8* data, uint8 tw, uint8 th); // TODO
 extern void blit_mask(uint16 x0, uint8 y0, const uint8* data, uint8 tw, uint8 th); // TODO

@@ -32,8 +32,6 @@
 .importzp draw_ptr0
 .importzp draw_ptr1
 
-TEXT_CLEAR = $A0 ; space, normal
-
 .proc video_mode_text
 	lda #40
 	sta video_text_w
@@ -75,11 +73,17 @@ _video_mode_text = video_mode_text
 .endproc
 
 .proc video_cls_text
+	; reset cursor
+	lda video_text_xr
+	sta video_text_x
+	lda video_text_yr
+	sta video_text_y
+	; clear page
 	lda video_page_w
 	and #1
 	eor #CLS_LOW0
 	tax
-	lda #TEXT_CLEAR
+	lda #$A0 ; space, normal
 	jmp video_cls_page
 .endproc
 
@@ -158,7 +162,7 @@ draw_pixel_text:
 	sta draw_ptr+1
 	lda video_rowpos0, X
 	sta draw_ptr+0
-	lda #TEXT_CLEAR
+	lda #$A0 ; space, normal
 	ldy video_text_xr
 	:
 		cpy video_text_w
