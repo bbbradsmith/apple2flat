@@ -81,8 +81,9 @@ char kb_field(char* field, uint8 len);
 // Paddle
 //
 
-// paddle_buttons mask
-// NOTE: PADDLE_B2 is likely to always report as set if unconnected
+// paddle button mask
+// NOTE: Unconnected buttons may be erratic or always report as set.
+//       On IIe, B0/B1 are always connected as keys, but B2 is likely unconnected.
 #define PADDLE_B0            0x01
 #define PADDLE_B1            0x02
 #define PADDLE_B2            0x01
