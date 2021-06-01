@@ -72,10 +72,11 @@ KB_DOWN   = $0A
 ;
 
 ; buttons
-; NOTE: PADDLE_B2 is likely to always report as set if unconnected
+; NOTE: Unconnected buttons may be erratic or always report as set.
+;       On IIe, B0/B1 are always connected as keys, but B2 is likely unconnected.
 PADDLE_B0 = $01
 PADDLE_B1 = $02
-PADDLE_B2 = $04
+PADDLE_B2 = $01
 
 ; paddle axis results are approximately 0-70, centred around 32
 ; 128 indicates a timeout, no paddle connected (avoid continually polling a disconnected paddle)
@@ -85,14 +86,15 @@ PADDLE_LOW    = 16
 PADDLE_HIGH   = 48
 
 ; variables updated by poll
-.global paddle_buttons
+.global paddle0_b ; B1, B0
+.global paddle1_b ; B2
 .global paddle0_x
 .global paddle0_y
 .global paddle1_x
 .global paddle1_y
 
 ; poll routines
-.global paddle_buttons_poll ; poll only paddle_buttons, result loaded in A/flags
+.global paddleb_poll        ; poll only paddle buttons, paddle0_b result loaded in A/flags (X=0)
 .global paddle0_poll        ; poll paddle0 and buttons (avg 1.5ms, max 3ms, 5ms if timeout)
 .global paddle01_poll       ; poll both paddles and buttons (avg 3ms, max 6ms, 10ms if both timeout)
 

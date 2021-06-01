@@ -162,9 +162,9 @@ void paddle_test()
 
 		text_window(1,1,39,23);
 		text_xy(12,5); text_printf("%d %d %d",
-			(paddle_buttons & PADDLE_B0) ? 1 : 0,
-			(paddle_buttons & PADDLE_B1) ? 2 : 0,
-			(paddle_buttons & PADDLE_B2) ? 3 : 0);
+			(paddle0_b & PADDLE_B0) ? 1 : 0,
+			(paddle0_b & PADDLE_B1) ? 2 : 0,
+			(paddle1_b & PADDLE_B2) ? 3 : 0);
 		text_xy(12,6); text_printf("$%02X %3d",paddle0_x,paddle0_x);
 		text_xy(12,7); text_printf("$%02X %3d",paddle0_y,paddle0_y);
 		text_xy(12,8); text_printf("$%02X %3d",paddle1_x,paddle1_x);

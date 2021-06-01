@@ -85,7 +85,7 @@ char kb_field(char* field, uint8 len);
 // NOTE: PADDLE_B2 is likely to always report as set if unconnected
 #define PADDLE_B0            0x01
 #define PADDLE_B1            0x02
-#define PADDLE_B2            0x04
+#define PADDLE_B2            0x01
 
 // paddle axis results are approximately 0-70, centred around 32
 // 128 indicates a timeout, no paddle connected (avoid continually polling a disconnected paddle)
@@ -95,13 +95,14 @@ char kb_field(char* field, uint8 len);
 #define PADDLE_HIGH          48
 
 // paddle poll result
-extern uint8 paddle_buttons;
+extern uint8 paddle0_b; // B1, B0
+extern uint8 paddle1_b; // B2
 extern uint8 paddle0_x;
 extern uint8 paddle0_y;
 extern uint8 paddle1_x;
 extern uint8 paddle1_y;
 
-extern uint8 paddle_buttons_poll(); // update only paddle_buttons (and return)
+extern uint8 paddleb_poll(); // update only paddle buttons (and returns paddle0_b result)
 extern void paddle0_poll(); // update paddle0 and buttons (avg 1.5ms, max 3ms, 5ms if timeout)
 extern void paddle01_poll(); // update both paddles and buttons (avg 3ms, max 6ms, 10ms if both timeout)
 

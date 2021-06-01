@@ -4,19 +4,21 @@
 
 .include "../a2f.inc"
 
-.export paddle_buttons_poll ; poll just paddle buttons
+.export paddleb_poll ; poll just paddle buttons
 .export paddle0_poll ; poll paddle 0 + buttons
 .export paddle01_poll ; poll both paddles and buttons
 
 ; variables updated by polling
-.export paddle_buttons
+.export paddle0_b
+.export paddle1_b
 .export paddle0_x
 .export paddle0_y
 .export paddle1_x
 .export paddle1_y
 
 .segment "CODE"
-paddle_buttons: .byte 0
+paddle0_b: .byte 0
+paddle1_b: .byte 0
 paddle0_x: .byte 128
 paddle0_y: .byte 128
 paddle1_x: .byte 128
@@ -59,19 +61,20 @@ paddle1_y: .byte 128
 
 .segment "CODE"
 
-paddle_buttons_poll:
+paddleb_poll:
 	ldx #0
-	stx paddle_buttons
+	stx paddle0_b
+	stx paddle1_b
 	lda $C063
 	asl
-	rol paddle_buttons
+	rol paddle1_b
 	lda $C062
 	asl
-	rol paddle_buttons
+	rol paddle0_b
 	lda $C061
 	asl
-	rol paddle_buttons
-	lda paddle_buttons
+	rol paddle0_b
+	lda paddle0_b
 	rts ; result in X:A for C calls
 
 paddle01_poll:
@@ -79,7 +82,7 @@ paddle01_poll:
 	jsr paddle_poll_ ; poll axes 2,3 (X=2)
 paddle0_poll:
 	; poll buttons first to allow extra discharge time before next read
-	jsr paddle_buttons_poll ; NOTE: result X=0
+	jsr paddleb_poll ; NOTE: result X=0
 	; poll axes 0,1 (X=0)
 paddle_poll_:
 	; pre-charge read: make sure both axes have returned to 0 (or timeout)
