@@ -46,9 +46,6 @@ table:
 	.word draw_hline_generic
 	.word draw_vline_generic
 	.word draw_fillbox_generic
-	.word video_null ; blit_coarse
-	.word video_null ; blit_fine
-	.word video_null ; blit_mask
 	.assert *-table = ((VIDEO_FUNCTION_MAX*2)/3), error, "table entry count incorrect"
 .endproc
 
@@ -59,6 +56,7 @@ _video_mode_low_mixed = video_mode_low_mixed
 	; TODO IIe stuff?
 	sta $C053 ; mixed (MIXED)
 	sta $C050 ; graphics mode (TEXT)
+	sta $C056 ; low-res (HIRES)
 	jmp video_page_apply
 .endproc
 

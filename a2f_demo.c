@@ -117,6 +117,20 @@ redraw:
 	}
 }
 
+void video_test_high_mono()
+{
+	// TODO
+	uint8 c;
+	video_mode_high_mono();
+	cls_full();
+	for (c=0; c<100; ++c)
+	{
+		draw_pixel(10+c,11+c,1);
+		draw_pixel(270-c,11+c,1);
+	}
+	
+	kb_get();
+}
 
 void keyboard_test()
 {
@@ -240,7 +254,7 @@ void main_menu()
 		"  1 - VIDEO: TEXT\n"
 		"  2 - VIDEO: LORES\n"
 		"  3 - VIDEO: HIRES COLOUR *\n"
-		"  4 - VIDEO: HIRES MONO *\n"
+		"  4 - VIDEO: HIRES MONO\n"
 		"  5 - VIDEO: DOUBLE TEXT *\n"
 		"  5 - VIDEO: DOUBLE LORES *\n"
 		"  6 - VIDEO: DOUBLE HIRES COLOUR *\n"
@@ -264,13 +278,13 @@ void main_menu()
 
 	case '1': video_test_text(); break;
 	case '2': video_test_low(); break;
+	case '4': video_test_high_mono(); break;
 	case 'K': case 'k': keyboard_test(); break;
 	case 'P': case 'p': paddle_test(); break;
 	case 'I': case 'i': system_info(); break;
 
 	// unimplemented
 	case '3':
-	case '4':
 	case '5':
 	case '6':
 	case '7':

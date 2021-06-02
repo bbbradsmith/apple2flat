@@ -78,12 +78,12 @@ PADDLE_B0 = $01
 PADDLE_B1 = $02
 PADDLE_B2 = $01
 
-; paddle axis results are approximately 0-70, centred around 32
+; paddle axis results are approximately 0-70, centre at around 32, right side range is slightly wider
 ; 128 indicates a timeout, no paddle connected (avoid continually polling a disconnected paddle)
 ; low/high are recommended thresholds
 PADDLE_CENTER = 32
 PADDLE_LOW    = 16
-PADDLE_HIGH   = 48
+PADDLE_HIGH   = 52
 
 ; variables updated by poll
 .global paddle0_b ; B1, B0

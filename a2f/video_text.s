@@ -51,9 +51,6 @@ table:
 	.word draw_hline_generic
 	.word draw_vline_generic
 	.word draw_fillbox_generic
-	.word video_null ; blit_coarse
-	.word video_null ; blit_fine
-	.word video_null ; blit_mask
 	.assert *-table = ((VIDEO_FUNCTION_MAX*2)/3), error, "table entry count incorrect"
 .endproc
 
@@ -69,6 +66,7 @@ _video_mode_text = video_mode_text
 	; set text mode
 	sta $C052 ; non-mixed (MIXED)
 	sta $C051 ; text mode (TEXT)
+	sta $C056 ; low-res (HIRES)
 	jmp video_page_apply
 .endproc
 
@@ -87,12 +85,7 @@ _video_mode_text = video_mode_text
 	jmp video_cls_page
 .endproc
 
-text_out_text:
-	eor text_inverse
-draw_pixel_text:
-	; X/Y = coordinate
-	; A = value
-	pha
+.proc draw_pixel_text_addr ; X/Y coordinate to draw_ptr, clobbers A
 	lda video_page_w
 	and #$0C
 	eor #$04 ; $04 or $08
@@ -102,6 +95,16 @@ draw_pixel_text:
 	clc
 	adc video_rowpos0, Y
 	sta draw_ptr+0
+	rts
+.endproc
+
+text_out_text:
+	eor text_inverse
+draw_pixel_text:
+	; X/Y = coordinate
+	; A = value
+	pha
+	jsr draw_pixel_text_addr
 	ldy #0
 	pla
 	sta (draw_ptr), Y
@@ -110,15 +113,7 @@ draw_pixel_text:
 
 .proc draw_getpixel_text
 	; X/Y = coordinate
-	lda video_page_w
-	and #$0C
-	eor #$04
-	ora video_rowpos1, Y
-	sta draw_ptr+1
-	txa
-	clc
-	adc video_rowpos0, Y
-	sta draw_ptr+0
+	jsr draw_pixel_text_addr
 	ldy #0
 	lda (draw_ptr), Y
 	rts

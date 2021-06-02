@@ -15,9 +15,6 @@
 .export draw_hline
 .export draw_vline
 .export draw_fillbox
-.export blit_coarse
-.export blit_fine
-.export blit_mask
 
 .export video_rowpos0
 .export video_rowpos1
@@ -68,9 +65,6 @@ draw_getpixel:   jmp a:video_null
 draw_hline:      jmp a:video_null
 draw_vline:      jmp a:video_null
 draw_fillbox:    jmp a:video_null
-blit_coarse:     jmp a:video_null
-blit_fine:       jmp a:video_null
-blit_mask:       jmp a:video_null
 VIDEO_FUNCTION_MAX = *-video_function_table
 .assert VIDEO_FUNCTION_MAX<256, error, "video_function_table too large?"
 
@@ -125,7 +119,7 @@ ptr = a2f_temp+0
 	cpx #CLS_HIGH0
 	bcc low
 	cpx #CLS_HIGH1+1
-	bcs high
+	bcc high
 	rts ; invalid page index
 low:
 	ldy #$04 ; LOW0 at $400
@@ -141,7 +135,7 @@ high:
 	bne :+
 		ldy #$40 ; HIGH1 at $4000
 	:
-	ldx #((24*4)/3) ; count of 3 row groupings
+	ldx #((24*8)/3) ; count of 3 row groupings
 clear:
 	sty ptr+1
 	ldy #0

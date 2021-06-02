@@ -88,12 +88,12 @@ char kb_field(char* field, uint8 len);
 #define PADDLE_B1            0x02
 #define PADDLE_B2            0x01
 
-// paddle axis results are approximately 0-70, centred around 32
+// paddle axis results are approximately 0-70, centre at around 32, right side range is slightly wider
 // 128 indicates a timeout, no paddle connected (avoid continually polling a disconnected paddle)
 // low/high are recommended thresholds
 #define PADDLE_CENTER        32
 #define PADDLE_LOW           16
-#define PADDLE_HIGH          48
+#define PADDLE_HIGH          52
 
 // paddle poll result
 extern uint8 paddle0_b; // B1, B0
@@ -106,6 +106,7 @@ extern uint8 paddle1_y;
 extern uint8 paddleb_poll(); // update only paddle buttons (and returns paddle0_b result)
 extern void paddle0_poll(); // update paddle0 and buttons (avg 1.5ms, max 3ms, 5ms if timeout)
 extern void paddle01_poll(); // update both paddles and buttons (avg 3ms, max 6ms, 10ms if both timeout)
+// TODO uint8 paddle0_digital() automatically apply thresholds and return digital bitmask?
 
 //
 // Floppy disk
@@ -190,13 +191,17 @@ extern uint8 text_inverse;
 extern void video_mode_text();
 extern void video_mode_low();
 extern void video_mode_low_mixed();
-extern void video_mode_high(); // TODO
-extern void video_mode_high_mixed(); // TODO
+extern void video_mode_high_mono();
+extern void video_mode_high_mono_mixed(); // TODO
+extern void video_mode_high_color(); // TODO
+extern void video_mode_high_color_mixed(); // TODO
 extern void video_mode_double_text(); // TODO
 extern void video_mode_double_low(); // TODO
 extern void video_mode_double_low_mixed(); // TODO
-extern void video_mode_double_high(); // TODO
-extern void video_mode_double_high_mixed(); // TODO
+extern void video_mode_double_high_mono(); // TODO
+extern void video_mode_double_high_mono_mixed(); // TODO
+extern void video_mode_double_high_color(); // TODO
+extern void video_mode_double_high_color_mixed(); // TODO
 
 extern void video_cls();
 extern void video_cls_page(uint8 page, uint8 fill);

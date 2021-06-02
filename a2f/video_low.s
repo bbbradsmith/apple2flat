@@ -41,9 +41,6 @@ table:
 	.word draw_hline_generic
 	.word draw_vline_generic
 	.word draw_fillbox_generic
-	.word video_null ; blit_coarse
-	.word video_null ; blit_fine
-	.word video_null ; blit_mask
 	.assert *-table = ((VIDEO_FUNCTION_MAX*2)/3), error, "table entry count incorrect"
 .endproc
 
@@ -54,6 +51,7 @@ _video_mode_low = video_mode_low
 	; TODO IIe stuff?
 	sta $C052 ; non-mixed (MIXED)
 	sta $C050 ; graphics mode (TEXT)
+	sta $C056 ; low-res (HIRES)
 	jmp video_page_apply
 .endproc
 
@@ -66,9 +64,7 @@ _video_mode_low = video_mode_low
 	jmp video_cls_page
 .endproc
 
-.proc draw_pixel_low
-	; X/Y = coordinate, A = value
-	sta draw_ptr1+0 ; store value
+.proc draw_pixel_low_addr ; X/Y = coordinate, clobbers A, sets draw_ptr0, draw_ptr1+1 stores parity
 	tya
 	lsr
 	tay ; Y = Y/2
@@ -85,6 +81,13 @@ _video_mode_low = video_mode_low
 	clc
 	adc video_rowpos0, Y
 	sta draw_ptr0+0
+	rts
+.endproc
+
+.proc draw_pixel_low
+	; X/Y = coordinate, A = value
+	sta draw_ptr1+0 ; store value
+	jsr draw_pixel_low_addr
 	; write either top or bottom half of bits
 	ldy #0
 	lda draw_ptr1+1 ; parity
@@ -111,21 +114,7 @@ _video_mode_low = video_mode_low
 
 .proc draw_getpixel_low
 	; X/Y = coordinate
-	tya
-	lsr
-	tay
-	lda #0
-	rol
-	sta draw_ptr1+1
-	lda video_page_w
-	and #$0C
-	eor #$04
-	ora video_rowpos1, Y
-	sta draw_ptr0+1
-	txa
-	clc
-	adc video_rowpos0, Y
-	sta draw_ptr0+0
+	jsr draw_pixel_low_addr
 	ldy #0
 	lda draw_ptr1+1
 	bne @bottom
