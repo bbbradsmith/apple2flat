@@ -215,15 +215,20 @@ void paddle_test()
 void system_info()
 {
 	const char* t = "UNKNOWN";
+
+	if (system_type == SYSTEM_APPLE2GS) // change colour to demonstrate IIGS detection
+		iigs_color(COL_YELLOW,COL_BLUE_DARK,COL_PINK);
+
 	video_cls();
 	text_xy(0,2);
 	text_outs("  DETECTED SYSTEM:\n    ");
 	switch(system_type)
 	{
 	case SYSTEM_APPLE2:      t = "APPLE 2"; break;
-	case SYSTEM_APPLE2_PLUS: t = "APPLE 2 PLUS"; break;
+	case SYSTEM_APPLE2_PLUS: t = "APPLE 2+"; break;
 	case SYSTEM_APPLE2E:     t = "APPLE 2E"; break;
 	case SYSTEM_APPLE2C:     t = "APPLE 2C"; break;
+	case SYSTEM_APPLE2GS:    t = "APPLE 2GS"; break;
 	default:                 break;
 	}
 	text_outs(t);
@@ -242,6 +247,9 @@ void unimplemented()
 
 void main_menu()
 {
+	if (system_type == SYSTEM_APPLE2GS)
+		iigs_color(COL_WHITE,COL_BLACK,COL_BLACK);
+
 	cls_full();
 	video_mode_text();
 	video_cls();

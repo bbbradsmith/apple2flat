@@ -19,6 +19,7 @@ typedef int8_t   sint8;
 #define SYSTEM_APPLE2_PLUS  2
 #define SYSTEM_APPLE2E      3
 #define SYSTEM_APPLE2C      4
+#define SYSTEM_APPLE2GS     5
 extern uint8 system_type;
 
 // exits to monitor with program counter display
@@ -166,13 +167,17 @@ extern uint8_t disk_volume; // last disk volume
 
 // high resolution colours
 #define COH_BLACK0      0x00
-#define COH_PURPLE      0x01
-#define COH_GREEN       0x02
+#define COH_GREEN       0x01
+#define COH_PURPLE      0x02
 #define COH_WHITE0      0x03
 #define COH_BLACK1      0x80
-#define COH_ORANGE      0x82
 #define COH_BLUE        0x81
+#define COH_ORANGE      0x82
 #define COH_WHITE1      0x83
+
+// monochrome colours
+#define COM_BLACK       0
+#define COM_WHITE       1
 
 extern uint8 video_text_x;
 extern uint8 video_text_y;
@@ -233,6 +238,9 @@ extern void draw_ellipse(uint16 x0, uint8 y0, uint16 w, uint8 h); // TODO
 extern void blit_coarse(uint16 x0, uint8 y0, const uint8* data, uint8 tw, uint8 th); // TODO
 extern void blit_fine(uint16 x0, uint8 y0, const uint8* data, uint8 tw, uint8 th); // TODO
 extern void blit_mask(uint16 x0, uint8 y0, const uint8* data, uint8 tw, uint8 th); // TODO
+
+// set text/border colours on IIGS only (call if system_type == SYSTEM_APPLE2GS)
+extern void iigs_color(uint8 text_fg, uint8 text_bg, uint8 border); // low-resolution colour values
 
 //
 // Misc

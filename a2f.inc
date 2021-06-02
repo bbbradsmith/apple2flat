@@ -13,6 +13,7 @@ SYSTEM_APPLE2      = 1
 SYSTEM_APPLE2_PLUS = 2
 SYSTEM_APPLE2E     = 3
 SYSTEM_APPLE2C     = 4
+SYSTEM_APPLE2GS    = 5
 .endenum
 .global system_type ; set to one of the enums above at startup
 
@@ -155,13 +156,17 @@ COL_WHITE       = 15
 
 ; high resolution colours
 COH_BLACK0      = $00
-COH_PURPLE      = $01
-COH_GREEN       = $02
+COH_GREEN       = $01
+COH_PURPLE      = $02
 COH_WHITE0      = $03
 COH_BLACK1      = $80
-COH_ORANGE      = $82
 COH_BLUE        = $81
+COH_ORANGE      = $82
 COH_WHITE1      = $83
+
+; monochrome colours
+COM_BLACK       = 0
+COM_WHITE       = 1
 
 ; variables
 .global video_text_x    ; text_out position
@@ -215,6 +220,9 @@ COH_WHITE1      = $83
 .global blit_coarse ; TODO
 .global blit_fine ; TODO
 .global blit_mask ; TODO
+
+; set text/border colours on IIGS only
+.global iigs_color ; A = text FG, X = text BG, Y = border (low-resolution colour values)
 
 ;
 ; Misc
