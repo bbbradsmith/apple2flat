@@ -13,10 +13,12 @@
 
 .import video_page_copy_high
 .import video_page_apply
+.import video_page_high
+.import video_cls_high
+.import draw_high_addr_y
+.import draw_high_addr_y_inc
 
 .import video_div7
-.import video_rowpos0
-.import video_rowpos1
 .import video_null
 .import video_mode_setup
 .import VIDEO_FUNCTION_MAX
@@ -49,82 +51,7 @@ table:
 ; void video_mode_high_mono()
 _video_mode_high_mono = video_mode_high_mono
 
-.proc video_page_high
-	; TODO IIe stuff?
-	sta $C052 ; non-mixed (MIXED)
-	sta $C050 ; graphics mode (TEXT)
-	sta $C057 ; high-res (HIRES)
-	jmp video_page_apply
-.endproc
-
-.proc video_cls_high
-	lda video_page_w
-	and #1
-	eor #CLS_HIGH0
-	tax
-	lda #0
-	jmp video_cls_page
-.endproc
-
-.proc draw_pixel_high_addr_y ; Y pixel address to draw_ptr0
-	lda video_page_w
-	and #$60
-	eor #$20 ; $20 or $40
-	sta draw_ptr0+1
-	tya
-	pha
-	lsr
-	lsr
-	lsr
-	tay ; Y/=8 to find row group
-	pla
-	and #7 ; Y%8 sub-row group
-	asl
-	asl
-	ora draw_ptr0+1
-	ora video_rowpos1, Y
-	sta draw_ptr0+1
-	lda video_rowpos0, Y
-	sta draw_ptr0+0 ; draw_ptr0 = pointer to row
-	rts
-.endproc
-
-.proc draw_high_addr_inc_y
-	; advance by 1 line
-	lda draw_ptr0+1
-	clc
-	adc #$04
-	sta draw_ptr0+1
-	and #$1C
-	bne :+
-		; gone past bottom, roll back and advance line group
-		lda draw_ptr0+1
-		sec
-		sbc #$20
-		sta draw_ptr0+1
-		lda draw_ptr0+0
-		clc
-		adc #<$80
-		sta draw_ptr0+0
-		lda draw_ptr0+1
-		adc #>$80
-		sta draw_ptr0+1
-		and #$04
-		beq :+
-		; into next 1/3 group, roll back and advance 1/3
-		lda draw_ptr0+1
-		sec
-		sbc #$04
-		sta draw_ptr0+1
-		lda draw_ptr0+0
-		clc
-		adc #40
-		sta draw_ptr0+0
-	:
-	rts
-.endproc
-
-.proc draw_pixel_high_mono_addr_x ; draw_xh:X pixel address to draw_ptr0, sub-pixel in draw_ptr1+1
+.proc draw_high_mono_addr_x ; draw_xh:X pixel address to draw_ptr0, sub-pixel in draw_ptr1+1
 	lda draw_xh
 	bne @x_right
 	txa
@@ -163,8 +90,8 @@ _video_mode_high_mono = video_mode_high_mono
 .proc draw_pixel_high_mono
 	; draw_xh:X/Y = coordinate, A = value
 	sta draw_ptr1+0 ; save value
-	jsr draw_pixel_high_addr_y
-	jsr draw_pixel_high_mono_addr_x
+	jsr draw_high_addr_y
+	jsr draw_high_mono_addr_x
 	; draw_ptr1+1 = sub-pixel X location
 	ldy #0
 	lda #1 ; inverse mask for pixel
@@ -185,8 +112,8 @@ _video_mode_high_mono = video_mode_high_mono
 
 .proc draw_getpixel_high_mono
 	; draw_xh:X/Y = coordinate
-	jsr draw_pixel_high_addr_y
-	jsr draw_pixel_high_mono_addr_x
+	jsr draw_high_addr_y
+	jsr draw_high_mono_addr_x
 	; draw_ptr1+1 = sub-pixel X location
 	ldy #0
 	lda (draw_ptr0), Y
@@ -205,8 +132,8 @@ _video_mode_high_mono = video_mode_high_mono
 	sta draw_ptr1+0 ; save value
 	ldx draw_x0+0
 	ldy draw_y0
-	jsr draw_pixel_high_addr_y
-	jsr draw_pixel_high_mono_addr_x
+	jsr draw_high_addr_y
+	jsr draw_high_mono_addr_x
 	lda #1
 	ldx draw_ptr1+1
 	beq :++
@@ -232,7 +159,7 @@ _video_mode_high_mono = video_mode_high_mono
 	ora draw_ptr1+0
 	sta (draw_ptr0), Y
 	; next pixel
-	jsr draw_high_addr_inc_y
+	jsr draw_high_addr_y_inc
 	inc draw_y0
 	jmp @loop
 .endproc

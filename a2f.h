@@ -167,12 +167,12 @@ extern uint8_t disk_volume; // last disk volume
 
 // high resolution colours
 #define COH_BLACK0      0x00
-#define COH_GREEN       0x01
-#define COH_PURPLE      0x02
+#define COH_PURPLE      0x01
+#define COH_GREEN       0x02
 #define COH_WHITE0      0x03
 #define COH_BLACK1      0x80
-#define COH_BLUE        0x81
-#define COH_ORANGE      0x82
+#define COH_ORANGE      0x81
+#define COH_BLUE        0x82
 #define COH_WHITE1      0x83
 
 // monochrome colours

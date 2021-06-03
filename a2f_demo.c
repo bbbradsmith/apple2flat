@@ -117,6 +117,65 @@ redraw:
 	}
 }
 
+void video_test_high_color()
+{
+	char mixed = 1;
+	char flip = 0;
+	uint8 c;
+
+redraw:
+	cls_full();
+	if (!mixed) video_mode_high_color();
+	else        video_mode_high_color_mixed();
+	cls_full();
+
+	text_outs(
+		"VIDEO: HIGH RES COLOR MIXED PAGE 1\n"
+		"       F FOR PAGE 2\n"
+		"       M FOR NON_MIXED"
+	);
+	draw_fillbox( 99,5,37,35,COH_WHITE0);
+	for (c=0; c<24; ++c)
+	{
+		draw_pixel( 10+c,11+c,COH_WHITE0);
+		draw_pixel(130-c,11+c,COH_BLACK0);
+		draw_pixel( 13+c,10+c,draw_getpixel( 10+c,11+c));
+		draw_pixel(127-c,10+c,draw_getpixel(130-c,11+c));
+	}
+	#define HCSW 14
+	draw_box(9,49,2+(HCSW*8),2+(2*HCSW),COH_WHITE1);
+	for (c=0; c<8; ++c)
+	{
+		draw_fillbox(10+(c*HCSW),50     ,HCSW,HCSW,(   c &3)|((   c &4)<<5));
+		draw_fillbox(10+(c*HCSW),50+HCSW,HCSW,HCSW,((7-c)&3)|(((7-c)&4)<<5));
+	}
+
+	video_page_select(0,1);
+	draw_fillbox(5,7,31,52,COH_PURPLE);
+	// TODO leyendecker blit?
+	// TODO fine blit? masked blit?
+
+	video_page_select(flip,flip);
+	while(1)
+	{
+		if (kb_new())
+		{
+			c = kb_get();
+			if      (c == KB_ESC) break;
+			else if (c == 'F' || c == 'f') { video_page_flip(); flip ^= 1; }
+			else if (c == 'M' || c == 'm') { mixed = !mixed; goto redraw; }
+			c = 0;
+		}
+		else if (video_page_w != 0)
+		{
+			if      (c == 0x00) text_outs("LOW RAM");
+			else if (c == 0x80) text_outs(" CHECKSUM...");
+			delay(1);
+			++c;
+		}
+	}
+}
+
 void video_test_high_mono()
 {
 	char mixed = 1;
@@ -130,7 +189,7 @@ redraw:
 	cls_full();
 
 	text_outs(
-		"VIDEO: HIGH RESOLUTION MONO MIXED PAGE 1\n"
+		"VIDEO: HIGH RES MONO MIXED PAGE 1\n"
 		"       F FOR PAGE 2\n"
 		"       M FOR NON_MIXED"
 	);
@@ -297,7 +356,7 @@ void main_menu()
 		"ESC - RETURN TO MENU\n"
 		"  1 - VIDEO: TEXT\n"
 		"  2 - VIDEO: LORES\n"
-		"  3 - VIDEO: HIRES COLOUR *\n"
+		"  3 - VIDEO: HIRES COLOUR\n"
 		"  4 - VIDEO: HIRES MONO\n"
 		"  5 - VIDEO: DOUBLE TEXT *\n"
 		"  5 - VIDEO: DOUBLE LORES *\n"
@@ -318,17 +377,17 @@ void main_menu()
 
 	switch(kb_get())
 	{
-	case KB_ESC: quit = 1; return; // ESCAPE (TODO: keycode enums)
+	case KB_ESC: quit = 1; return;
 
 	case '1': video_test_text(); break;
 	case '2': video_test_low(); break;
+	case '3': video_test_high_color(); break;
 	case '4': video_test_high_mono(); break;
 	case 'K': case 'k': keyboard_test(); break;
 	case 'P': case 'p': paddle_test(); break;
 	case 'I': case 'i': system_info(); break;
 
 	// unimplemented
-	case '3':
 	case '5':
 	case '6':
 	case '7':
