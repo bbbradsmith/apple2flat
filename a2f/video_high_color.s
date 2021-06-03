@@ -65,12 +65,13 @@ _video_mode_high_color = video_mode_high_color
 	rts
 .endproc
 
-.proc draw_pixel_high_color
+draw_pixel_high_color:
 	; draw_xh:X/Y = coordinate, A = value
 	sta draw_ptr1+0 ; save value
 	jsr draw_high_addr_y
 	jsr draw_high_color_addr_x
 	; draw_ptr1+1 = sub-pixel X location
+draw_pixel_high_color_addr:
 	ldx draw_ptr1+1
 	beq @x0
 	cpx #4
@@ -208,7 +209,6 @@ _video_mode_high_color = video_mode_high_color
 	ora draw_ptr1+0
 	sta (draw_ptr0), Y
 	rts
-.endproc
 
 .proc draw_getpixel_high_color
 	; draw_xh:X/Y = coordinate
@@ -243,5 +243,26 @@ _video_mode_high_color = video_mode_high_color
 .endproc
 
 .proc draw_vline_high_color
-	jmp draw_vline_generic ; TODO?
+	pha ; save value
+	ldx draw_x0+0
+	ldy draw_y0
+	jsr draw_high_addr_y
+	jsr draw_high_color_addr_x
+@loop:
+	; stop when y0 >= y1
+	lda draw_y0
+	cmp draw_y1
+	bcc :+
+		pla
+		rts
+	:
+	; draw the pixel
+	pla
+	pha
+	sta draw_ptr1+0 ; restore value
+	jsr draw_pixel_high_color_addr
+	; next pixel
+	jsr draw_high_addr_y_inc
+	inc draw_y0
+	jmp @loop
 .endproc
