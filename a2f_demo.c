@@ -119,17 +119,53 @@ redraw:
 
 void video_test_high_mono()
 {
-	// TODO
+	char mixed = 1;
+	char flip = 0;
 	uint8 c;
-	video_mode_high_mono();
+
+redraw:
 	cls_full();
-	for (c=0; c<100; ++c)
+	if (!mixed) video_mode_high_mono();
+	else        video_mode_high_mono_mixed();
+	cls_full();
+
+	text_outs(
+		"VIDEO: HIGH RESOLUTION MONO MIXED PAGE 1\n"
+		"       F FOR PAGE 2\n"
+		"       M FOR NON_MIXED"
+	);
+	draw_fillbox(239,5,37,35,COM_WHITE);
+	for (c=0; c<24; ++c)
 	{
-		draw_pixel(10+c,11+c,1);
-		draw_pixel(270-c,11+c,1);
+		draw_pixel( 10+c,11+c,COM_WHITE);
+		draw_pixel(270-c,11+c,COM_BLACK);
+		draw_pixel( 13+c,10+c,draw_getpixel( 10+c,11+c));
+		draw_pixel(267-c,10+c,draw_getpixel(270-c,11+c));
 	}
-	
-	kb_get();
+
+	video_page_select(0,1);
+	// TODO leyendecker blit?
+	// TODO fine blit? masked blit?
+
+	video_page_select(flip,flip);
+	while(1)
+	{
+		if (kb_new())
+		{
+			c = kb_get();
+			if      (c == KB_ESC) break;
+			else if (c == 'F' || c == 'f') { video_page_flip(); flip ^= 1; }
+			else if (c == 'M' || c == 'm') { mixed = !mixed; goto redraw; }
+			c = 0;
+		}
+		else if (video_page_w != 0)
+		{
+			if      (c == 0x00) text_outs("LOW RAM");
+			else if (c == 0x80) text_outs(" CHECKSUM...");
+			delay(1);
+			++c;
+		}
+	}
 }
 
 void keyboard_test()
