@@ -327,6 +327,7 @@ void system_info()
 	default:                 break;
 	}
 	text_outs(t);
+	// TODO ram size / page count? Need interface for banking.
 	while (kb_get() != KB_ESC);
 }
 

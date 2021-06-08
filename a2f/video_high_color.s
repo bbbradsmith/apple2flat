@@ -26,9 +26,10 @@
 .import draw_vline_generic
 .import draw_fillbox_generic
 
+.importzp a2f_temp
 .importzp draw_ptr
-.importzp draw_ptr0
-.importzp draw_ptr1
+draw_high_color = a2f_temp+2
+draw_high_phase = a2f_temp+3
 
 .proc video_mode_high_color
 	lda #<table
@@ -51,28 +52,27 @@ table:
 ; void video_mode_high_color()
 _video_mode_high_color = video_mode_high_color
 
-.proc draw_high_color_addr_x ; draw_xh:X pixel address to draw_ptr0, sub-pixel in draw_ptr1+1
+.proc draw_high_color_addr_x ; draw_xh:X pixel address to draw_ptr, sub-pixel 0-6 in draw_high_phase
 	lda video_div7, X
 	and #7
-	sta draw_ptr1+1
+	sta draw_high_phase
 	lda video_div7, X
 	lsr
 	lsr
 	and #%11111110 ; (X/7)*2 = byte pair this pixel is in
 	clc
-	adc draw_ptr0+0
-	sta draw_ptr0+0
+	adc draw_ptr+0
+	sta draw_ptr+0
 	rts
 .endproc
 
 draw_pixel_high_color:
 	; draw_xh:X/Y = coordinate, A = value
-	sta draw_ptr1+0 ; save value
+	sta draw_high_color ; save value
 	jsr draw_high_addr_y
 	jsr draw_high_color_addr_x
-	; draw_ptr1+1 = sub-pixel X location
-draw_pixel_high_color_addr:
-	ldx draw_ptr1+1
+draw_pixel_high_color_addr: ; ready: draw_ptr, draw_high_color, draw_high_phase
+	ldx draw_high_phase
 	beq @x0
 	cpx #4
 	bcs @x456
@@ -82,76 +82,76 @@ draw_pixel_high_color_addr:
 	bcs @x3
 @x0:
 	ldy #0
-	lda (draw_ptr0), Y
+	lda (draw_ptr), Y
 	and #%01111100
-	ora draw_ptr1+0
-	sta (draw_ptr0), Y
+	ora draw_high_color
+	sta (draw_ptr), Y
 	rts
 @x1:
-	lda draw_ptr1+0
+	lda draw_high_color
 	tax
 	asl
 	asl
-	sta draw_ptr1+0
+	sta draw_high_color
 	txa
 	and #%10000000
-	ora draw_ptr1+0
-	sta draw_ptr1+0
+	ora draw_high_color
+	sta draw_high_color
 	ldy #0
-	lda (draw_ptr0), Y
+	lda (draw_ptr), Y
 	and #%01110011
-	ora draw_ptr1+0
-	sta (draw_ptr0), Y
+	ora draw_high_color
+	sta (draw_ptr), Y
 	rts
 @x2:
-	lda draw_ptr1+0
+	lda draw_high_color
 	tax
 	asl
 	asl
 	asl
 	asl
-	sta draw_ptr1+0
+	sta draw_high_color
 	txa
 	and #%10000000
-	ora draw_ptr1+0
-	sta draw_ptr1+0
+	ora draw_high_color
+	sta draw_high_color
 	ldy #0
-	lda (draw_ptr0), Y
+	lda (draw_ptr), Y
 	and #%01001111
-	ora draw_ptr1+0
-	sta (draw_ptr0), Y
+	ora draw_high_color
+	sta (draw_ptr), Y
 	rts
 @x3:
-	lda draw_ptr1+0
+	lda draw_high_color
 	pha
 	tax
 	lsr
 	ror
 	ror
 	and #%01000000
-	sta draw_ptr1+0
+	sta draw_high_color
 	txa
 	and #%10000000
 	tax
-	ora draw_ptr1+0
-	sta draw_ptr1+0
+	ora draw_high_color
+	sta draw_high_color
 	ldy #0
-	lda (draw_ptr0), Y
+	lda (draw_ptr), Y
 	and #%00111111
-	ora draw_ptr1+0
-	sta (draw_ptr0), Y
+	ora draw_high_color
+	sta (draw_ptr), Y
 	pla
 	lsr
 	lsr
 	txa
 	adc #0
 	and #%10000001
-	sta draw_ptr1+0
+	sta draw_high_color
 	iny
-	lda (draw_ptr0), Y
+	lda (draw_ptr), Y
 	and #%01111110
-	ora draw_ptr1+0
-	sta (draw_ptr0), Y
+	ora draw_high_color
+	sta (draw_ptr), Y
 	rts
 @x456:
 	beq @x4
@@ -159,86 +159,86 @@ draw_pixel_high_color_addr:
 	beq @x5
 	bne @x6
 @x4:
-	lda draw_ptr1+0
+	lda draw_high_color
 	tax
 	asl
-	sta draw_ptr1+0
+	sta draw_high_color
 	txa
 	and #%10000000
-	ora draw_ptr1+0
-	sta draw_ptr1+0
+	ora draw_high_color
+	sta draw_high_color
 	ldy #1
-	lda (draw_ptr0), Y
+	lda (draw_ptr), Y
 	and #%01111001
-	ora draw_ptr1+0
-	sta (draw_ptr0), Y
+	ora draw_high_color
+	sta (draw_ptr), Y
 	rts
 @x5:
-	lda draw_ptr1+0
+	lda draw_high_color
 	tax
 	asl
 	asl
 	asl
-	sta draw_ptr1+0
+	sta draw_high_color
 	txa
 	and #%10000000
-	ora draw_ptr1+0
-	sta draw_ptr1+0
+	ora draw_high_color
+	sta draw_high_color
 	ldy #1
-	lda (draw_ptr0), Y
+	lda (draw_ptr), Y
 	and #%01100111
-	ora draw_ptr1+0
-	sta (draw_ptr0), Y
+	ora draw_high_color
+	sta (draw_ptr), Y
 	rts
 @x6:
-	lda draw_ptr1+0
+	lda draw_high_color
 	tax
 	asl
 	asl
 	asl
 	asl
 	asl
-	sta draw_ptr1+0
+	sta draw_high_color
 	txa
 	and #%10000000
-	ora draw_ptr1+0
-	sta draw_ptr1+0
+	ora draw_high_color
+	sta draw_high_color
 	ldy #1
-	lda (draw_ptr0), Y
+	lda (draw_ptr), Y
 	and #%00011111
-	ora draw_ptr1+0
-	sta (draw_ptr0), Y
+	ora draw_high_color
+	sta (draw_ptr), Y
 	rts
 
 .proc draw_getpixel_high_color
 	; draw_xh:X/Y = coordinate
 	jsr draw_high_addr_y
 	jsr draw_high_color_addr_x
-	; draw_ptr1+1 = sub-pixel X location
-	lda draw_ptr1+1
+	; draw_high_phase = sub-pixel X location
+	lda draw_high_phase
 	asl
 	tax
 	inx ; X = 2 * bits to rotate + 1
 	; load two bytes into draw_ptr1
 	ldy #0
-	lda (draw_ptr0), Y
+	lda (draw_ptr), Y
 	asl ; rotate left to delete color phase bit (+1 rotation will undo this)
-	sta draw_ptr1+0
+	sta draw_high_color
 	iny
-	lda (draw_ptr0), Y
-	sta draw_ptr1+1
-	lda draw_ptr1+0
+	lda (draw_ptr), Y
+	sta draw_high_phase ; temporary high bits of color
+	lda draw_high_color
 	:
-		lsr draw_ptr1+1
+		lsr draw_high_phase ; high bits
 		ror
 		dex
 		bne :-
 	and #3
-	sta draw_ptr1+0 ; store colour without phase
+	sta draw_high_color ; store colour without phase
 	dey
-	lda (draw_ptr0), Y
+	lda (draw_ptr), Y
 	and #%10000000
-	ora draw_ptr1+0 ; combine with phase
+	ora draw_high_color ; combine with phase
 	rts
 .endproc
 
@@ -259,7 +259,7 @@ draw_pixel_high_color_addr:
 	; draw the pixel
 	pla
 	pha
-	sta draw_ptr1+0 ; restore value
+	sta draw_high_color ; restore value
 	jsr draw_pixel_high_color_addr
 	; next pixel
 	jsr draw_high_addr_y_inc

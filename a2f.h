@@ -34,6 +34,10 @@ extern void prepare_assert(const char* message);
 #define ASSERT(condition_,message_) { if(!(condition_)) { prepare_assert((message_)); FATAL(); } }
 #endif
 
+// TODO
+// query avaiable RAM pages
+// RAM banking
+
 //
 // Keyboard
 //
@@ -233,6 +237,12 @@ extern void draw_box(uint16 x, uint8 y, uint16 w, uint8 h, uint8 c);
 extern void draw_fillbox(uint16 x, uint8 y, uint16 w, uint8 h, uint8 c);
 extern void draw_line(uint16 x0, uint8 y0, uint16 x1, uint8 y1); // TODO
 extern void draw_ellipse(uint16 x0, uint8 y0, uint16 w, uint8 h); // TODO
+//extern void draw_triangle(); // TODO filled triangle
+//extern void draw_polygon(const uint8* list, color); // TODO can this be done efficiently without multiply?
+// TODO keep track of current graphics mode
+// only operate the IIe double registers if switching from a double mode
+// for polgyon it could determine whether the list is 3-byte XXY or 2-byte XY
+// ... maybe a polygon needs to be triangulated to be efficient... maybe trilist?
 
 // TODO these probably deserve to be per-mode, because they're large code
 extern void blit_coarse(uint16 x0, uint8 y0, const uint8* data, uint8 tw, uint8 th); // TODO

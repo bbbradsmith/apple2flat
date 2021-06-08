@@ -22,9 +22,10 @@
 .import draw_vline_generic
 .import draw_fillbox_generic
 
+.importzp a2f_temp
 .importzp draw_ptr
-.importzp draw_ptr0
-.importzp draw_ptr1
+draw_low_color = a2f_temp+2
+draw_low_phase = a2f_temp+3
 
 .proc video_mode_low
 	lda #<table
@@ -64,51 +65,51 @@ _video_mode_low = video_mode_low
 	jmp video_cls_page
 .endproc
 
-.proc draw_pixel_low_addr ; X/Y = coordinate, clobbers A, sets draw_ptr0, draw_ptr1+1 stores parity
+.proc draw_pixel_low_addr ; X/Y = coordinate, clobbers A, sets draw_ptr, draw_low_phase stores parity
 	tya
 	lsr
 	tay ; Y = Y/2
 	lda #0
 	rol
-	sta draw_ptr1+1 ; store low bit of Y for parity select
+	sta draw_low_phase ; store low bit of Y for parity select
 	; calculate video address
 	lda video_page_w
 	and #$0C
 	eor #$04 ; $04 or $08
 	ora video_rowpos1, Y
-	sta draw_ptr0+1
+	sta draw_ptr+1
 	txa
 	clc
 	adc video_rowpos0, Y
-	sta draw_ptr0+0
+	sta draw_ptr+0
 	rts
 .endproc
 
 .proc draw_pixel_low
 	; X/Y = coordinate, A = value
-	sta draw_ptr1+0 ; store value
+	sta draw_low_color ; store value
 	jsr draw_pixel_low_addr
 	; write either top or bottom half of bits
 	ldy #0
-	lda draw_ptr1+1 ; parity
+	lda draw_low_phase ; parity
 	bne @bottom
 @top:
-	lda (draw_ptr0), Y
+	lda (draw_ptr), Y
 	and #$F0
-	ora draw_ptr1+0
-	sta (draw_ptr0), Y
+	ora draw_low_color
+	sta (draw_ptr), Y
 	rts
 @bottom:
-	lda (draw_ptr0), Y
+	lda (draw_ptr), Y
 	and #$0F
-	sta draw_ptr1+1 ; top half
-	lda draw_ptr1+0
+	sta draw_low_phase ; top half
+	lda draw_low_color
 	asl
 	asl
 	asl
 	asl
-	ora draw_ptr1+1
-	sta (draw_ptr0), Y
+	ora draw_low_phase ; top half
+	sta (draw_ptr), Y
 	rts
 .endproc
 
@@ -116,14 +117,14 @@ _video_mode_low = video_mode_low
 	; X/Y = coordinate
 	jsr draw_pixel_low_addr
 	ldy #0
-	lda draw_ptr1+1
+	lda draw_low_phase
 	bne @bottom
 @top:
-	lda (draw_ptr0), Y
+	lda (draw_ptr), Y
 	and #$0F
 	rts
 @bottom:
-	lda (draw_ptr0), Y
+	lda (draw_ptr), Y
 	lsr
 	lsr
 	lsr

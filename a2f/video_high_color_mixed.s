@@ -22,6 +22,8 @@
 .import draw_fillbox_generic
 
 .proc video_mode_high_color_mixed
+	; TODO make the mixed setup a shared utility function, we can just reset text
+	; (don't really know why I have w/h set above instead of below?)
 	lda #40
 	sta video_text_w
 	lda #24

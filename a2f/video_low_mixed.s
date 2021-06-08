@@ -21,7 +21,7 @@
 .import draw_vline_generic
 .import draw_fillbox_generic
 
-.importzp a2f_temp
+.importzp draw_ptr
 
 .proc video_mode_low_mixed
 	lda #40
@@ -75,9 +75,9 @@ _video_mode_low_mixed = video_mode_low_mixed
 	lda video_page_w
 	and #$0C
 	eor #$04
-	sta a2f_temp+1 ; $400 or $800
+	sta draw_ptr+1 ; $400 or $800
 	lda #0
-	sta a2f_temp+0
+	sta draw_ptr+0
 	; 20 lines of 0
 	ldx #20
 	jsr @clear ; A = 0, X = 20
@@ -89,31 +89,31 @@ _video_mode_low_mixed = video_mode_low_mixed
 	; clear line
 	ldy #0
 	:
-		sta (a2f_temp), Y
+		sta (draw_ptr), Y
 		iny
 		cpy #40
 		bcc :-
 	; advance to next line, $80 bytes
 	tay ; store clear colour
-	lda a2f_temp+0
+	lda draw_ptr+0
 	clc
 	adc #<$80
-	sta a2f_temp+0
+	sta draw_ptr+0
 	bcc :+
-	lda a2f_temp+1
+	lda draw_ptr+1
 	adc #0
-	sta a2f_temp+1
+	sta draw_ptr+1
 	and #$03
 	bne :+
 		; group exceeded, move to next segment of group
-		lda a2f_temp+1
+		lda draw_ptr+1
 		sec
 		sbc #$04
-		sta a2f_temp+1 ; back to top of area
-		lda a2f_temp+0
+		sta draw_ptr+1 ; back to top of area
+		lda draw_ptr+0
 		clc
 		adc #40
-		sta a2f_temp+0 ; advance by 40 bytes
+		sta draw_ptr+0 ; advance by 40 bytes
 	:
 	tya
 	; next line
