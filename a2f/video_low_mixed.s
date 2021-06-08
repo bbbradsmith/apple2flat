@@ -16,6 +16,7 @@
 
 .import video_null
 .import video_mode_setup
+.import video_mode_mixed_setup
 .import VIDEO_FUNCTION_MAX
 .import draw_hline_generic
 .import draw_vline_generic
@@ -24,17 +25,10 @@
 .importzp draw_ptr
 
 .proc video_mode_low_mixed
-	lda #40
-	sta video_text_w
-	lda #24
-	sta video_text_h
 	lda #<table
 	ldx #>table
 	jsr video_mode_setup
-	lda #20
-	sta video_text_y
-	sta video_text_yr
-	rts
+	jmp video_mode_mixed_setup
 table:
 	.word video_page_low_mixed
 	.word video_page_copy_low

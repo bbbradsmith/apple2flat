@@ -8,6 +8,7 @@
 .export _video_mode_high_mono_mixed
 
 .import video_mode_setup
+.import video_mode_mixed_setup
 .import VIDEO_FUNCTION_MAX
 
 .import video_page_high_mixed
@@ -22,17 +23,10 @@
 .import draw_fillbox_generic
 
 .proc video_mode_high_mono_mixed
-	lda #40
-	sta video_text_w
-	lda #24
-	sta video_text_h
 	lda #<table
 	ldx #>table
 	jsr video_mode_setup
-	lda #20
-	sta video_text_y
-	sta video_text_yr
-	rts
+	jmp video_mode_mixed_setup
 table:
 	.word video_page_high_mixed
 	.word video_page_copy_high_mixed

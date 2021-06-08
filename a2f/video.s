@@ -93,11 +93,16 @@ VIDEO_FUNCTION_MAX = *-video_function_table
 		inx
 		cpx #VIDEO_FUNCTION_MAX
 		bcc :-
+	; default text window
 	lda #0
 	sta video_text_x
 	sta video_text_y
 	sta video_text_xr
 	sta video_text_yr
+	lda #40
+	sta video_text_w
+	lda #24
+	sta video_text_h
 	jmp video_page
 .endproc
 

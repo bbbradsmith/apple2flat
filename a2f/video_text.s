@@ -108,7 +108,6 @@ draw_pixel_text:
 	ldy #0
 	pla
 	sta (draw_ptr), Y
-:
 	rts
 
 .proc draw_getpixel_text
