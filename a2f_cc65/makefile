@@ -15,7 +15,7 @@ SRC_CONIO   = $(wildcard ../cc65/libsrc/conio/*.s)
 
 CSRC_COMMON = $(wildcard ../cc65/libsrc/common/*.c)
 CSSRC_COMMON = $(addprefix ($OBJCDIR_COMMON)/,$(notdir $(CSRC_COMMON:.c=.s)))
-CSSRCS = $(CSSRC_COMMON)
+CSSRCS_CLEAN = $(wildcard $(OBJCDIR_COMMON)/*.s)
 
 OBJ = $(addprefix $(OBJDIR)/,$(notdir $(SRC:.s=.o)))
 OBJ_RUNTIME = $(addprefix $(OBJDIR_RUNTIME)/,$(notdir $(SRC_RUNTIME:.s=.o)))
@@ -66,4 +66,4 @@ $(LIB): $(OBJS)
 	$(AR65) a $(LIB) $(OBJS)
 
 clean:
-	$(RM) $(subst /,$(DS),$(LIB) $(OBJS) $(CSSRCS))
+	$(RM) $(subst /,$(DS),$(LIB) $(OBJS) $(CSSRCS_CLEAN))
