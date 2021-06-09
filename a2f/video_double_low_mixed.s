@@ -1,0 +1,88 @@
+; video_double_low_mixed
+;
+; Video driver for double low resolution + mixed double text
+
+.include "../a2f.inc"
+
+.export video_mode_double_low_mixed
+.export _video_mode_double_low_mixed
+
+.import video_page_copy_double_low
+.import video_page_apply
+.import text_out_double_text
+.import text_copy_row_double_text
+.import text_clear_row_double_text
+.import draw_pixel_double_low
+.import draw_getpixel_double_low
+
+.import video_null
+.import video_mode_setup
+.import video_mode_mixed_setup
+.import VIDEO_FUNCTION_TABLE_SIZE
+.import video_double_rw_aux_setup
+.import video_double_read_aux
+;.import video_double_write_aux
+.import draw_hline_generic
+.import draw_vline_generic
+.import draw_fillbox_generic
+
+.importzp draw_ptr
+
+.proc video_mode_double_low_mixed
+	lda #<table
+	ldx #>table
+	jsr video_mode_setup
+	jsr video_mode_mixed_setup
+	asl video_text_w ; 40 << 1 = 80
+	jmp video_double_rw_aux_setup
+table:
+	.word video_page_double_low_mixed
+	.word video_page_copy_double_low
+	.word video_cls_double_low_mixed
+	.word text_out_double_text
+	.word text_copy_row_double_text
+	.word text_clear_row_double_text
+	.word draw_pixel_double_low
+	.word draw_getpixel_double_low
+	.word draw_hline_generic
+	.word draw_vline_generic
+	.word draw_fillbox_generic
+	.assert *-table = VIDEO_FUNCTION_TABLE_SIZE, error, "table entry count incorrect"
+.endproc
+
+; void video_mode_low_mixed()
+_video_mode_double_low_mixed = video_mode_double_low_mixed
+
+.proc video_page_double_low_mixed
+	; set mode
+	sta $C050 ; graphics mode (TEXT)
+	sta $C053 ; mixed (MIXED)
+	sta $C056 ; low-res (HIRES)
+	; disable double mode
+	sta $C00D ; 80 columns (80COL)
+	sta $C07E ; enable DHIRES switch (IOUDIS)
+	sta $C05E ; double-hires oc (AN3/DHIRES)
+	jmp video_page_apply
+.endproc
+
+.proc video_cls_double_low_mixed
+	; reset cursor
+	lda video_text_xr
+	sta video_text_x
+	lda video_text_yr
+	sta video_text_y
+	; clear graphics
+	lda video_page_w
+	and #1
+	eor #CLS_DLOW0
+	tax
+	lda #0
+	jsr video_cls_page ; NOTE: mixed text area will be briefly filled with @ (0)
+	; clear mixed text
+	lda video_page_w
+	and #1
+	eor #CLS_DMIXED0
+	tax
+	lda #$A0 ; space, normal
+	jmp video_cls_page
+.endproc

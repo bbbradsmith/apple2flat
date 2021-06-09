@@ -279,6 +279,68 @@ void video_test_double_text()
 	}
 }
 
+void video_test_double_low()
+{
+	char mixed = 1;
+	char flip = 0;
+	uint8 c;
+
+redraw:
+	cls_full();
+	if (!mixed) video_mode_double_low();
+	else        video_mode_double_low_mixed();
+	cls_full();
+
+	text_outs(
+		"VIDEO: DOUBLE LOW RESOLUTION MIXED PAGE 1\n"
+		"       F FOR PAGE 2\n"
+		"       M FOR NON_MIXED"
+	);
+	draw_box(1,1,18,3,COL_WHITE);
+	for (c=0; c<16; ++c) draw_pixel(2+c,2,c);
+	draw_box(1,3,18,6,COL_WHITE);
+	for (c=0; c<16; ++c) draw_pixel(2+c,4,draw_getpixel(2+c,2)); // test getpixel for even->even
+	for (c=0; c<16; ++c) draw_pixel(2+c,5,draw_getpixel(2+c,2)); // even->odd
+	for (c=0; c<16; ++c) draw_pixel(2+c,6,draw_getpixel(2+c,5)); // odd->even
+	for (c=0; c<16; ++c) draw_pixel(2+c,7,draw_getpixel(2+c,5)); // odd->odd
+	draw_fillbox(2,11,6,7,COL_GREEN_DARK);
+	
+	for (c=0; c<16; ++c)
+	{
+		draw_pixel(2+(c*2),22,c);
+		draw_pixel(3+(c*2),23,c);
+		draw_pixel(60,16+c,c);
+		draw_pixel(61,16+c,c);
+		draw_pixel(64,17+c,c);
+		draw_pixel(65,17+c,c);
+	}
+
+	video_page_select(0,1);
+	draw_fillbox(1,1,34,34,COL_GREEN_LIGHT);
+	// TODO leyendecker blit?
+	// TODO fine blit? masked blit?
+
+	video_page_select(flip,flip);
+	while(1)
+	{
+		if (kb_new())
+		{
+			c = kb_get();
+			if      (c == KB_ESC) break;
+			else if (c == 'F' || c == 'f') { video_page_flip(); flip ^= 1; }
+			else if (c == 'M' || c == 'm') { mixed = !mixed; goto redraw; }
+			c = 0;
+		}
+		else if (video_page_w != 0)
+		{
+			if      (c == 0x00) text_outs("LOW RAM");
+			else if (c == 0x80) text_outs(" CHECKSUM...");
+			delay(1);
+			++c;
+		}
+	}
+}
+
 void keyboard_test()
 {
 	unsigned int count = 0;
@@ -413,7 +475,7 @@ void main_menu()
 		"  3 - VIDEO: HIRES COLOUR\n"
 		"  4 - VIDEO: HIRES MONO\n"
 		"  5 - VIDEO: DOUBLE TEXT\n"
-		"  6 - VIDEO: DOUBLE LORES *\n"
+		"  6 - VIDEO: DOUBLE LORES\n"
 		"  7 - VIDEO: DOUBLE HIRES COLOUR *\n"
 		"  8 - VIDEO: DOUBLE HIRES MONO *\n"
 		"  A - ANIMATION *\n"
@@ -438,12 +500,12 @@ void main_menu()
 	case '3': video_test_high_color(); break;
 	case '4': video_test_high_mono(); break;
 	case '5': video_test_double_text(); break;
+	case '6': video_test_double_low(); break;
 	case 'K': case 'k': keyboard_test(); break;
 	case 'P': case 'p': paddle_test(); break;
 	case 'I': case 'i': system_info(); break;
 
 	// unimplemented
-	case '6':
 	case '7':
 	case '8':
 	case 'A': case 'a':

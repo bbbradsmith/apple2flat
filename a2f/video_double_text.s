@@ -7,6 +7,10 @@
 .export video_mode_double_text
 .export _video_mode_double_text
 
+.export text_out_double_text
+.export text_copy_row_double_text
+.export text_clear_row_double_text
+
 .import video_page_copy_double_low
 .import video_page_apply
 .import video_mode_setup
@@ -172,7 +176,7 @@ draw_pixel_double_text: ; A = value, X/Y = coordinate
 		jmp draw_pixel_text
 	;
 
-.proc draw_getpixel_double_text ; A/Y = coordinate
+.proc draw_getpixel_double_text ; X/Y = coordinate
 	txa
 	lsr
 	tax

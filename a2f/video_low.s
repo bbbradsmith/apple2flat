@@ -9,6 +9,7 @@
 
 .export draw_pixel_low
 .export draw_getpixel_low
+.export draw_pixel_low_addr
 
 .import video_page_copy_low
 .import video_page_apply

@@ -205,12 +205,12 @@ extern void video_mode_text();
 extern void video_mode_low();
 extern void video_mode_low_mixed();
 extern void video_mode_high_mono();
-extern void video_mode_high_mono_mixed(); // TODO
-extern void video_mode_high_color(); // TODO
-extern void video_mode_high_color_mixed(); // TODO
-extern void video_mode_double_text(); // TODO
-extern void video_mode_double_low(); // TODO
-extern void video_mode_double_low_mixed(); // TODO
+extern void video_mode_high_mono_mixed();
+extern void video_mode_high_color();
+extern void video_mode_high_color_mixed();
+extern void video_mode_double_text();
+extern void video_mode_double_low();
+extern void video_mode_double_low_mixed();
 extern void video_mode_double_high_mono(); // TODO
 extern void video_mode_double_high_mono_mixed(); // TODO
 extern void video_mode_double_high_color(); // TODO
