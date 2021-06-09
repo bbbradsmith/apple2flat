@@ -28,18 +28,24 @@
 	rts
 .endproc
 
-.proc video_cls_high_mixed ; TODO make common and more succinct
+.proc video_cls_high_mixed
+	; reset cursor
+	lda video_text_xr
+	sta video_text_x
+	lda video_text_yr
+	sta video_text_y
+	; clear graphics
 	lda video_page_w
 	and #1
 	eor #CLS_HIGH0
 	tax
 	lda #0
 	jsr video_cls_page
-	; TODO TEXT0
+	; clear mixed text
 	lda video_page_w
 	and #1
-	eor #CLS_LOW0
+	eor #CLS_MIXED0
 	tax
-	lda #$A0
+	lda #$A0 ; space, normal
 	jmp video_cls_page
 .endproc

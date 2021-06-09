@@ -141,10 +141,10 @@ low:
 mixed:
 	ldy #$50
 	sty ptr+0
-	ldy #$07 ; MIXED0 at $650
+	ldy #$06 ; MIXED0 at $650
 	cpx #CLS_MIXED1
 	bne :+
-		ldy #$0B ; MIXED1 at $A50
+		ldy #$0A ; MIXED1 at $A50
 	:
 	sty ptr+1
 	jsr mixed_line
