@@ -313,6 +313,10 @@ redraw:
 		draw_pixel(61,16+c,c);
 		draw_pixel(64,17+c,c);
 		draw_pixel(65,17+c,c);
+		draw_pixel(68,16+c,15-c);
+		draw_pixel(69,16+c,15-c);
+		draw_pixel(72,17+c,15-c);
+		draw_pixel(73,17+c,15-c);
 	}
 
 	video_page_select(0,1);
