@@ -88,8 +88,7 @@ _video_mode_double_low = video_mode_double_low
 		jmp draw_pixel_low
 	:
 	jsr draw_pixel_low_addr
-	; even rows have scrambled colour?
-	 ; TODO is this scrambling real? test on hardware
+	; aux memory colours are remapped (barrel rotate nibble right)
 	lsr draw_low_color
 	bcc :+
 		lda draw_low_color
@@ -145,7 +144,7 @@ _video_mode_double_low = video_mode_double_low
 	lsr
 	lsr
 	lsr
-@unscramble: ; TODO is this scrambling real? test on hardware
+@unscramble: ; undo the aux memory colour mapping (barrel rotate nibble left)
 	asl
 	cmp #$10
 	bcc :+
