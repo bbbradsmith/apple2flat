@@ -40,8 +40,9 @@ table:
 	.word video_page_high
 	.word video_page_copy_high
 	.word video_cls_high
-	.word video_null ; TODO out_text_high
-	.word video_null ; TODO scroll_text_high
+	.word video_null ; TODO out_text
+	.word video_null ; TODO text_copy_row
+	.word video_null ; TODO text_clear_row
 	.word draw_pixel_high_mono
 	.word draw_getpixel_high_mono
 	.word draw_hline_generic

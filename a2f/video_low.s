@@ -35,8 +35,9 @@ table:
 	.word video_page_low
 	.word video_page_copy_low
 	.word video_cls_low
-	.word video_null ; out_text
-	.word video_null ; out_text
+	.word video_null ; TODO out_text
+	.word video_null ; TODO text_copy_row
+	.word video_null ; TODO text_clear_row
 	.word draw_pixel_low
 	.word draw_getpixel_low
 	.word draw_hline_generic

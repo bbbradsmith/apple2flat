@@ -8,6 +8,7 @@
 .export text_out
 .export text_outs
 .export text_charset
+.export text_scroll
 
 .export video_text_x
 .export video_text_y
@@ -18,8 +19,12 @@
 .export text_inverse
 
 .importzp draw_ptr
+.import draw_y0
+.import draw_y1
+
 .import text_out_
-.import text_scroll
+.import text_copy_row
+.import text_clear_row
 
 video_text_x:  .byte 0
 video_text_y:  .byte 0
@@ -124,5 +129,67 @@ ready:
 	and #1
 	tax
 	sta $C00E, X
+	rts
+.endproc
+
+.proc text_scroll
+	; A = number of lines to scroll (signed)
+lines = draw_y1
+	sta lines
+	cmp #0
+	beq scroll_none
+	bmi scroll_up
+scroll_down:
+	lda video_text_yr
+	sta draw_y0
+	:
+		ldy draw_y0
+		tya
+		clc
+		adc lines
+		cmp video_text_h
+		bcs :+
+		tax
+		jsr text_copy_row
+		inc draw_y0
+		jmp :-
+	:
+	ldx video_text_h
+	dex
+	stx draw_y0
+	:
+		ldx draw_y0
+		jsr text_clear_row
+		dec draw_y0
+		dec lines
+		bne :-
+	;rts
+scroll_none:
+	rts
+scroll_up:
+	ldx video_text_h
+	dex
+	stx draw_y0
+	:
+		ldy draw_y0
+		tya
+		clc
+		adc lines
+		bmi :+ ; in case yr=0
+		cmp video_text_yr
+		bcc :+
+		tax
+		jsr text_copy_row
+		dec draw_y0
+		jmp :-
+	:
+	ldx video_text_yr
+	stx draw_y0
+	:
+		ldx draw_y0
+		jsr text_clear_row
+		inc draw_y0
+		inc lines ; count up to 0
+		bne :-
 	rts
 .endproc

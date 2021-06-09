@@ -23,7 +23,7 @@
 	sta $C050 ; graphics mode (TEXT)
 	sta $C052 ; non-mixed (MIXED)
 	sta $C057 ; high-res (HIRES)
-	; disable double modes
+	; disable double mode
 	sta $C00C ; 40 columns (80COL)
 	sta $C07E ; enable DHIRES switch (IOUDIS)
 	sta $C05F ; double-hires off (AN3/DHIRES)

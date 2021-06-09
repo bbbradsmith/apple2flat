@@ -447,9 +447,9 @@ void main_menu()
 	case '7':
 	case '8':
 	case 'A': case 'a':
-	case 'B': case 'b':
 	case 'D': case 'd':
 	case 'S': case 's':
+	case 'T': case 't':
 		unimplemented(); break;
 
 	default: break; // TODO beep

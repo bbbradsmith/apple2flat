@@ -10,7 +10,8 @@
 .import video_page_copy_low
 .import video_page_apply
 .import text_out_text
-.import text_scroll_text
+.import text_copy_row_text
+.import text_clear_row_text
 .import draw_pixel_low
 .import draw_getpixel_low
 
@@ -34,7 +35,8 @@ table:
 	.word video_page_copy_low
 	.word video_cls_low_mixed
 	.word text_out_text
-	.word text_scroll_text
+	.word text_copy_row_text
+	.word text_clear_row_text
 	.word draw_pixel_low
 	.word draw_getpixel_low
 	.word draw_hline_generic

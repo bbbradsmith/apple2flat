@@ -9,7 +9,12 @@
 
 ; shared for mixed/double modes
 .export text_out_text
-.export text_scroll_text
+.export text_copy_row_text
+.export text_copy_row_draw_ptr0_draw_ptr1
+.export text_clear_row_text
+.export text_clear_row_draw_ptr0
+.export text_row_addr_x_draw_ptr0
+.export text_row_addr_y_draw_ptr1
 .export draw_pixel_text_addr
 .export draw_pixel_text
 .export draw_getpixel_text
@@ -44,7 +49,8 @@ table:
 	.word video_page_copy_low
 	.word video_cls_text
 	.word text_out_text
-	.word text_scroll_text
+	.word text_copy_row_text
+	.word text_clear_row_text
 	.word draw_pixel_text
 	.word draw_getpixel_text
 	.word draw_hline_generic
@@ -96,6 +102,28 @@ _video_mode_text = video_mode_text
 	rts
 .endproc
 
+.proc text_row_addr_x_draw_ptr0 ; X = row to draw_ptr0, clobbers A
+	lda video_page_w
+	and #$0C
+	eor #$04
+	ora video_rowpos1, X
+	sta draw_ptr0+1
+	lda video_rowpos0, X
+	sta draw_ptr0+0
+	rts
+.endproc
+
+.proc text_row_addr_y_draw_ptr1 ; Y = row to draw_ptr1, clobbers A
+	lda video_page_w
+	and #$0C
+	eor #$04
+	ora video_rowpos1, Y
+	sta draw_ptr1+1
+	lda video_rowpos0, Y
+	sta draw_ptr1+0
+	rts
+.endproc
+
 text_out_text:
 	eor text_inverse
 draw_pixel_text:
@@ -116,114 +144,34 @@ draw_pixel_text:
 	rts
 .endproc
 
-.proc text_copy_row_text
-	; X = copy to
-	; Y = copy from
-	lda video_page_w
-	and #$0C
-	eor #$04
-	ora video_rowpos1, X
-	sta draw_ptr0+1
-	lda video_rowpos0, X
-	sta draw_ptr0+0
-	lda video_page_w
-	and #$0C
-	eor #$04
-	ora video_rowpos1, Y
-	sta draw_ptr1+1
-	lda video_rowpos0, Y
-	sta draw_ptr1+0
+text_copy_row_text:
+	; X = copy from
+	; Y = copy to
+	jsr text_row_addr_x_draw_ptr0
+	jsr text_row_addr_y_draw_ptr1
+text_copy_row_draw_ptr0_draw_ptr1:
 	ldy video_text_xr
 	:
 		cpy video_text_w
 		bcs :+
-		lda (draw_ptr1), Y
-		sta (draw_ptr0), Y
+		lda (draw_ptr0), Y
+		sta (draw_ptr1), Y
 		iny
 		jmp :-
 	:
 	rts
-.endproc
 
-.proc text_clear_row_text
+text_clear_row_text:
 	; X = row to clear
-	lda video_page_w
-	and #$0C
-	eor #$04
-	ora video_rowpos1, X
-	sta draw_ptr+1
-	lda video_rowpos0, X
-	sta draw_ptr+0
+	jsr text_row_addr_x_draw_ptr0
+text_clear_row_draw_ptr0:
 	lda #$A0 ; space, normal
 	ldy video_text_xr
 	:
 		cpy video_text_w
 		bcs :+
-		sta (draw_ptr), Y
+		sta (draw_ptr0), Y
 		iny
 		jmp :-
 	:
 	rts
-.endproc
-
-.proc text_scroll_text
-	; A = number of lines to scroll (signed)
-lines = draw_y1
-	sta lines
-	cmp #0
-	beq scroll_none
-	bmi scroll_up
-scroll_down:
-	lda video_text_yr
-	sta draw_y0
-	:
-		ldx draw_y0
-		txa
-		clc
-		adc lines
-		cmp video_text_h
-		bcs :+
-		tay
-		jsr text_copy_row_text
-		inc draw_y0
-		jmp :-
-	:
-	ldx video_text_h
-	dex
-	stx draw_y0
-	:
-		ldx draw_y0
-		jsr text_clear_row_text
-		dec draw_y0
-		dec lines
-		bne :-
-	;rts
-scroll_none:
-	rts
-scroll_up:
-	ldx video_text_h
-	dex
-	stx draw_y0
-	:
-		ldx draw_y0
-		txa
-		clc
-		adc lines
-		bmi :+ ; in case yr=0
-		cmp video_text_yr
-		bcc :+
-		tay
-		jsr text_copy_row_text
-		dec draw_y0
-		jmp :-
-	:
-	ldx video_text_yr
-	stx draw_y0
-	:
-		ldx draw_y0
-		jsr text_clear_row_text
-		inc draw_y0
-		inc lines ; count up to 0
-		bne :-
-	rts
-.endproc

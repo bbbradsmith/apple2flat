@@ -15,7 +15,8 @@
 .import video_page_copy_high_mixed
 .import video_cls_high_mixed
 .import text_out_text
-.import text_scroll_text
+.import text_copy_row_text
+.import text_clear_row_text
 .import draw_pixel_high_mono
 .import draw_getpixel_high_mono
 .import draw_hline_generic
@@ -32,7 +33,8 @@ table:
 	.word video_page_copy_high_mixed
 	.word video_cls_high_mixed
 	.word text_out_text
-	.word text_scroll_text
+	.word text_copy_row_text
+	.word text_clear_row_text
 	.word draw_pixel_high_mono
 	.word draw_getpixel_high_mono
 	.word draw_hline_generic

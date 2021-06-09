@@ -9,7 +9,8 @@
 
 .export video_cls
 .export text_out_
-.export text_scroll
+.export text_copy_row
+.export text_clear_row
 .export draw_pixel
 .export draw_getpixel
 .export draw_hline
@@ -59,7 +60,8 @@ video_page:      jmp a:video_null
 video_page_copy: jmp a:video_null
 video_cls:       jmp a:video_null
 text_out_:       jmp a:video_null
-text_scroll:     jmp a:video_null
+text_copy_row:   jmp a:video_null
+text_clear_row:  jmp a:video_null
 draw_pixel:      jmp a:video_null
 draw_getpixel:   jmp a:video_null
 draw_hline:      jmp a:video_null
