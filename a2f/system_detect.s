@@ -22,13 +22,13 @@ _system_type = system_type ; C access
 	cmp #$38
 	beq @apple2
 	cmp #$EA
-	beq @apple2_plus
+	beq @apple2p
 	cmp #$06
 	bne @unknown
 	lda $FBC0
 	beq @apple2c
 	cmp #$E0
-	beq @apple2e_enhanced
+	beq @apple2ee
 	cmp #$EA
 	beq @apple2e
 @unknown:
@@ -37,19 +37,22 @@ _system_type = system_type ; C access
 @apple2:
 	lda #SYSTEM_APPLE2
 	rts
-@apple2_plus:
-	lda #SYSTEM_APPLE2_PLUS
+@apple2p:
+	lda #SYSTEM_APPLE2P
+	rts
+@apple2e:
+	lda #SYSTEM_APPLE2E
 	rts
 @apple2c:
 	lda #SYSTEM_APPLE2C
 	rts
-@apple2e_enhanced:
+@apple2ee:
 	sec
 	jsr $FE1F ; RTS except on IIGS which will clear carry
-	bcs @apple2e
-	lda #SYSTEM_APPLE2GS
+	bcc @apple2gs
+	lda #SYSTEM_APPLE2EE
 	rts
-@apple2e:
-	lda #SYSTEM_APPLE2E
+@apple2gs:
+	lda #SYSTEM_APPLE2GS
 	rts
 .endproc

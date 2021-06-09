@@ -227,6 +227,58 @@ redraw:
 	}
 }
 
+void video_test_double_text()
+{
+	uint8 c = 0;
+	char alt = 0;
+
+	video_mode_double_text();
+	video_cls();
+	text_xy( 1, 1); text_outs("VIDEO: DOUBLE TEXT PAGE 1 (F FOR PAGE 2)");
+	text_xy(44,12); text_outs("CHARACTER SET: (C TO SWITCH)");
+	text_xy( 2, 3); text_outs("-- WINDOW --");
+	text_xy( 2, 9); text_outs("------------");
+
+	video_cls_page(CLS_DLOW1,' '^0x80); // clear second page
+	video_page_select(0,1); // write to second page
+	text_xy( 1, 1); text_outs("VIDEO: DOUBLE TEXT PAGE 2 (F FOR PAGE 1)");
+	draw_box(2,4,7,7,'+'^0x80);
+	draw_hline(4,7,3,'-'^0x80);
+	draw_vline(5,6,3,'|'^0x80);
+	draw_fillbox(12,5,6,5,draw_getpixel(4,1));
+
+	video_page_select(0,0); // write/view first page
+	do
+	{
+		draw_pixel(44+(c%32),14+(c/32),c);
+		++c;
+	} while (c!=0);
+
+	text_window(2,4,14,9);
+	while(1)
+	{
+		if (kb_new())
+		{
+			c = kb_get();
+			if      (c == KB_ESC) return;
+			else if (c == 'F' || c == 'f') video_page_flip();
+			else if (c == 'C' || c == 'c')
+			{
+				alt ^= 1;
+				text_charset(alt);
+			}
+			c = 0;
+		}
+		else if (video_page_w == 0)
+		{
+			if      (c == 0x00) text_outs("LOW RAM");
+			else if (c == 0x80) text_outs(" CHECKSUM...");
+			delay(1);
+			++c;
+		}
+	}
+}
+
 void keyboard_test()
 {
 	unsigned int count = 0;
@@ -320,8 +372,9 @@ void system_info()
 	switch(system_type)
 	{
 	case SYSTEM_APPLE2:      t = "APPLE 2"; break;
-	case SYSTEM_APPLE2_PLUS: t = "APPLE 2+"; break;
+	case SYSTEM_APPLE2P:     t = "APPLE 2+"; break;
 	case SYSTEM_APPLE2E:     t = "APPLE 2E"; break;
+	case SYSTEM_APPLE2EE:    t = "APPLE 2E ENHANCED"; break;
 	case SYSTEM_APPLE2C:     t = "APPLE 2C"; break;
 	case SYSTEM_APPLE2GS:    t = "APPLE 2GS"; break;
 	default:                 break;
@@ -359,10 +412,10 @@ void main_menu()
 		"  2 - VIDEO: LORES\n"
 		"  3 - VIDEO: HIRES COLOUR\n"
 		"  4 - VIDEO: HIRES MONO\n"
-		"  5 - VIDEO: DOUBLE TEXT *\n"
-		"  5 - VIDEO: DOUBLE LORES *\n"
-		"  6 - VIDEO: DOUBLE HIRES COLOUR *\n"
-		"  7 - VIDEO: DOUBLE HIRES MONO *\n"
+		"  5 - VIDEO: DOUBLE TEXT\n"
+		"  6 - VIDEO: DOUBLE LORES *\n"
+		"  7 - VIDEO: DOUBLE HIRES COLOUR *\n"
+		"  8 - VIDEO: DOUBLE HIRES MONO *\n"
 		"  A - ANIMATION *\n"
 		"  K - KEYBOARD\n"
 		"  P - PADDLES\n"
@@ -384,14 +437,15 @@ void main_menu()
 	case '2': video_test_low(); break;
 	case '3': video_test_high_color(); break;
 	case '4': video_test_high_mono(); break;
+	case '5': video_test_double_text(); break;
 	case 'K': case 'k': keyboard_test(); break;
 	case 'P': case 'p': paddle_test(); break;
 	case 'I': case 'i': system_info(); break;
 
 	// unimplemented
-	case '5':
 	case '6':
 	case '7':
+	case '8':
 	case 'A': case 'a':
 	case 'B': case 'b':
 	case 'D': case 'd':

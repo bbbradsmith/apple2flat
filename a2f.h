@@ -16,10 +16,11 @@ typedef int8_t   sint8;
 // system type detected at startup
 #define SYSTEM_UNKNOWN      0
 #define SYSTEM_APPLE2       1
-#define SYSTEM_APPLE2_PLUS  2
+#define SYSTEM_APPLE2P      2
 #define SYSTEM_APPLE2E      3
-#define SYSTEM_APPLE2C      4
-#define SYSTEM_APPLE2GS     5
+#define SYSTEM_APPLE2EE     4
+#define SYSTEM_APPLE2C      5
+#define SYSTEM_APPLE2GS     6
 extern uint8 system_type;
 
 // exits to monitor with program counter display
@@ -140,16 +141,19 @@ extern uint8_t disk_volume; // last disk volume
 //
 
 // page definitions for video_cls_page
-// TODO D-versions
-// TODO CLS_TEXT/DTEXT?
 #define CLS_LOW0    0
 #define CLS_LOW1    1
 #define CLS_HIGH0   2
 #define CLS_HIGH1   3
-#define CLS_DLOW0   4
-#define CLS_DLOW1   5
-#define CLS_DHIGH0  6
-#define CLS_DHIGH1  7
+#define CLS_MIXED0  4
+#define CLS_MIXED1  5
+#define CLS_DLOW0   6
+#define CLS_DLOW1   7
+#define CLS_DHIGH0  8
+#define CLS_DHIGH1  9
+#define CLS_DMIXED0 10
+#define CLS_DMIXED1 11
+
 
 // low/double resolution colours
 #define COL_BLACK       0

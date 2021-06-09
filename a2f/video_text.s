@@ -7,9 +7,12 @@
 .export video_mode_text
 .export _video_mode_text
 
-; shared for mixed modes
+; shared for mixed/double modes
 .export text_out_text
 .export text_scroll_text
+.export draw_pixel_text_addr
+.export draw_pixel_text
+.export draw_getpixel_text
 
 .import video_cls_page
 .import video_page_copy_low
@@ -19,7 +22,7 @@
 .import video_rowpos1
 .import video_null
 .import video_mode_setup
-.import VIDEO_FUNCTION_MAX
+.import VIDEO_FUNCTION_TABLE_SIZE
 .import draw_hline_generic
 .import draw_vline_generic
 .import draw_fillbox_generic
@@ -33,10 +36,6 @@
 .importzp draw_ptr1
 
 .proc video_mode_text
-	lda #40
-	sta video_text_w
-	lda #24
-	sta video_text_h
 	lda #<table
 	ldx #>table
 	jmp video_mode_setup
@@ -51,22 +50,21 @@ table:
 	.word draw_hline_generic
 	.word draw_vline_generic
 	.word draw_fillbox_generic
-	.assert *-table = ((VIDEO_FUNCTION_MAX*2)/3), error, "table entry count incorrect"
+	.assert *-table = VIDEO_FUNCTION_TABLE_SIZE, error, "table entry count incorrect"
 .endproc
 
 ; void video_mode_text()
 _video_mode_text = video_mode_text
 
 .proc video_page_text
-	; TODO: disable IIe double resolution features
-	;sta $C00C ; 40-column display (80COL)
-	;sta $C000 ; disable 80-column paging (80STORE)
-	;sta $C05F ; disable double resolution
-	; TODO: what dpes IOUDIS do?
-	; set text mode
-	sta $C052 ; non-mixed (MIXED)
+	; set mode
 	sta $C051 ; text mode (TEXT)
+	sta $C052 ; non-mixed (MIXED)
 	sta $C056 ; low-res (HIRES)
+	; disable double mode
+	sta $C00C ; 40 columns (80COL)
+	sta $C07E ; enable DHIRES switch (IOUDIS)
+	sta $C05F ; double-hires off (AN3/DHIRES)
 	jmp video_page_apply
 .endproc
 

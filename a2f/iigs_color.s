@@ -15,7 +15,7 @@
 	sta a2f_temp+0
 	txa
 	ora a2f_temp+0
-	sta $C022
+	sta $C022 ; (TBCOLOR)
 	; set IIGS border color register $C034
 	; using 65816-only RMW instructions to avoid disturbing the real-time clock control in high nibble
 	ldx #0 ; X=0 to avoid reading other registers on 6502
@@ -25,7 +25,7 @@
 	lda #$0F
 	.byte $1C, $34, $C0 ; trb $C034 / nop $C034, X
 	tya
-	.byte $0C, $34, $C0 ; tsb $C034 / nop $C034
+	.byte $0C, $34, $C0 ; tsb $C034 / nop $C034 (CLOCKCTL)
 	; NOTE: TRB/TSB should be NOPs on 6502/65C02
 	rts
 .endproc

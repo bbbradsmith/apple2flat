@@ -21,7 +21,7 @@
 .export video_null
 .export video_function_table
 .export video_mode_setup
-.export VIDEO_FUNCTION_MAX
+.export VIDEO_FUNCTION_TABLE_SIZE
 .export video_rowpos0
 .export video_rowpos1
 
@@ -67,6 +67,7 @@ draw_vline:      jmp a:video_null
 draw_fillbox:    jmp a:video_null
 VIDEO_FUNCTION_MAX = *-video_function_table
 .assert VIDEO_FUNCTION_MAX<256, error, "video_function_table too large?"
+VIDEO_FUNCTION_TABLE_SIZE = (VIDEO_FUNCTION_MAX*2)/3
 
 .proc video_null ; empty function for unimplemented/unimplementable video functions
 	rts
@@ -119,13 +120,14 @@ video_rowpos1:
 .proc video_cls_page
 ; A = fill value
 ; X = page select (CLS_LOW0, CLS_LOW1, CLS_HIGH0, etc.)
-; TODO handle IIe double resolutions... (probably just a register set + call cls_page twice)
-ptr = a2f_temp+0
+ptr   = a2f_temp+0
+xtemp = a2f_temp+2
+	cpx #CLS_DLOW0
+	bcs double
+	cpx #CLS_MIXED0
+	bcs mixed
 	cpx #CLS_HIGH0
-	bcc low
-	cpx #CLS_HIGH1+1
-	bcc high
-	rts ; invalid page index
+	bcs high
 low:
 	ldy #$04 ; LOW0 at $400
 	cpx #CLS_LOW1
@@ -134,6 +136,23 @@ low:
 	:
 	ldx #(24/3) ; count of 3 row groupings
 	jmp clear
+mixed:
+	ldy #$50
+	sty ptr+0
+	ldy #$07 ; MIXED0 at $650
+	cpx #CLS_MIXED1
+	bne :+
+		ldy #$0B ; MIXED1 at $A50
+	:
+	sty ptr+1
+	jsr mixed_line
+	jsr mixed_line
+	jsr mixed_line
+mixed_line:
+	ldy #40-1
+	ldx #1
+	jsr row
+	jmp next_group
 high:
 	ldy #$20 ; HIGH0 at $2000
 	cpx #CLS_HIGH1
@@ -145,16 +164,19 @@ clear:
 	sty ptr+1
 	ldy #0
 	sty ptr+0
-@group:
+clear_group:
 	ldy #(40*3)-1 ; 3 rows in a group
-@row:
+row:
 	sta (ptr), Y
 	dey
-	bpl @row
+	bpl row
 	dex
 	bne :+
 		rts
 	:
+	jsr next_group
+	jmp clear_group
+next_group:
 	pha
 	lda #<$80 ; groups are $80 bytes apart
 	clc
@@ -164,7 +186,28 @@ clear:
 	adc ptr+1
 	sta ptr+1
 	pla
-	jmp @group
+	rts
+double:
+	; NOTE: double modes work by clearing aux page then main using the single versions,
+	;       so they may not rely on variable writes to RAM outside of ZP/stack.
+	cpx #CLS_DMIXED1+1
+	bcc :+
+		rts ; invalid entry
+	:
+	pha
+	txa
+	sec
+	sbc #CLS_DLOW0-CLS_LOW0
+	tax
+	stx xtemp
+	pla
+	pha
+	sta $C005 ; aux (RAMWRT)
+	jsr video_cls_page
+	sta $C004 ; main (RAMWRT)
+	ldx xtemp
+	pla
+	jmp video_cls_page
 .endproc
 
 .proc video_page_flip

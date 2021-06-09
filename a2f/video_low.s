@@ -17,7 +17,7 @@
 .import video_rowpos1
 .import video_null
 .import video_mode_setup
-.import VIDEO_FUNCTION_MAX
+.import VIDEO_FUNCTION_TABLE_SIZE
 .import draw_hline_generic
 .import draw_vline_generic
 .import draw_fillbox_generic
@@ -42,17 +42,21 @@ table:
 	.word draw_hline_generic
 	.word draw_vline_generic
 	.word draw_fillbox_generic
-	.assert *-table = ((VIDEO_FUNCTION_MAX*2)/3), error, "table entry count incorrect"
+	.assert *-table = VIDEO_FUNCTION_TABLE_SIZE, error, "table entry count incorrect"
 .endproc
 
 ; void video_mode_low()
 _video_mode_low = video_mode_low
 
 .proc video_page_low
-	; TODO IIe stuff?
-	sta $C052 ; non-mixed (MIXED)
+	; set mode
 	sta $C050 ; graphics mode (TEXT)
+	sta $C052 ; non-mixed (MIXED)
 	sta $C056 ; low-res (HIRES)
+	; disable double mode
+	sta $C00C ; 40 columns (80COL)
+	sta $C07E ; enable DHIRES switch (IOUDIS)
+	sta $C05F ; double-hires off (AN3/DHIRES)
 	jmp video_page_apply
 .endproc
 

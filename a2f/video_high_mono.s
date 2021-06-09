@@ -21,7 +21,7 @@
 .import video_div7
 .import video_null
 .import video_mode_setup
-.import VIDEO_FUNCTION_MAX
+.import VIDEO_FUNCTION_TABLE_SIZE
 .import draw_hline_generic
 .import draw_fillbox_generic
 
@@ -47,7 +47,7 @@ table:
 	.word draw_hline_generic
 	.word draw_vline_high_mono
 	.word draw_fillbox_generic
-	.assert *-table = ((VIDEO_FUNCTION_MAX*2)/3), error, "table entry count incorrect"
+	.assert *-table = VIDEO_FUNCTION_TABLE_SIZE, error, "table entry count incorrect"
 .endproc
 
 ; void video_mode_high_mono()

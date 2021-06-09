@@ -19,10 +19,14 @@
 .importzp draw_ptr1
 
 .proc video_page_high
-	; TODO IIe stuff?
-	sta $C052 ; non-mixed (MIXED)
+	; set mode
 	sta $C050 ; graphics mode (TEXT)
+	sta $C052 ; non-mixed (MIXED)
 	sta $C057 ; high-res (HIRES)
+	; disable double modes
+	sta $C00C ; 40 columns (80COL)
+	sta $C07E ; enable DHIRES switch (IOUDIS)
+	sta $C05F ; double-hires off (AN3/DHIRES)
 	jmp video_page_apply
 .endproc
 

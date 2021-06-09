@@ -9,7 +9,7 @@
 
 .import video_mode_setup
 .import video_mode_mixed_setup
-.import VIDEO_FUNCTION_MAX
+.import VIDEO_FUNCTION_TABLE_SIZE
 
 .import video_page_high_mixed
 .import video_page_copy_high_mixed
@@ -38,7 +38,7 @@ table:
 	.word draw_hline_generic
 	.word draw_vline_high_color
 	.word draw_fillbox_generic
-	.assert *-table = ((VIDEO_FUNCTION_MAX*2)/3), error, "table entry count incorrect"
+	.assert *-table = VIDEO_FUNCTION_TABLE_SIZE, error, "table entry count incorrect"
 .endproc
 
 ; void video_mode_high_color_mixed()

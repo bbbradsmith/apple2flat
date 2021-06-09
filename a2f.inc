@@ -10,10 +10,11 @@
 .enum
 SYSTEM_UNKNOWN     = 0
 SYSTEM_APPLE2      = 1
-SYSTEM_APPLE2_PLUS = 2
+SYSTEM_APPLE2P     = 2
 SYSTEM_APPLE2E     = 3
-SYSTEM_APPLE2C     = 4
-SYSTEM_APPLE2GS    = 5
+SYSTEM_APPLE2EE    = 4
+SYSTEM_APPLE2C     = 5
+SYSTEM_APPLE2GS    = 6
 .endenum
 .global system_type ; set to one of the enums above at startup
 
@@ -127,14 +128,19 @@ DISK_ERROR_PARTIAL = $04 ; sector read but only partially correct (checksum fail
 ;
 
 ; constants
-CLS_LOW0   = 0 ; text 40 / low-res first page
-CLS_LOW1   = 1 ;                   second page
-CLS_HIGH0  = 2 ; high-res
-CLS_HIGH1  = 3
-CLS_DLOW0  = 4 ; IIe double resolutions (TODO)
-CLS_DLOW1  = 5
-CLS_DHIGH0 = 6
-CLS_DHIGH1 = 7
+CLS_LOW0    = 0 ; text 40 / low-res first page
+CLS_LOW1    = 1 ;                   second page
+CLS_HIGH0   = 2 ; high-res
+CLS_HIGH1   = 3
+CLS_MIXED0  = 4 ; mixed text area
+CLS_MIXED1  = 5
+CLS_DLOW0   = 6 ; IIe double resolutions
+CLS_DLOW1   = 7
+CLS_DHIGH0  = 8
+CLS_DHIGH1  = 9
+CLS_DMIXED0 = 10
+CLS_DMIXED1 = 11
+
 
 ; low/double resolution colours
 COL_BLACK       = 0
@@ -188,9 +194,9 @@ COM_WHITE       = 1
 .global video_mode_text
 .global video_mode_low
 .global video_mode_low_mixed
-.global video_mode_high ; TODO
-.global video_mode_high_mixed ; TODO
-.global video_mode_double_text ; TODO
+.global video_mode_high
+.global video_mode_high_mixed
+.global video_mode_double_text
 .global video_mode_double_low ; TODO
 .global video_mode_double_low_mixed ; TODO
 .global video_mode_double_high ; TODO
