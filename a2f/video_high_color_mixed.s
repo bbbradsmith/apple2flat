@@ -11,8 +11,8 @@
 .import video_mode_mixed_setup
 .import VIDEO_FUNCTION_TABLE_SIZE
 
-.import video_page_high_mixed
 .import video_page_copy_high_mixed
+.import video_page_apply
 .import video_cls_high_mixed
 .import text_out_text
 .import text_copy_row_text
@@ -29,7 +29,7 @@
 	jsr video_mode_setup
 	jmp video_mode_mixed_setup
 table:
-	.word video_page_high_mixed
+	.word video_page_high_color_mixed
 	.word video_page_copy_high_mixed
 	.word video_cls_high_mixed
 	.word text_out_text
@@ -45,3 +45,21 @@ table:
 
 ; void video_mode_high_color_mixed()
 _video_mode_high_color_mixed = video_mode_high_color_mixed
+
+.proc video_page_high_color_mixed
+	; set mode
+	sta $C050 ; graphics mode (TEXT)
+	sta $C057 ; high-res (HIRES)
+	; double/RGB settings
+	sta $C07E ; enable DHIRES switch (IOUDIS)
+	sta $C052
+	sta $C00D ; RGB 11 = color
+	sta $C05E
+	sta $C05F
+	sta $C05E
+	sta $C05F ; double-hires off (AN3/DHIRES)
+	sta $C00C ; 40 columns (80COL)
+	; set mixed
+	sta $C053 ; mixed (MIXED)
+	jmp video_page_apply
+.endproc

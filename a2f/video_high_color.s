@@ -13,7 +13,6 @@
 
 .import video_page_copy_high
 .import video_page_apply
-.import video_page_high
 .import video_cls_high
 .import draw_high_addr_y
 .import draw_high_addr_y_inc
@@ -36,7 +35,7 @@ draw_high_phase = a2f_temp+3
 	ldx #>table
 	jmp video_mode_setup
 table:
-	.word video_page_high
+	.word video_page_high_color
 	.word video_page_copy_high
 	.word video_cls_high
 	.word video_null ; TODO out_text
@@ -52,6 +51,22 @@ table:
 
 ; void video_mode_high_color()
 _video_mode_high_color = video_mode_high_color
+
+.proc video_page_high_color
+	; set mode
+	sta $C050 ; graphics mode (TEXT)
+	sta $C052 ; non-mixed (MIXED)
+	sta $C057 ; high-res (HIRES)
+	; double/RGB settings
+	sta $C07E ; enable DHIRES switch (IOUDIS)
+	sta $C00D ; RGB 11 = color
+	sta $C05E
+	sta $C05F
+	sta $C05E
+	sta $C05F ; double-hires off (AN3/DHIRES)
+	sta $C00C ; 40 columns (80COL)
+	jmp video_page_apply
+.endproc
 
 .proc draw_high_color_addr_x ; draw_xh:X pixel address to draw_ptr, sub-pixel 0-6 in draw_high_phase
 	lda video_div7, X

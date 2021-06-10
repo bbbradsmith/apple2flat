@@ -65,9 +65,13 @@ _video_mode_double_text = video_mode_double_text
 	sta $C051 ; text mode (TEXT)
 	sta $C052 ; non-mixed (MIXED)
 	sta $C056 ; low-res (HIRES)
-	sta $C00D ; 80 columns (80COL)
 	sta $C07E ; enable DHIRES switch (IOUDIS)
+	sta $C00C
+	sta $C05E ; RGB 00 = mono
+	sta $C05F
+	sta $C05E
 	sta $C05F ; double-hires off (AN3/DHIRES)
+	sta $C00D ; 80 columns (80COL)
 	jmp video_page_apply
 .endproc
 

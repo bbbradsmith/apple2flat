@@ -37,7 +37,7 @@ draw_high_phase = a2f_temp+3
 	ldx #>table
 	jmp video_mode_setup
 table:
-	.word video_page_high
+	.word video_page_high_mono
 	.word video_page_copy_high
 	.word video_cls_high
 	.word video_null ; TODO out_text
@@ -53,6 +53,21 @@ table:
 
 ; void video_mode_high_mono()
 _video_mode_high_mono = video_mode_high_mono
+
+.proc video_page_high_mono
+	; set mode
+	sta $C050 ; graphics mode (TEXT)
+	sta $C052 ; non-mixed (MIXED)
+	sta $C057 ; high-res (HIRES)
+	; double/RGB settings
+	sta $C07E ; enable DHIRES switch (IOUDIS)
+	sta $C00C ; 40 columns (80COL)
+	sta $C05E ; RGB 00 = mono
+	sta $C05F
+	sta $C05E
+	sta $C05F ; double-hires off (AN3/DHIRES)
+	jmp video_page_apply
+.endproc
 
 .proc draw_high_mono_addr_x ; draw_xh:X pixel address to draw_ptr, sub-pixel in draw_high_phase
 	lda draw_xh

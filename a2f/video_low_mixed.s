@@ -51,12 +51,18 @@ _video_mode_low_mixed = video_mode_low_mixed
 .proc video_page_low_mixed
 	; set mode
 	sta $C050 ; graphics mode (TEXT)
-	sta $C053 ; mixed (MIXED)
 	sta $C056 ; low-res (HIRES)
-	; disable double mode
-	sta $C00C ; 40 columns (80COL)
+	; double/RGB settings
 	sta $C07E ; enable DHIRES switch (IOUDIS)
+	sta $C052
+	sta $C00D ; RGB 11 = color
+	sta $C05E
+	sta $C05F
+	sta $C05E
 	sta $C05F ; double-hires off (AN3/DHIRES)
+	sta $C00C ; 40 columns (80COL)
+	; set mixed
+	sta $C053 ; mixed (MIXED)
 	jmp video_page_apply
 .endproc
 

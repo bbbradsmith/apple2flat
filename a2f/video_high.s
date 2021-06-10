@@ -4,7 +4,6 @@
 
 .include "../a2f.inc"
 
-.export video_page_high
 .export video_cls_high
 .export draw_high_addr_y
 .export draw_high_addr_y_inc
@@ -13,22 +12,8 @@
 .import video_rowpos0
 .import video_rowpos1
 
-.import video_page_apply
-
 .importzp draw_ptr0
 .importzp draw_ptr1
-
-.proc video_page_high
-	; set mode
-	sta $C050 ; graphics mode (TEXT)
-	sta $C052 ; non-mixed (MIXED)
-	sta $C057 ; high-res (HIRES)
-	; disable double mode
-	sta $C00C ; 40 columns (80COL)
-	sta $C07E ; enable DHIRES switch (IOUDIS)
-	sta $C05F ; double-hires off (AN3/DHIRES)
-	jmp video_page_apply
-.endproc
 
 .proc video_page_copy_high
 	; TODO copy page_r to page_w

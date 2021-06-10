@@ -55,10 +55,14 @@ _video_mode_low = video_mode_low
 	sta $C050 ; graphics mode (TEXT)
 	sta $C052 ; non-mixed (MIXED)
 	sta $C056 ; low-res (HIRES)
-	; disable double mode
-	sta $C00C ; 40 columns (80COL)
+	; double/RGB settings
 	sta $C07E ; enable DHIRES switch (IOUDIS)
+	sta $C00D ; RGB 11 = color
+	sta $C05E
+	sta $C05F
+	sta $C05E
 	sta $C05F ; double-hires off (AN3/DHIRES)
+	sta $C00C ; 40 columns (80COL)
 	jmp video_page_apply
 .endproc
 
