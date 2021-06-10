@@ -5,6 +5,7 @@
 
 .include "../a2f.inc"
 
+.export video_page_apply
 .export video_cls_page
 
 .export video_cls
@@ -56,7 +57,7 @@ draw_y1: .byte 0
 draw_xh = draw_x0+1 ; alias
 
 video_function_table:
-video_page:      jmp a:video_null
+video_mode_set:  jmp a:video_null
 video_page_copy: jmp a:video_null
 video_cls:       jmp a:video_null
 text_out_:       jmp a:video_null
@@ -106,7 +107,7 @@ VIDEO_FUNCTION_TABLE_SIZE = (VIDEO_FUNCTION_MAX*2)/3
 	sta video_text_w
 	lda #24
 	sta video_text_h
-	jmp video_page
+	jmp video_mode_set
 .endproc
 
 ; lookup tables for Apple II video layout in 8 x 3-row groups
@@ -118,6 +119,14 @@ video_rowpos1:
 	.repeat 24, I
 		.byte >(((I .mod 8)*$80)+((I / 8)*40))
 	.endrepeat
+
+.proc video_page_apply
+	lda video_page_r
+	and #1
+	tax
+	sta $C054, X ; (PAGE2)
+	rts
+.endproc
 
 .proc video_cls_page
 ; A = fill value
@@ -219,5 +228,5 @@ double:
 	lda video_page_r
 	eor #$FF
 	sta video_page_r
-	jmp video_page
+	jmp video_page_apply
 .endproc

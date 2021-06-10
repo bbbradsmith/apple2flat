@@ -45,7 +45,7 @@
 	ldx #>table
 	jmp video_mode_setup
 table:
-	.word video_page_text
+	.word video_mode_set_text
 	.word video_page_copy_low
 	.word video_cls_text
 	.word text_out_text
@@ -62,7 +62,7 @@ table:
 ; void video_mode_text()
 _video_mode_text = video_mode_text
 
-.proc video_page_text
+.proc video_mode_set_text
 	; set mode
 	sta $C051 ; text mode (TEXT)
 	sta $C052 ; non-mixed (MIXED)

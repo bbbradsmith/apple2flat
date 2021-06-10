@@ -35,7 +35,7 @@ draw_high_phase = a2f_temp+3
 	ldx #>table
 	jmp video_mode_setup
 table:
-	.word video_page_high_color
+	.word video_mode_set_high_color
 	.word video_page_copy_high
 	.word video_cls_high
 	.word video_null ; TODO out_text
@@ -52,7 +52,7 @@ table:
 ; void video_mode_high_color()
 _video_mode_high_color = video_mode_high_color
 
-.proc video_page_high_color
+.proc video_mode_set_high_color
 	; set mode
 	sta $C050 ; graphics mode (TEXT)
 	sta $C052 ; non-mixed (MIXED)

@@ -29,7 +29,7 @@
 	jsr video_mode_setup
 	jmp video_mode_mixed_setup
 table:
-	.word video_page_high_mono_mixed
+	.word video_mode_set_high_mono_mixed
 	.word video_page_copy_high_mixed
 	.word video_cls_high_mixed
 	.word text_out_text
@@ -46,7 +46,7 @@ table:
 ; void video_mode_high_mono_mixed()
 _video_mode_high_mono_mixed = video_mode_high_mono_mixed
 
-.proc video_page_high_mono_mixed
+.proc video_mode_set_high_mono_mixed
 	; set mode
 	sta $C050 ; graphics mode (TEXT)
 	sta $C057 ; high-res (HIRES)

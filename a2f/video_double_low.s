@@ -40,7 +40,7 @@ draw_low_phase = a2f_temp+3
 	jsr video_mode_setup
 	jmp video_double_rw_aux_setup
 table:
-	.word video_page_double_low
+	.word video_mode_set_double_low
 	.word video_page_copy_double_low
 	.word video_cls_double_low
 	.word video_null
@@ -57,7 +57,7 @@ table:
 ; void video_mode_low()
 _video_mode_double_low = video_mode_double_low
 
-.proc video_page_double_low
+.proc video_mode_set_double_low
 	; set mode
 	sta $C050 ; graphics mode (TEXT)
 	sta $C052 ; non-mixed (MIXED)

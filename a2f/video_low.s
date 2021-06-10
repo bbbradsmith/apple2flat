@@ -33,7 +33,7 @@ draw_low_phase = a2f_temp+3
 	ldx #>table
 	jmp video_mode_setup
 table:
-	.word video_page_low
+	.word video_mode_set_low
 	.word video_page_copy_low
 	.word video_cls_low
 	.word video_null ; TODO out_text
@@ -50,7 +50,7 @@ table:
 ; void video_mode_low()
 _video_mode_low = video_mode_low
 
-.proc video_page_low
+.proc video_mode_set_low
 	; set mode
 	sta $C050 ; graphics mode (TEXT)
 	sta $C052 ; non-mixed (MIXED)

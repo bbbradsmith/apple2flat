@@ -31,7 +31,7 @@
 	jsr video_mode_setup
 	jmp video_mode_mixed_setup
 table:
-	.word video_page_low_mixed
+	.word video_mode_set_low_mixed
 	.word video_page_copy_low
 	.word video_cls_low_mixed
 	.word text_out_text
@@ -48,7 +48,7 @@ table:
 ; void video_mode_low_mixed()
 _video_mode_low_mixed = video_mode_low_mixed
 
-.proc video_page_low_mixed
+.proc video_mode_set_low_mixed
 	; set mode
 	sta $C050 ; graphics mode (TEXT)
 	sta $C056 ; low-res (HIRES)

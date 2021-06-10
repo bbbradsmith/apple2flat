@@ -44,7 +44,7 @@
 	asl video_text_w ; 40 << 1 = 80
 	jmp video_double_rw_aux_setup
 table:
-	.word video_page_double_text
+	.word video_mode_set_double_text
 	.word video_page_copy_double_low
 	.word video_cls_double_text
 	.word text_out_double_text
@@ -61,7 +61,7 @@ table:
 ; void video_mode_double_text()
 _video_mode_double_text = video_mode_double_text
 
-.proc video_page_double_text
+.proc video_mode_set_double_text
 	sta $C051 ; text mode (TEXT)
 	sta $C052 ; non-mixed (MIXED)
 	sta $C056 ; low-res (HIRES)

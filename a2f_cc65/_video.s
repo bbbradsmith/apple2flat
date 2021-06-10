@@ -7,7 +7,7 @@
 
 .export _video_cls
 .export _video_cls_page
-.export _video_page
+.export _video_page_apply
 .export _video_page_flip
 .export _video_page_copy
 .export _video_page_select
@@ -25,7 +25,7 @@
 .import popax
 .import video_cls
 .import video_cls_page
-.import video_page
+.import video_page_apply
 .import video_page_flip
 .import video_page_copy
 .import draw_pixel
@@ -62,8 +62,8 @@ _video_cls_page:
 	pla
 	jmp video_cls_page
 
-; void video_page()
-_video_page = video_page
+; void video_page_apply()
+_video_page_apply = video_page_apply
 
 ; void video_page_flip()
 _video_page_flip = video_page_flip
@@ -78,7 +78,7 @@ _video_page_select:
 	jsr popa
 	jsr @boolify
 	sta video_page_r
-	jmp video_page
+	jmp video_page_apply
 @boolify:
 	cmp #0
 	beq :+

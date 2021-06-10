@@ -215,10 +215,12 @@ extern void video_mode_double_high_mono(); // TODO
 extern void video_mode_double_high_mono_mixed(); // TODO
 extern void video_mode_double_high_color(); // TODO
 extern void video_mode_double_high_color_mixed(); // TODO
+// TODO high_color_double_mixed (hires with 80col)
+// TODO high_mono_double_mixed
 
 extern void video_cls();
 extern void video_cls_page(uint8 page, uint8 fill);
-extern void video_page(); // applies video page selection immediately (probably use flip/select instead)
+extern void video_page_apply(); // applies video page selection immediately (probably use flip/select instead)
 extern void video_page_flip(); // flips the two selected video pages
 extern void video_page_copy(); // copies read page into write page
 extern void video_page_select(uint8 read, uint8 write); // sets and applies pages: 0 = page 1, 1 = page 2
@@ -247,11 +249,12 @@ extern void draw_ellipse(uint16 x0, uint8 y0, uint16 w, uint8 h); // TODO
 // only operate the IIe double registers if switching from a double mode
 // for polgyon it could determine whether the list is 3-byte XXY or 2-byte XY
 // ... maybe a polygon needs to be triangulated to be efficient... maybe trilist?
+// span fill to chosen boundary colour (using vline) might be effective: https://en.wikipedia.org/wiki/Flood_fill#Span_Filling
 
 // TODO these probably deserve to be per-mode, because they're large code
-extern void blit_coarse(uint16 x0, uint8 y0, const uint8* data, uint8 tw, uint8 th); // TODO
-extern void blit_fine(uint16 x0, uint8 y0, const uint8* data, uint8 tw, uint8 th); // TODO
-extern void blit_mask(uint16 x0, uint8 y0, const uint8* data, uint8 tw, uint8 th); // TODO
+//extern void blit_coarse(uint16 x0, uint8 y0, const uint8* data, uint8 tw, uint8 th); // TODO
+//extern void blit_fine(uint16 x0, uint8 y0, const uint8* data, uint8 tw, uint8 th); // TODO
+//extern void blit_mask(uint16 x0, uint8 y0, const uint8* data, uint8 tw, uint8 th); // TODO
 
 // set text/border colours on IIGS only (call if system_type == SYSTEM_APPLE2GS)
 extern void iigs_color(uint8 text_fg, uint8 text_bg, uint8 border); // low-resolution colour values
