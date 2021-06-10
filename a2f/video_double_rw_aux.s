@@ -1,6 +1,6 @@
-; video_double
+; video_double_rw_aux
 ;
-; Shared routines for double video modes.
+; Shared safe-read routines for double video modes
 
 .export video_double_rw_aux_setup
 .export video_double_read_aux ; safely reads (draw_ptr), Y from auxiliary memory
