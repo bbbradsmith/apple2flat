@@ -13,7 +13,6 @@
 
 .import video_page_copy_high
 .import video_page_apply
-.import video_page_high
 .import video_cls_high
 .import draw_high_addr_y
 .import draw_high_addr_y_inc
