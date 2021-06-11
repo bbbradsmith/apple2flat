@@ -208,7 +208,6 @@ _video_mode_double_high_color = video_mode_double_high_color
 	rts
 .endproc
 
-; TODO this isn't quite working yet, haven't found the fault in its logic
 .proc draw_getpixel_double_high_color
 	; X/Y = coordinate
 	jsr draw_high_addr_y
@@ -265,7 +264,7 @@ _video_mode_double_high_color = video_mode_double_high_color
 			dey
 			bne :-
 		dex
-		bne :-
+		bne @rotate
 	@found:
 	and #%00001111
 	rts
