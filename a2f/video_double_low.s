@@ -58,7 +58,6 @@ table:
 _video_mode_double_low = video_mode_double_low
 
 .proc video_mode_set_double_low
-	; set mode
 	sta $C050 ; graphics mode (TEXT)
 	sta $C052 ; non-mixed (MIXED)
 	sta $C056 ; low-res (HIRES)

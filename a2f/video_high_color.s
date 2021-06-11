@@ -7,6 +7,7 @@
 .export video_mode_high_color
 .export _video_mode_high_color
 
+.export draw_high_color_addr_x
 .export draw_pixel_high_color
 .export draw_getpixel_high_color
 .export draw_vline_high_color
@@ -22,7 +23,6 @@
 .import video_mode_setup
 .import VIDEO_FUNCTION_TABLE_SIZE
 .import draw_hline_generic
-.import draw_vline_generic
 .import draw_fillbox_generic
 
 .importzp a2f_temp
@@ -83,7 +83,7 @@ _video_mode_high_color = video_mode_high_color
 .endproc
 
 draw_pixel_high_color:
-	; draw_xh:X/Y = coordinate, A = value
+	; X/Y = coordinate, A = value
 	sta draw_high_color ; save value
 	jsr draw_high_addr_y
 	jsr draw_high_color_addr_x
@@ -96,14 +96,14 @@ draw_pixel_high_color_addr: ; ready: draw_ptr, draw_high_color, draw_high_phase
 	beq @x2
 	bcc @x1
 	bcs @x3
-@x0:
+@x0: ; 1.xxxxxxx 0.xxxxx--
 	ldy #0
 	lda (draw_ptr), Y
 	and #%01111100
 	ora draw_high_color
 	sta (draw_ptr), Y
 	rts
-@x1:
+@x1: ; 1.xxxxxxx 0.xxx--xx
 	lda draw_high_color
 	tax
 	asl
@@ -119,7 +119,7 @@ draw_pixel_high_color_addr: ; ready: draw_ptr, draw_high_color, draw_high_phase
 	ora draw_high_color
 	sta (draw_ptr), Y
 	rts
-@x2:
+@x2: ; 1.xxxxxxx 0.x--xxxx
 	lda draw_high_color
 	tax
 	asl
@@ -137,7 +137,7 @@ draw_pixel_high_color_addr: ; ready: draw_ptr, draw_high_color, draw_high_phase
 	ora draw_high_color
 	sta (draw_ptr), Y
 	rts
-@x3:
+@x3: ; 1.xxxxxx- 0.-xxxxxx
 	lda draw_high_color
 	pha
 	tax
@@ -174,7 +174,7 @@ draw_pixel_high_color_addr: ; ready: draw_ptr, draw_high_color, draw_high_phase
 	cpx #5
 	beq @x5
 	bne @x6
-@x4:
+@x4: ; 1.xxxx--x 0.xxxxxxx
 	lda draw_high_color
 	tax
 	asl
@@ -189,7 +189,7 @@ draw_pixel_high_color_addr: ; ready: draw_ptr, draw_high_color, draw_high_phase
 	ora draw_high_color
 	sta (draw_ptr), Y
 	rts
-@x5:
+@x5: ; 1.xx--xxx 0.xxxxxxx
 	lda draw_high_color
 	tax
 	asl
@@ -206,7 +206,7 @@ draw_pixel_high_color_addr: ; ready: draw_ptr, draw_high_color, draw_high_phase
 	ora draw_high_color
 	sta (draw_ptr), Y
 	rts
-@x6:
+@x6: ; 1.--xxxxx 0.xxxxxxx
 	lda draw_high_color
 	tax
 	asl
@@ -227,7 +227,7 @@ draw_pixel_high_color_addr: ; ready: draw_ptr, draw_high_color, draw_high_phase
 	rts
 
 .proc draw_getpixel_high_color
-	; draw_xh:X/Y = coordinate
+	; X/Y = coordinate
 	jsr draw_high_addr_y
 	jsr draw_high_color_addr_x
 	; draw_high_phase = sub-pixel X location

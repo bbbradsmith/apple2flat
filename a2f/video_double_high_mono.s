@@ -56,7 +56,6 @@ table:
 _video_mode_double_high_mono = video_mode_double_high_mono
 
 .proc video_mode_set_double_high_mono
-	; set mode
 	sta $C050 ; graphics mode (TEXT)
 	sta $C052 ; non-mixed (MIXED)
 	sta $C057 ; high-res (HIRES)

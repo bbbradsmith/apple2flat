@@ -345,6 +345,65 @@ redraw:
 	}
 }
 
+void video_test_double_high_color()
+{
+	char mixed = 1;
+	char flip = 0;
+	uint8 c;
+
+redraw:
+	cls_full();
+	if (!mixed) video_mode_double_high_color();
+	else        video_mode_double_high_color_mixed();
+	cls_full();
+
+	text_outs(
+		"VIDEO: DOUBLE HIGH RES COLOR MIXED PAGE 1\n"
+		"       F FOR PAGE 2\n"
+		"       M FOR NON_MIXED"
+	);
+	draw_fillbox( 99,5,37,35,COL_WHITE);
+	for (c=0; c<24; ++c)
+	{
+		draw_pixel( 10+c,11+c,COL_WHITE);
+		draw_pixel(130-c,11+c,COL_BLACK);
+		draw_pixel( 13+c,10+c,draw_getpixel( 10+c,11+c));
+		draw_pixel(127-c,10+c,draw_getpixel(130-c,11+c));
+	}
+	#define DHCSW 7
+	draw_box(9,49,2+(DHCSW*16),2+(2*DHCSW),COL_WHITE);
+	for (c=0; c<16; ++c)
+	{
+		draw_fillbox(10+(c*DHCSW),50      ,DHCSW,DHCSW,c);
+		draw_fillbox(10+(c*DHCSW),50+DHCSW,DHCSW,DHCSW,c);
+	}
+
+	video_page_select(0,1);
+	draw_fillbox(5,7,31,52,COL_PURPLE);
+	// TODO leyendecker blit?
+	// TODO fine blit? masked blit?
+
+	video_page_select(flip,flip);
+	while(1)
+	{
+		if (kb_new())
+		{
+			c = kb_get();
+			if      (c == KB_ESC) break;
+			else if (c == 'F' || c == 'f') { video_page_flip(); flip ^= 1; }
+			else if (c == 'M' || c == 'm') { mixed = !mixed; goto redraw; }
+			c = 0;
+		}
+		else if (video_page_w != 0)
+		{
+			if      (c == 0x00) text_outs("LOW RAM");
+			else if (c == 0x80) text_outs(" CHECKSUM...");
+			delay(1);
+			++c;
+		}
+	}
+}
+
 void video_test_double_high_mono()
 {
 	char mixed = 1;
@@ -536,7 +595,7 @@ void main_menu()
 		"  4 - VIDEO: HIRES MONO\n"
 		"  5 - VIDEO: DOUBLE TEXT\n"
 		"  6 - VIDEO: DOUBLE LORES\n"
-		"  7 - VIDEO: DOUBLE HIRES COLOUR *\n"
+		"  7 - VIDEO: DOUBLE HIRES COLOUR\n"
 		"  8 - VIDEO: DOUBLE HIRES MONO\n"
 		"  A - ANIMATION *\n"
 		"  K - KEYBOARD\n"
@@ -561,13 +620,13 @@ void main_menu()
 	case '4': video_test_high_mono(); break;
 	case '5': video_test_double_text(); break;
 	case '6': video_test_double_low(); break;
+	case '7': video_test_double_high_color(); break;
 	case '8': video_test_double_high_mono(); break;
 	case 'K': case 'k': keyboard_test(); break;
 	case 'P': case 'p': paddle_test(); break;
 	case 'I': case 'i': system_info(); break;
 
 	// unimplemented
-	case '7':
 	case 'A': case 'a':
 	case 'D': case 'd':
 	case 'S': case 's':

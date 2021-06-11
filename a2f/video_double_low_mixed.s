@@ -54,7 +54,6 @@ table:
 _video_mode_double_low_mixed = video_mode_double_low_mixed
 
 .proc video_mode_set_double_low_mixed
-	; set mode
 	sta $C050 ; graphics mode (TEXT)
 	sta $C056 ; low-res (HIRES)
 	sta $C07E ; enable DHIRES switch (IOUDIS)

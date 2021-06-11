@@ -211,12 +211,13 @@ extern void video_mode_high_color_mixed();
 extern void video_mode_double_text();
 extern void video_mode_double_low();
 extern void video_mode_double_low_mixed();
-extern void video_mode_double_high_mono(); // TODO
-extern void video_mode_double_high_mono_mixed(); // TODO
-extern void video_mode_double_high_color(); // TODO
-extern void video_mode_double_high_color_mixed(); // TODO
+extern void video_mode_double_high_mono();
+extern void video_mode_double_high_mono_mixed();
+extern void video_mode_double_high_color();
+extern void video_mode_double_high_color_mixed();
 // TODO high_color_double_mixed (hires with 80col)
 // TODO high_mono_double_mixed
+// TODO low_double_mixed
 
 extern void video_cls();
 extern void video_cls_page(uint8 page, uint8 fill);
