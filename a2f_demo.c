@@ -377,16 +377,16 @@ redraw:
 		"       F FOR PAGE 2\n"
 		"       M FOR NON_MIXED"
 	);
-	draw_fillbox( 99,5,37,35,COL_WHITE);
+	draw_fillbox( 99,5,37,35,COD_WHITE);
 	for (c=0; c<24; ++c)
 	{
-		draw_pixel( 10+c,11+c,COL_WHITE);
-		draw_pixel(130-c,11+c,COL_BLACK);
+		draw_pixel( 10+c,11+c,COD_WHITE);
+		draw_pixel(130-c,11+c,COD_BLACK);
 		draw_pixel( 13+c,10+c,draw_getpixel( 10+c,11+c));
 		draw_pixel(127-c,10+c,draw_getpixel(130-c,11+c));
 	}
 	#define DHCSW 7
-	draw_box(9,49,2+(DHCSW*16),2+(2*DHCSW),COL_WHITE);
+	draw_box(9,49,2+(DHCSW*16),2+(2*DHCSW),COD_WHITE);
 	for (c=0; c<16; ++c)
 	{
 		draw_fillbox(10+(c*DHCSW),50      ,DHCSW,DHCSW,c);
@@ -394,7 +394,7 @@ redraw:
 	}
 
 	video_page_select(0,1);
-	draw_fillbox(5,7,31,52,COL_PURPLE);
+	draw_fillbox(5,7,31,52,COD_PURPLE);
 	// TODO leyendecker blit?
 	// TODO fine blit? masked blit?
 

@@ -127,7 +127,7 @@ DISK_ERROR_PARTIAL = $04 ; sector read but only partially correct (checksum fail
 ; Video
 ;
 
-; constants
+; pages for video_cls_page
 CLS_LOW0    = 0 ; text 40 / low-res first page
 CLS_LOW1    = 1 ;                   second page
 CLS_HIGH0   = 2 ; high-res
@@ -141,8 +141,7 @@ CLS_DHIGH1  = 9
 CLS_DMIXED0 = 10
 CLS_DMIXED1 = 11
 
-
-; low/double resolution colours
+; low/double-low resolution colours
 COL_BLACK       = 0
 COL_MAGENTA     = 1
 COL_BLUE_DARK   = 2
@@ -173,6 +172,24 @@ COH_WHITE1      = $83
 ; monochrome colours
 COM_BLACK       = 0
 COM_WHITE       = 1
+
+; double-high resolution colours
+COD_BLACK       = 0
+COD_BLUE_DARK   = 1
+COD_GREEN_DARK  = 2
+COD_BLUE_MID    = 3
+COD_BROWN       = 4
+COD_GREY1       = 5
+COD_GREEN_LIGHT = 6
+COD_AQUAMARINE  = 7
+COD_MAGENTA     = 8
+COD_PURPLE      = 9
+COD_GREY0       = 10
+COD_BLUE_LIGHT  = 11
+COD_ORANGE      = 12
+COD_PINK        = 13
+COD_YELLOW      = 14
+COD_WHITE       = 15
 
 ; variables
 .global video_text_x    ; text_out position

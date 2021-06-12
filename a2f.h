@@ -155,7 +155,7 @@ extern uint8_t disk_volume; // last disk volume
 #define CLS_DMIXED1 11
 
 
-// low/double resolution colours
+// low/double-low resolution colours
 #define COL_BLACK       0
 #define COL_MAGENTA     1
 #define COL_BLUE_DARK   2
@@ -186,6 +186,24 @@ extern uint8_t disk_volume; // last disk volume
 // monochrome colours
 #define COM_BLACK       0
 #define COM_WHITE       1
+
+// double-high resolution colours
+#define COD_BLACK       0
+#define COD_BLUE_DARK   1
+#define COD_GREEN_DARK  2
+#define COD_BLUE_MID    3
+#define COD_BROWN       4
+#define COD_GREY1       5
+#define COD_GREEN_LIGHT 6
+#define COD_AQUAMARINE  7
+#define COD_MAGENTA     8
+#define COD_PURPLE      9
+#define COD_GREY0       10
+#define COD_BLUE_LIGHT  11
+#define COD_ORANGE      12
+#define COD_PINK        13
+#define COD_YELLOW      14
+#define COD_WHITE       15
 
 extern uint8 video_text_x;
 extern uint8 video_text_y;
@@ -258,6 +276,12 @@ extern void draw_ellipse(uint16 x0, uint8 y0, uint16 w, uint8 h); // TODO
 //extern void blit_coarse(uint16 x0, uint8 y0, const uint8* data, uint8 tw, uint8 th); // TODO
 //extern void blit_fine(uint16 x0, uint8 y0, const uint8* data, uint8 tw, uint8 th); // TODO
 //extern void blit_mask(uint16 x0, uint8 y0, const uint8* data, uint8 tw, uint8 th); // TODO
+// blit coarse low, high, double-low, double-high
+// set-font, pointer to data + ascii start
+// font high, font double high color (does bit doubling for wider font), font double high mono
+
+// TODO set attribute high, set attribute double high (used to set "secret" high bit, value = 0 or $80)
+// TODO get for above
 
 // set text/border colours on IIGS only (call if system_type == SYSTEM_APPLE2GS)
 extern void iigs_color(uint8 text_fg, uint8 text_bg, uint8 border); // low-resolution colour values
