@@ -208,8 +208,8 @@ COM_WHITE       = 1
 .global video_mode_double_high_color_mixed
 ; half-double video modes (non-double graphics with 80-column text)
 .global video_mode_high_color_double_mixed
-.global void video_mode_high_mono_double_mixed
-.global void video_mode_low_double_mixed
+.global video_mode_high_mono_double_mixed
+.global video_mode_low_double_mixed
 
 .global video_cls ; clear current write screen with an appropriate value
 .global video_cls_page ; X = screen, A = fill value. clear one of the 4 screen memory areas
