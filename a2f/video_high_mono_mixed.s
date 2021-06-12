@@ -58,7 +58,6 @@ _video_mode_high_mono_mixed = video_mode_high_mono_mixed
 	sta $C05F
 	sta $C05E
 	sta $C05F ; double-hires off (AN3/DHIRES)
-	sta $C053
 	; set mixed
 	sta $C053 ; mixed (MIXED)
 	jmp video_page_apply

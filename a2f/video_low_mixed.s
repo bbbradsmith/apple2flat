@@ -15,7 +15,6 @@
 .import draw_pixel_low
 .import draw_getpixel_low
 
-.import video_null
 .import video_mode_setup
 .import video_mode_mixed_setup
 .import VIDEO_FUNCTION_TABLE_SIZE

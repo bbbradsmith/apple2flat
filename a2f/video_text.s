@@ -25,7 +25,6 @@
 
 .import video_rowpos0
 .import video_rowpos1
-.import video_null
 .import video_mode_setup
 .import VIDEO_FUNCTION_TABLE_SIZE
 .import draw_hline_generic

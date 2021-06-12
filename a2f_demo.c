@@ -68,19 +68,22 @@ void video_test_text()
 void video_test_low()
 {
 	char mixed = 1;
+	char dmixed = 0;
 	char flip = 0;
 	uint8 c;
 
 redraw:
 	cls_full();
-	if (!mixed) video_mode_low();
-	else        video_mode_low_mixed();
+	if      (!mixed)  video_mode_low();
+	else if (!dmixed) video_mode_low_mixed();
+	else if ( dmixed) video_mode_low_double_mixed();
 	cls_full();
 
 	text_outs(
 		"VIDEO: LOW RESOLUTION MIXED PAGE 1\n"
 		"       F FOR PAGE 2\n"
-		"       M FOR NON_MIXED"
+		"       M FOR NON_MIXED\n"
+		"       4/8 FOR 40/80 COLUMN MIXED"
 	);
 	draw_box(1,1,18,3,COL_WHITE);
 	for (c=0; c<16; ++c) draw_pixel(2+c,2,c);
@@ -105,6 +108,8 @@ redraw:
 			if      (c == KB_ESC) break;
 			else if (c == 'F' || c == 'f') { video_page_flip(); flip ^= 1; }
 			else if (c == 'M' || c == 'm') { mixed = !mixed; goto redraw; }
+			else if (c == '4') { mixed = 1; dmixed = 0; goto redraw; }
+			else if (c == '8') { mixed = 1; dmixed = 1; goto redraw; }
 			c = 0;
 		}
 		else if (video_page_w != 0)
@@ -120,19 +125,22 @@ redraw:
 void video_test_high_color()
 {
 	char mixed = 1;
+	char dmixed = 0;
 	char flip = 0;
 	uint8 c;
 
 redraw:
 	cls_full();
-	if (!mixed) video_mode_high_color();
-	else        video_mode_high_color_mixed();
+	if      (!mixed)  video_mode_high_color();
+	else if (!dmixed) video_mode_high_color_mixed();
+	else if ( dmixed) video_mode_high_color_double_mixed();
 	cls_full();
 
 	text_outs(
 		"VIDEO: HIGH RES COLOR MIXED PAGE 1\n"
 		"       F FOR PAGE 2\n"
-		"       M FOR NON_MIXED"
+		"       M FOR NON_MIXED\n"
+		"       4/8 FOR 40/80 COLUMN MIXED"
 	);
 	draw_fillbox( 99,5,37,35,COH_WHITE0);
 	for (c=0; c<24; ++c)
@@ -164,6 +172,8 @@ redraw:
 			if      (c == KB_ESC) break;
 			else if (c == 'F' || c == 'f') { video_page_flip(); flip ^= 1; }
 			else if (c == 'M' || c == 'm') { mixed = !mixed; goto redraw; }
+			else if (c == '4') { mixed = 1; dmixed = 0; goto redraw; }
+			else if (c == '8') { mixed = 1; dmixed = 1; goto redraw; }
 			c = 0;
 		}
 		else if (video_page_w != 0)
@@ -179,19 +189,22 @@ redraw:
 void video_test_high_mono()
 {
 	char mixed = 1;
+	char dmixed = 0;
 	char flip = 0;
 	uint8 c;
 
 redraw:
 	cls_full();
-	if (!mixed) video_mode_high_mono();
-	else        video_mode_high_mono_mixed();
+	if      (!mixed)  video_mode_high_mono();
+	else if (!dmixed) video_mode_high_mono_mixed();
+	else if ( dmixed) video_mode_high_mono_double_mixed();
 	cls_full();
 
 	text_outs(
 		"VIDEO: HIGH RES MONO MIXED PAGE 1\n"
 		"       F FOR PAGE 2\n"
-		"       M FOR NON_MIXED"
+		"       M FOR NON_MIXED\n"
+		"       4/8 FOR 40/80 COLUMN MIXED"
 	);
 	draw_fillbox(239,5,37,35,COM_WHITE);
 	for (c=0; c<24; ++c)
@@ -215,6 +228,8 @@ redraw:
 			if      (c == KB_ESC) break;
 			else if (c == 'F' || c == 'f') { video_page_flip(); flip ^= 1; }
 			else if (c == 'M' || c == 'm') { mixed = !mixed; goto redraw; }
+			else if (c == '4') { mixed = 1; dmixed = 0; goto redraw; }
+			else if (c == '8') { mixed = 1; dmixed = 1; goto redraw; }
 			c = 0;
 		}
 		else if (video_page_w != 0)
@@ -561,7 +576,8 @@ void system_info()
 	default:                 break;
 	}
 	text_outs(t);
-	// TODO ram size / page count? Need interface for banking.
+	// TODO 80-column card detection?
+	// TODO ram size / page count? / Need interface for banking.
 	while (kb_get() != KB_ESC);
 }
 
