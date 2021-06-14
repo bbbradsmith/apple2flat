@@ -26,7 +26,7 @@
 .import system_detect
 
 .segment "ZEROPAGE"
-a2f_temp: .res 4
+a2f_temp: .res 8
 
 .segment "BRKV" ; vector for BRK
 brkv: .res 2

@@ -11,7 +11,7 @@
 .import video_mode_mixed_setup
 .import VIDEO_FUNCTION_TABLE_SIZE
 .import video_double_rw_aux_setup
-.import video_double_read_aux
+.importzp video_double_read_aux
 
 .import video_page_copy_double_high_mixed
 .import video_page_apply

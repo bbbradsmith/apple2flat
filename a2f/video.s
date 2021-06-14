@@ -24,8 +24,6 @@
 .export video_function_table
 .export video_mode_setup
 .export VIDEO_FUNCTION_TABLE_SIZE
-.export video_rowpos0
-.export video_rowpos1
 
 .exportzp draw_ptr
 .exportzp draw_ptr0

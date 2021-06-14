@@ -3,8 +3,8 @@
 ; Shared safe-read routines for double video modes
 
 .export video_double_rw_aux_setup
-.export video_double_read_aux ; safely reads (draw_ptr), Y from auxiliary memory
-;.export video_double_write_aux ; safely writes A to (draw_ptr), Y in auxiliary memory
+.exportzp video_double_read_aux ; safely reads (draw_ptr), Y from auxiliary memory
+;.exportzp video_double_write_aux ; safely writes A to (draw_ptr), Y in auxiliary memory
 
 .importzp draw_ptr
 
@@ -22,7 +22,7 @@ video_double_read_aux_: ; reads from (draw_ptr), Y in auxiliary memory
 ;	rts
 VIDEO_DOUBLE_ZPCODE_SIZE = * - video_double_read_aux_
 
-.segment "LOWZP"
+.segment "LOWZP" : zeropage
 ; code to be run from ZP
 video_double_read_aux: .res VIDEO_DOUBLE_ZPCODE_SIZE
 ;video_double_write_aux = video_double_read_aux + (video_double_write_aux_ - video_double_read_aux_)

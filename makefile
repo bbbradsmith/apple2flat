@@ -24,7 +24,7 @@ SRC = $(wildcard *.s)
 OUTCDIR = $(OUTDIR)/c
 CSSRC = $(addprefix $(OUTCDIR)/,$(CSRC:.c=.c.s))
 OBJ = $(addprefix $(OUTDIR)/,$(SRC:.s=.o))
-OBJ := $(addprefix $(OUTCDIR)/,$(CSRC:.c=.c.o))
+OBJ += $(addprefix $(OUTCDIR)/,$(CSRC:.c=.c.o))
 
 CLEAN = $(OBJ) $(CSSRC) \
 	$(DSK_DISK) $(BIN_DISK) $(MAP_DISK) $(DBG_DISK) $(SYM_DISK) \

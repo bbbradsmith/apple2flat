@@ -52,7 +52,7 @@
 	rts
 .endproc
 
-.proc draw_high_addr_y_inc
+.proc draw_high_addr_y_inc ; clobbers A
 	; advance by 1 line
 	lda draw_ptr0+1
 	clc

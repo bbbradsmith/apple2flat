@@ -1,6 +1,6 @@
 ; A2F library public interface
 
-; 4 bytes of temporary space on zero-page
+; 8 bytes of temporary space on zero-page
 .globalzp a2f_temp
 
 ;
@@ -206,6 +206,8 @@ COD_WHITE       = 15
 .global draw_y0
 .global draw_y1
 .global draw_xh ; high byte for draw_pixel, alias of: draw_x0+1
+.global text_fontset ; pointer to high-resolution font set
+.global text_fontset_offset ; ASCII offset to beginning of font set (usually $20)
 
 ; select video mode driver
 .global video_mode_text
@@ -249,9 +251,9 @@ COD_WHITE       = 15
 .global text_scroll
 .global text_charset ; A = 0 primary character set, 1 alternate character set (IIe)
 
-.global blit_coarse ; TODO
-.global blit_fine ; TODO
-.global blit_mask ; TODO
+;.global blit_coarse ; TODO
+;.global blit_fine ; TODO
+;.global blit_mask ; TODO
 
 ; set text/border colours on IIGS only
 .global iigs_color ; A = text FG, X = text BG, Y = border (low-resolution colour values)

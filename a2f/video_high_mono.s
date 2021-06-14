@@ -16,9 +16,11 @@
 .import video_cls_high
 .import draw_high_addr_y
 .import draw_high_addr_y_inc
+.import text_out_high
+.import text_copy_row_high
+.import text_clear_row_high
 
 .import video_div7
-.import video_null
 .import video_mode_setup
 .import VIDEO_FUNCTION_TABLE_SIZE
 .import draw_hline_generic
@@ -39,9 +41,9 @@ table:
 	.word video_mode_set_high_mono
 	.word video_page_copy_high
 	.word video_cls_high
-	.word video_null ; TODO out_text
-	.word video_null ; TODO text_copy_row
-	.word video_null ; TODO text_clear_row
+	.word text_out_high
+	.word text_copy_row_high
+	.word text_clear_row_high
 	.word draw_pixel_high_mono
 	.word draw_getpixel_high_mono
 	.word draw_hline_generic

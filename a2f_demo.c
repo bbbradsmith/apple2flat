@@ -3,6 +3,8 @@
 #include <string.h>
 #include "a2f.h"
 
+extern uint8 font_bin[]; // in a2f_demo.s
+
 char quit = 0;
 
 void cls_full() // clears both pages and sets 0,0
@@ -136,10 +138,11 @@ redraw:
 	else if ( dmixed) video_mode_high_color_double_mixed();
 	cls_full();
 
+	if (!mixed) text_window(0,20,40,24);
 	text_outs(
-		"VIDEO: HIGH RES COLOR MIXED PAGE 1\n"
+		"VIDEO: HIGH RES COLOR PAGE 1\n"
 		"       F FOR PAGE 2\n"
-		"       M FOR NON_MIXED\n"
+		"       M TO TOGGLE MIXED\n"
 		"       4/8 FOR 40/80 COLUMN MIXED"
 	);
 	draw_fillbox( 99,5,37,35,COH_WHITE0);
@@ -200,10 +203,11 @@ redraw:
 	else if ( dmixed) video_mode_high_mono_double_mixed();
 	cls_full();
 
+	if (!mixed) text_window(0,20,40,24);
 	text_outs(
-		"VIDEO: HIGH RES MONO MIXED PAGE 1\n"
+		"VIDEO: HIGH RES MONO PAGE 1\n"
 		"       F FOR PAGE 2\n"
-		"       M FOR NON_MIXED\n"
+		"       M TO TOGGLE MIXED\n"
 		"       4/8 FOR 40/80 COLUMN MIXED"
 	);
 	draw_fillbox(239,5,37,35,COM_WHITE);
@@ -593,6 +597,7 @@ void unimplemented()
 
 void main_menu()
 {
+	text_set_font(font_bin,0x20);
 	if (system_type == SYSTEM_APPLE2GS)
 		iigs_color(COL_WHITE,COL_BLACK,COL_BLACK);
 

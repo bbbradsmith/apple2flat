@@ -214,6 +214,8 @@ extern uint8 video_text_yr;
 extern uint8 video_page_w; // $00 (page 1) or $FF (page 2)
 extern uint8 video_page_r;
 extern uint8 text_inverse;
+extern uint8* text_fontset; // high-resolution font set
+extern uint8 text_fontset_offset; // ASCII offset to beginning of font set (usually $20)
 
 // TODO vysnc ; wait for next video frame (needs separate IIe/IIc implementation), assembly version: call system_detect first, otherwise uses fallback (or if not IIe/IIc)
 // TODO extern uint16 vsync_fallback ; for Apple II/II+ use a fixed timer instead of vsync, 12.5ms by default
@@ -255,6 +257,7 @@ extern void text_scroll(sint8 lines); // positive: shift text up, clear bottom, 
 extern void text_charset(char alt); // 0 = primary character set, 1 = alternat character set (IIe)
 extern void text_xy(uint8 x, uint8 y); // set text output location (faster to set video_text_x/y directly, though)
 extern void text_window(uint8 x0, uint8 y0, uint8 x1, uint8 y1); // confine text to x0<=x<x1, y0<=y<y1
+extern void text_set_font(const uint8* fontset, uint8 offset); // set high-resolution fontset (beginning at offset character)
 
 extern void draw_pixel(uint16 x, uint8 y, uint8 c);
 extern uint8 draw_getpixel(uint16 x, uint8 y);
@@ -279,6 +282,33 @@ extern void draw_ellipse(uint16 x0, uint8 y0, uint16 w, uint8 h); // TODO
 // blit coarse low, high, double-low, double-high
 // set-font, pointer to data + ascii start
 // font high, font double high color (does bit doubling for wider font), font double high mono
+
+// blit coarse:
+// low res (1x2) 1b
+// hires mono (7x1) 1b
+// hires color (7x1) 2b
+// double-low res (2x2) 2b
+// double-high res mono (14x1) 2b
+// double-high res colour (7x1) 4b
+
+// blit coarse masked:
+// hires mono (7x1) 2b
+// hires color (7x1) 4b
+// double-high res mono (14x1) 4b
+// double-high res colour (14x1) 8b
+
+// blit fine:
+// hires mono
+// hires color
+
+// blit fine masked:
+// hires mono
+// hires color
+
+// fonts:
+// mono/color = same in hires
+// dhires mono = 80 column
+// dhires color = 40 column - auto-expand font bits
 
 // TODO set attribute high, set attribute double high (used to set "secret" high bit, value = 0 or $80)
 // TODO get for above
