@@ -22,14 +22,14 @@ void video_test_text()
 	char alt = 0;
 
 	video_cls();
-	text_xy( 1, 1); text_outs("VIDEO: TEXT PAGE 1 (F FOR PAGE 2)");
+	text_xy( 1, 1); text_outs("\x0FVIDEO\x0E: TEXT PAGE 1 (F FOR PAGE 2)");
 	text_xy( 4,12); text_outs("CHARACTER SET: (C TO SWITCH)");
 	text_xy( 2, 3); text_outs("-- WINDOW --");
 	text_xy( 2, 9); text_outs("------------");
 
 	video_cls_page(CLS_LOW1,' '^0x80); // clear second page
 	video_page_select(0,1); // write to second page
-	text_xy( 1, 1); text_outs("VIDEO: TEXT PAGE 2 (F FOR PAGE 1)");
+	text_xy( 1, 1); text_outs("\x0FVIDEO\x0E: TEXT PAGE 2 (F FOR PAGE 1)");
 	draw_box(2,4,7,7,'+'^0x80);
 	draw_hline(4,7,3,'-'^0x80);
 	draw_vline(5,6,3,'|'^0x80);
@@ -82,9 +82,9 @@ redraw:
 	cls_full();
 
 	text_outs(
-		"VIDEO: LOW RESOLUTION MIXED PAGE 1\n"
+		"\x0FVIDEO\x0E: LOW RESOLUTION MIXED PAGE 1\n"
 		"       F FOR PAGE 2\n"
-		"       M FOR NON_MIXED\n"
+		"       M FOR NON MIXED\n"
 		"       4/8 FOR 40/80 COLUMN MIXED"
 	);
 	draw_box(1,1,18,3,COL_WHITE);
@@ -140,7 +140,7 @@ redraw:
 
 	if (!mixed) text_window(0,20,40,24);
 	text_outs(
-		"VIDEO: HIGH RES COLOR PAGE 1\n"
+		"\x0FVIDEO\x0E: HIGH RES COLOR PAGE 1\n"
 		"       F FOR PAGE 2\n"
 		"       M TO TOGGLE MIXED\n"
 		"       4/8 FOR 40/80 COLUMN MIXED"
@@ -205,7 +205,7 @@ redraw:
 
 	if (!mixed) text_window(0,20,40,24);
 	text_outs(
-		"VIDEO: HIGH RES MONO PAGE 1\n"
+		"\x0FVIDEO\x0E: HIGH RES MONO PAGE 1\n"
 		"       F FOR PAGE 2\n"
 		"       M TO TOGGLE MIXED\n"
 		"       4/8 FOR 40/80 COLUMN MIXED"
@@ -253,14 +253,14 @@ void video_test_double_text()
 
 	video_mode_double_text();
 	video_cls();
-	text_xy( 1, 1); text_outs("VIDEO: DOUBLE TEXT PAGE 1 (F FOR PAGE 2)");
+	text_xy( 1, 1); text_outs("\x0FVIDEO\x0E: DOUBLE TEXT PAGE 1 (F FOR PAGE 2)");
 	text_xy(44,12); text_outs("CHARACTER SET: (C TO SWITCH)");
 	text_xy( 2, 3); text_outs("-- WINDOW --");
 	text_xy( 2, 9); text_outs("------------");
 
 	video_cls_page(CLS_DLOW1,' '^0x80); // clear second page
 	video_page_select(0,1); // write to second page
-	text_xy( 1, 1); text_outs("VIDEO: DOUBLE TEXT PAGE 2 (F FOR PAGE 1)");
+	text_xy( 1, 1); text_outs("\x0FVIDEO\x0E: DOUBLE TEXT PAGE 2 (F FOR PAGE 1)");
 	draw_box(2,4,7,7,'+'^0x80);
 	draw_hline(4,7,3,'-'^0x80);
 	draw_vline(5,6,3,'|'^0x80);
@@ -311,9 +311,9 @@ redraw:
 	cls_full();
 
 	text_outs(
-		"VIDEO: DOUBLE LOW RESOLUTION MIXED PAGE 1\n"
+		"\x0FVIDEO\x0E: DOUBLE LOW RESOLUTION MIXED PAGE 1\n"
 		"       F FOR PAGE 2\n"
-		"       M FOR NON_MIXED"
+		"       M FOR NON MIXED"
 	);
 	draw_box(1,1,18,3,COL_WHITE);
 	for (c=0; c<16; ++c) draw_pixel(2+c,2,c);
@@ -376,10 +376,11 @@ redraw:
 	else        video_mode_double_high_color_mixed();
 	cls_full();
 
+	if (!mixed) text_window(0,20,40,24);
 	text_outs(
-		"VIDEO: DOUBLE HIGH RES COLOR MIXED PAGE 1\n"
+		"\x0FVIDEO\x0E: DOUBLE HIGH RES COLOR PAGE 1\n"
 		"       F FOR PAGE 2\n"
-		"       M FOR NON_MIXED"
+		"       M TO TOGGLE MIXED"
 	);
 	draw_fillbox( 99,5,37,35,COD_WHITE);
 	for (c=0; c<24; ++c)
@@ -435,10 +436,11 @@ redraw:
 	else        video_mode_double_high_mono_mixed();
 	cls_full();
 
+	if (!mixed) text_window(0,20,80,24);
 	text_outs(
-		"VIDEO: DOUBLE HIGH RES MONO MIXED PAGE 1\n"
+		"\x0FVIDEO\x0E: DOUBLE HIGH RES MONO PAGE 1\n"
 		"       F FOR PAGE 2\n"
-		"       M FOR NON_MIXED"
+		"       M TO TOGGLE MIXED"
 	);
 	draw_fillbox(    239, 5,37,35,COM_WHITE);
 	draw_fillbox(280+239,45,37,35,COM_WHITE);

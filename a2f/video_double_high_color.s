@@ -16,6 +16,10 @@
 .import draw_high_addr_y
 .import draw_high_color_addr_x
 
+.import text_out_double_high_color
+.import text_copy_row_double_high_color
+.import text_clear_row_double_high_color
+
 .import video_div7
 .import video_null
 .import video_mode_setup
@@ -40,9 +44,9 @@ table:
 	.word video_mode_set_double_high_color
 	.word video_page_copy_double_high
 	.word video_cls_double_high
-	.word video_null ; TODO text_out_text
-	.word video_null ; TODO text_copy_row
-	.word video_null ; TODO text_clear_row
+	.word text_out_double_high_color
+	.word text_copy_row_double_high_color
+	.word text_clear_row_double_high_color
 	.word draw_pixel_double_high_color
 	.word draw_getpixel_double_high_color
 	.word draw_hline_generic

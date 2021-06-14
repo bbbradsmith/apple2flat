@@ -6,6 +6,11 @@
 .export text_copy_row_high
 .export text_clear_row_high
 
+.export text_row_addr_x_draw_ptr0_high
+.export text_row_addr_y_draw_ptr1_high
+.export draw_ptr1_high_addr_y_inc
+.export text_out_high_prepare
+
 .import video_rowpos0
 .import video_rowpos1
 .import draw_high_addr_y_inc
@@ -77,9 +82,7 @@ text_row_addr_y_draw_ptr1_high: ; Y = row to draw_ptr1, clobbers A
 	rts
 .endproc
 
-text_out_high:
-	; A = value
-	; X/Y = coordinate
+text_out_high_prepare: ; A = value, X/Y = coordinate
 	; 1. draw_ptr1 = video write position
 	pha
 	jsr text_row_addr_y_draw_ptr1_high
@@ -114,6 +117,12 @@ text_out_high:
 		lda #$7F
 	:
 	sta text_high_inverse
+	rts
+
+text_out_high:
+	; A = value
+	; X/Y = coordinate
+	jsr text_out_high_prepare
 	; 4. copy glyph
 	ldy #0
 	sty blit_read_y

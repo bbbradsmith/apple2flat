@@ -259,6 +259,18 @@ extern void text_xy(uint8 x, uint8 y); // set text output location (faster to se
 extern void text_window(uint8 x0, uint8 y0, uint8 x1, uint8 y1); // confine text to x0<=x<x1, y0<=y<y1
 extern void text_set_font(const uint8* fontset, uint8 offset); // set high-resolution fontset (beginning at offset character)
 
+// TODO VWF specifically for hires:
+// window x will be 0-(140-8) instead of 0-40
+// glyph is up to 8x8 white pixels
+// text_out will extra-advance text x by glyph width value-1 (X is pixel address, Y is still 8-pixel row)
+// width value includes gutter, can be wider than 8 (i.e. use lsr to just pad 0s) (oregon trail had great 2px gutters)
+// replace copy/clear row with null, no automatic text scrolling
+// starting close to right edge might overflow by 1px into screen memory edge
+// -> do these as an extra 2 video modes for hires
+//    and move pixel stuff from video_high_color/mono into video_high_color_draw to be shared w/o
+//    needing both text routines. (Add "VWF option to demo to show cool text in both mono/color.)
+// font generator: draw vertical 8px magenta line between glyphs to indicate glyph width, enforce 8px max for white
+
 extern void draw_pixel(uint16 x, uint8 y, uint8 c);
 extern uint8 draw_getpixel(uint16 x, uint8 y);
 extern void draw_hline(uint16 x, uint8 y, uint16 w, uint8 c);

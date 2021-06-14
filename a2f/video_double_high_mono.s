@@ -15,6 +15,10 @@
 .import video_cls_double_high
 .import draw_high_addr_y
 
+.import text_out_double_high_mono
+.import text_copy_row_double_high_mono
+.import text_clear_row_double_high_mono
+
 .import video_div7
 .import video_null
 .import video_mode_setup
@@ -36,14 +40,15 @@ draw_high_phase = a2f_temp+3
 	lda #<table
 	ldx #>table
 	jsr video_mode_setup
+	asl video_text_w ; 40 << 1 = 80
 	jmp video_double_rw_aux_setup
 table:
 	.word video_mode_set_double_high_mono
 	.word video_page_copy_double_high
 	.word video_cls_double_high
-	.word video_null ; TODO text_out_text
-	.word video_null ; TODO text_copy_row
-	.word video_null ; TODO text_clear_row
+	.word text_out_double_high_mono
+	.word text_copy_row_double_high_mono
+	.word text_clear_row_double_high_mono
 	.word draw_pixel_double_high_mono
 	.word draw_getpixel_double_high_mono
 	.word draw_hline_generic
