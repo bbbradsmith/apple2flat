@@ -9,7 +9,7 @@
 .import video_rowpos0
 .import video_rowpos1
 .import draw_high_addr_y_inc
-.import video_double_read_aux
+.importzp video_double_read_aux
 
 .import text_copy_row_high
 .import text_clear_row_high
