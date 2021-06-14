@@ -229,6 +229,14 @@ COD_WHITE       = 15
 .global video_mode_high_color_double_mixed
 .global video_mode_high_mono_double_mixed
 .global video_mode_low_double_mixed
+; high/double-high resolution with no text support
+.global video_mode_high_mono_notext
+.global video_mode_high_color_notext
+.global video_mode_double_high_mono_notext
+.global video_mode_double_high_color_notext
+; high resolution with variable width software-font
+.global video_mode_high_mono_vwf
+.global video_mode_high_color_vwf
 
 .global video_cls ; clear current write screen with an appropriate value
 .global video_cls_page ; X = screen, A = fill value. clear one of the 4 screen memory areas

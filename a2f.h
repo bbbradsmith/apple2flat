@@ -240,6 +240,14 @@ extern void video_mode_double_high_color_mixed();
 extern void video_mode_high_color_double_mixed();
 extern void video_mode_high_mono_double_mixed();
 extern void video_mode_low_double_mixed();
+// high/double-high resolution with no text support
+extern void video_mode_high_mono_notext();
+extern void video_mode_high_color_notext();
+extern void video_mode_double_high_mono_notext();
+extern void video_mode_double_high_color_notext();
+// high resolution with variable width software-font
+extern void video_mode_high_mono_vwf();
+extern void video_mode_high_color_vwf();
 
 extern void video_cls();
 extern void video_cls_page(uint8 page, uint8 fill);
@@ -316,11 +324,6 @@ extern void draw_ellipse(uint16 x0, uint8 y0, uint16 w, uint8 h); // TODO
 // blit fine masked:
 // hires mono
 // hires color
-
-// fonts:
-// mono/color = same in hires
-// dhires mono = 80 column
-// dhires color = 40 column - auto-expand font bits
 
 // TODO set attribute high, set attribute double high (used to set "secret" high bit, value = 0 or $80)
 // TODO get for above
