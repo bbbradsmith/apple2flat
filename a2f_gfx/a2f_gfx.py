@@ -48,7 +48,7 @@ def palette_image(img,palette):
 
 # load and convert image to indexed palette
 def index_image(filename, palette):
-    src = PIL.Image.open(filename)
+    src = PIL.Image.open(filename).convert("RGB")
     dst = PIL.Image.new("P",src.size,color=0)
     for y in range(src.size[1]):
         for x in range(src.size[0]):
@@ -99,7 +99,7 @@ def preview_font(ba,offset=0x20):
     COLUMNS = 32
     img = PIL.Image.new("P",(7*COLUMNS,8*(256//COLUMNS)),color=2)
     palette_image(img,PAL_MONO)
-    count = max(offset+(len(ba)//8),256)
+    count = min(offset+(len(ba)//8),256)-offset
     for i in range(count):
         a = i + offset
         paste_block_high_mono(img,7*(a%COLUMNS),8*(a//COLUMNS),ba[i*8:i*8+8])
@@ -118,6 +118,64 @@ def make_font(filename,count=256):
             count -= 1
     return ba
 
+#
+# variable width font generation (?x8 mono)
+#
+
+def glyph_vfw(img,gx,gy):
+    while gx < img.width: # skip to next non-magenta area
+        if img.getpixel((gx,gy)) < 2:
+            break
+        gx += 1
+    if gx >= img.width: # nothing found, just return to the start of the next row with an empty array
+        return (0,gy+8,bytearray(),[])
+    b = bytearray([0]*8)
+    w = 0
+    for w in range(min(img.width-gx,15)):
+        if img.getpixel((gx+w,gy)) >= 2:
+            break
+        if w < 8:
+            for y in range(8):
+                b[y] |= (img.getpixel((gx+w,gy+y)) & 1) << w
+    return (gx+w,gy,b,[w])
+
+def paste_glyph_vfw(img,x,y,b,w):
+    for py in range(8):
+        bp = b[py]
+        for px in range(w):
+            img.putpixel((x+px,y+py),bp&1)
+            bp >>= 1
+
+def preview_font_vwf(ba,wa,offset=0x20):
+    COLUMNS = 32
+    img = PIL.Image.new("P",(16*COLUMNS,8*(256//COLUMNS)),color=2)
+    palette_image(img,PAL_MONO)
+    count = min(offset+(len(ba)//8),256)-offset
+    for i in range(count):
+        a = i + offset
+        w = (wa[i//2] >> ((i&1)*4)) & 0xF
+        paste_glyph_vfw(img,16*(a%COLUMNS),8*(a//COLUMNS),ba[i*8:i*8+8],w)
+    return img
+
+def make_font_vfw(filename,count=256):
+    img = index_image(filename,PAL_MONO)
+    ba = bytearray()
+    wa = []
+    gx = 0
+    gy = 0
+    ba = bytearray()
+    while (gy+8) <= img.height:
+        (gx,gy,b,w) = glyph_vfw(img,gx,gy)
+        ba += b
+        wa += w
+    # pack pairs of widths into nibbles
+    if (len(wa) & 1) == 1:
+        wa.append(0)
+    wn = bytearray()
+    for i in range(0,len(wa),2):
+        wn.append(wa[i+0] | (wa[i+1]<<4))
+    return (ba,wn)
+
 # TODO monochrome masked (1 byte AND, 1 byte OR) span
 # TODO hires (2 bytes) span
 # TODO hires masked (2 + 2) span
@@ -130,3 +188,8 @@ def make_font(filename,count=256):
 f = make_font("../font.png")
 open("../font.bin","wb").write(f)
 preview_font(f).save("../test.png")
+
+(f,w) = make_font_vfw("../font_vwf.png")
+open("../font_vwf.bin","wb").write(f)
+open("../font_vwf.wid","wb").write(w)
+preview_font_vwf(f,w).save("../test_vwf.png")
