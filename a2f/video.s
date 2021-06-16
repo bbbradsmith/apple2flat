@@ -18,6 +18,9 @@
 .export draw_vline
 .export draw_fillbox
 
+.export video_w
+.export video_h
+
 .export video_rowpos0
 .export video_rowpos1
 .export video_null
@@ -68,22 +71,27 @@ draw_vline:      jmp a:video_null
 draw_fillbox:    jmp a:video_null
 VIDEO_FUNCTION_MAX = *-video_function_table
 .assert VIDEO_FUNCTION_MAX<256, error, "video_function_table too large?"
-VIDEO_FUNCTION_TABLE_SIZE = (VIDEO_FUNCTION_MAX*2)/3
+video_w:         .word 0
+video_h:         .byte 0
+VIDEO_FUNCTION_TABLE_SIZE = ((VIDEO_FUNCTION_MAX*2)/3)+3
 
 .proc video_null ; empty function for unimplemented/unimplementable video functions
 	rts
 .endproc
 
 ; sets up common video mode stuff:
-; 1. copies function table
+; 1. copies function table + 3 byte screen size suffix
 ; 2. resets text window and text position to 0,0 (but not w/h)
 ; 3. calls video_page to display the page
 .proc video_mode_setup ; X:A = pointer to function table
+	; copy function table
 	sta draw_ptr+0
 	stx draw_ptr+1
-	ldx #1
-	ldy #0
+	lda #0
+	tax
+	tay
 	:
+		inx ; skip jmp
 		lda (draw_ptr), Y
 		sta video_function_table, X
 		iny
@@ -91,9 +99,18 @@ VIDEO_FUNCTION_TABLE_SIZE = (VIDEO_FUNCTION_MAX*2)/3
 		lda (draw_ptr), Y
 		sta video_function_table, X
 		iny
-		inx
 		inx
 		cpx #VIDEO_FUNCTION_MAX
+		bcc :-
+	; 3 byte screen size suffix
+	.assert video_w = (video_function_table + VIDEO_FUNCTION_MAX), error, "video_w must be suffix of video_function_table"
+	.assert video_h = (video_w + 2), error, "video_h must directly follow video_w"
+	:
+		lda (draw_ptr),Y
+		sta video_function_table, X
+		iny
+		inx
+		cpx #VIDEO_FUNCTION_MAX + 3
 		bcc :-
 	; default text window
 	lda #0

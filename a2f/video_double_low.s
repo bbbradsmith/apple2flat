@@ -50,6 +50,8 @@ table:
 	.word draw_hline_generic
 	.word draw_vline_generic
 	.word draw_fillbox_generic
+	.word 80
+	.byte 48
 	.assert *-table = VIDEO_FUNCTION_TABLE_SIZE, error, "table entry count incorrect"
 .endproc
 

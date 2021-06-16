@@ -192,12 +192,14 @@ COD_YELLOW      = 14
 COD_WHITE       = 15
 
 ; variables
+.global video_w         ; (16-bit) pixel dimensions of current video mode
+.global video_h         ; (8-bit)
 .global video_text_x    ; text_out position
 .global video_text_y
 .global video_text_w    ; right side of text area (x wrap)
 .global video_text_h    ; bottom of text area (y wrap)
 .global video_text_xr   ; left side of text area (after x wrap)
-.global video_text_yr   ; top of text area (after y wrap)
+.global video_text_yr   ; top of text area
 .global video_page_w    ; page to write/draw: 00 page 1, FF page 2
 .global video_page_r    ; page to read/display
 .global text_inverse    ; $80 = normal text, $00 = inverse text

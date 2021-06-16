@@ -2,6 +2,8 @@
 ;
 ; C access for video
 
+.export _video_w
+.export _video_h
 .export _video_page_w
 .export _video_page_r
 
@@ -38,6 +40,8 @@
 .import blit_fine
 .import blit_mask
 
+.import video_w
+.import video_h
 .import video_page_w
 .import video_page_r
 .import draw_x0
@@ -48,6 +52,8 @@
 
 .importzp a2f_temp
 
+_video_w = video_w
+_video_h = video_h
 _video_page_w = video_page_w
 _video_page_r = video_page_r
 

@@ -205,15 +205,17 @@ extern uint8_t disk_volume; // last disk volume
 #define COD_YELLOW      14
 #define COD_WHITE       15
 
-extern uint8 video_text_x;
+extern uint16 video_w; // pixel dimensons of current video mode
+extern uint8 video_h;
+extern uint8 video_text_x; // text_out position
 extern uint8 video_text_y;
-extern uint8 video_text_w;
-extern uint8 video_text_h;
-extern uint8 video_text_xr;
-extern uint8 video_text_yr;
-extern uint8 video_page_w; // $00 (page 1) or $FF (page 2)
-extern uint8 video_page_r;
-extern uint8 text_inverse;
+extern uint8 video_text_w; // right side of text area
+extern uint8 video_text_h; // bottom of text area
+extern uint8 video_text_xr; // left side of text area (after x wrap)
+extern uint8 video_text_yr; // top of text area
+extern uint8 video_page_w; // page to write/draw: $00 (page 1) or $FF (page 2)
+extern uint8 video_page_r; // page to read/display
+extern uint8 text_inverse; // $80 (normal text) or $00 (inverse text)
 extern uint8* text_fontset; // high-resolution font set
 extern uint8 text_fontset_offset; // ASCII offset to beginning of font set (usually $20)
 
