@@ -194,12 +194,12 @@ COD_WHITE       = 15
 ; variables
 .global video_w         ; (16-bit) pixel dimensions of current video mode
 .global video_h         ; (8-bit)
-.global video_text_x    ; text_out position
+.global video_text_x    ; text_out position (16-bit x, 8-bit y)
 .global video_text_y
-.global video_text_w    ; right side of text area (x wrap)
-.global video_text_h    ; bottom of text area (y wrap)
-.global video_text_xr   ; left side of text area (after x wrap)
-.global video_text_yr   ; top of text area
+.global video_text_w    ; right side of text area (x wrap, 16-bit)
+.global video_text_h    ; bottom of text area (y wrap, 8-bit)
+.global video_text_xr   ; left side of text area (after x wrap, 16-bit)
+.global video_text_yr   ; top of text area (8-bit)
 .global video_page_w    ; page to write/draw: 00 page 1, FF page 2
 .global video_page_r    ; page to read/display
 .global text_inverse    ; $80 = normal text, $00 = inverse text
@@ -257,8 +257,8 @@ COD_WHITE       = 15
 .global draw_line ; TODO
 .global draw_ellipse ; TODO
 
-.global text_out
-.global text_scroll
+.global text_out ; A = character
+.global text_scroll ; A = signed value, positive = lines to shift up (clear bottom), negative = lines to shift down (clear top)
 .global text_charset ; A = 0 primary character set, 1 alternate character set (IIe)
 
 ;.global blit_coarse ; TODO

@@ -28,7 +28,7 @@
 	lda #<table
 	ldx #>table
 	jsr video_mode_setup
-	asl video_text_w ; 40 << 1 = 80
+	asl video_text_w+0 ; 40 << 1 = 80
 	jmp video_double_rw_aux_setup
 table:
 	.word video_mode_set_double_high_mono

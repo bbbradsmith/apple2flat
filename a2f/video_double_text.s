@@ -78,8 +78,8 @@ _video_mode_double_text = video_mode_double_text
 
 .proc video_cls_double_text
 	; reset cursor
-	lda video_text_xr
-	sta video_text_x
+	lda video_text_xr+0
+	sta video_text_x+0
 	lda video_text_yr
 	sta video_text_y
 	lda video_page_w
@@ -97,20 +97,20 @@ text_copy_row_double_text:
 	jsr text_row_addr_x_draw_ptr0
 	jsr text_row_addr_y_draw_ptr1
 	; even columns
-	lda video_text_xr
+	lda video_text_xr+0
 	pha
 	lsr
 	adc #0
-	sta video_text_xr
-	lda video_text_w
+	sta video_text_xr+0
+	lda video_text_w+0
 	pha
 	lsr
 	adc #0
-	sta video_text_w
+	sta video_text_w+0
 	sta $C005 ; aux (RAMWRT)
-	ldy video_text_xr
+	ldy video_text_xr+0
 	:
-		cpy video_text_w
+		cpy video_text_w+0
 		bcs :+
 		jsr video_double_read_aux
 		sta (draw_ptr1), Y
@@ -122,33 +122,33 @@ text_copy_row_double_text:
 	tsx
 	lda $101, X
 	lsr
-	sta video_text_w
+	sta video_text_w+0
 	lda $102, X
 	lsr
-	sta video_text_xr
+	sta video_text_xr+0
 	jsr text_copy_row_draw_ptr0_draw_ptr1
 	; restore window
 text_row_double_restore_window:
 	pla
-	sta video_text_w
+	sta video_text_w+0
 	pla
-	sta video_text_xr
+	sta video_text_xr+0
 	rts
 
 text_clear_row_double_text:
 	; X = row to clear
 	jsr text_row_addr_x_draw_ptr0
 	; even columns
-	lda video_text_xr
+	lda video_text_xr+0
 	pha
 	lsr
 	adc #0
-	sta video_text_xr
-	lda video_text_w
+	sta video_text_xr+0
+	lda video_text_w+0
 	pha
 	lsr
 	adc #0
-	sta video_text_w
+	sta video_text_w+0
 	sta $C005 ; aux (RAMWRT)
 	jsr text_clear_row_draw_ptr0
 	sta $C004 ; main (RAMWRT)
@@ -156,10 +156,10 @@ text_clear_row_double_text:
 	tsx
 	lda $101, X
 	lsr
-	sta video_text_w
+	sta video_text_w+0
 	lda $102, X
 	lsr
-	sta video_text_xr
+	sta video_text_xr+0
 	jsr text_clear_row_draw_ptr0
 	jmp text_row_double_restore_window
 

@@ -31,7 +31,7 @@
 	ldx #>table
 	jsr video_mode_setup
 	jsr video_mode_mixed_setup
-	asl video_text_w ; 40 << 1 = 80
+	asl video_text_w+0 ; 40 << 1 = 80
 	jmp video_double_rw_aux_setup
 table:
 	.word video_mode_set_low_double_mixed
@@ -69,8 +69,8 @@ _video_mode_low_double_mixed = video_mode_low_double_mixed
 
 .proc video_cls_low_double_mixed
 	; reset cursor
-	lda video_text_xr
-	sta video_text_x
+	lda video_text_xr+0
+	sta video_text_x+0
 	lda video_text_yr
 	sta video_text_y
 	; clear graphics

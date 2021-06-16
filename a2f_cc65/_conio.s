@@ -68,7 +68,9 @@ _gotoxy:
 	jsr popa
 ; void gotox (unsigned char x)
 _gotox:
-	sta video_text_x
+	sta video_text_x+0
+	lda #0
+	sta video_text_x+1
 	rts
 
 ; void gotoy (unsigned char y)
@@ -80,7 +82,7 @@ _gotox:
 ; unsigned char wherex (void)
 .proc _wherex
 	ldx #0
-	lda video_text_x
+	lda video_text_x+0
 	rts
 .endproc
 
@@ -101,7 +103,9 @@ _gotox:
 	jsr popa
 	sta video_text_y
 	jsr popa
-	sta video_text_x
+	sta video_text_x+0
+	lda #0
+	sta video_text_x+1
 	pla
 	jmp text_out
 .endproc
@@ -111,7 +115,9 @@ _cgetc = _kb_get
 
 ; char cpeekc (void)
 .proc _cpeekc
-	ldx video_text_x
+	lda video_text_x+1
+	sta draw_xh
+	ldx video_text_x+0
 	ldy video_text_y
 	jsr draw_getpixel
 	and #$7F
@@ -121,7 +127,9 @@ _cgetc = _kb_get
 
 ; unsigned char cpeekrevers (void)
 .proc _cpeekrevers
-	ldx video_text_x
+	lda video_text_x+1
+	sta draw_xh
+	ldx video_text_x+0
 	ldy video_text_y
 	jsr draw_getpixel
 	ldx #0
@@ -140,12 +148,14 @@ _cgetc = _kb_get
 	; tmp2 = current X
 	sta tmp1
 	jsr popptr1
-	lda video_text_x
+	lda video_text_x+1
+	sta draw_xh
+	lda video_text_x+0
 	sta tmp2
 	lda tmp1
-	beq :++
+	beq @loop_end
 	ldy #0
-	:
+	@loop:
 		sty tmp3
 		ldx tmp2
 		ldy video_text_y
@@ -154,10 +164,13 @@ _cgetc = _kb_get
 		ldy tmp3
 		sta (ptr1), Y
 		inc tmp2
+		bne :+
+			inc draw_xh
+		:
 		iny
 		cpy tmp1
-		bcc :-
-	:
+		bcc @loop
+	@loop_end:
 	lda #0
 	sta (ptr1), Y
 	rts

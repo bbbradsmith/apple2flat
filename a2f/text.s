@@ -18,6 +18,7 @@
 .export video_text_yr
 .export text_inverse
 
+.import draw_xh
 .importzp draw_ptr
 .import draw_y0
 .import draw_y1
@@ -26,11 +27,11 @@
 .import text_copy_row
 .import text_clear_row
 
-video_text_x:  .byte 0
+video_text_x:  .word 0
 video_text_y:  .byte 0
-video_text_w:  .byte 40
+video_text_w:  .word 40
 video_text_h:  .byte 24
-video_text_xr: .byte 0
+video_text_xr: .word 0
 video_text_yr: .byte 0
 text_inverse:  .byte $80
 
@@ -44,8 +45,10 @@ text_inverse:  .byte $80
 	bcs ready
 	cmp #10 ; newline
 	bne :+
-		lda video_text_xr
-		sta video_text_x
+		lda video_text_xr+0
+		sta video_text_x+0
+		lda video_text_xr+1
+		sta video_text_x+1
 		inc video_text_y
 		rts
 	:
@@ -63,11 +66,18 @@ text_inverse:  .byte $80
 	:
 	; allow other control codes to pass through?
 ready:
-	ldx video_text_x
-	cpx video_text_w
+	pha
+	ldx video_text_x+0
+	cpx video_text_w+0
+	lda video_text_x+1
+	sta draw_xh
+	sbc video_text_w+1
 	bcc :+ ; wrap to next line
-		ldx video_text_xr
-		stx video_text_x
+		ldx video_text_xr+0
+		stx video_text_x+0
+		lda video_text_xr+1
+		sta video_text_x+1
+		sta draw_xh
 		inc video_text_y
 	:
 	ldy video_text_y
@@ -76,7 +86,6 @@ ready:
 		ldy video_text_h
 		dey
 		sty video_text_y
-		pha
 		txa
 		pha
 		tya
@@ -87,10 +96,13 @@ ready:
 		tay
 		pla
 		tax
-		pla
 	:
+	pla
 	jsr text_out_
-	inc video_text_x
+	inc video_text_x+0
+	bne :+
+		inc video_text_x+1
+	:
 	rts
 .endproc
 

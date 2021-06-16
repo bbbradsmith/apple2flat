@@ -20,6 +20,7 @@
 .export _text_window
 
 .import popa
+.import popax
 .import _cprintf ; from conio
 .import _vcprintf ; from conio
 .import text_out
@@ -63,27 +64,35 @@ _text_scroll = text_scroll
 ; void text_charset(char alt)
 _text_charset = text_charset
 
-; void text_xy(uint8 x, uint8 y)
+; void text_xy(uint16 x, uint8 y)
 _text_xy:
 	sta video_text_y
-	jsr popa
-	sta video_text_x
+	jsr popax
+	sta video_text_x+0
+	stx video_text_x+1
 	rts
 
-; void text_window(uint8 x0, uint8 y0, uint8 x1, uint8 y1)
+; void text_window(uint16 x0, uint8 y0, uint16 x1, uint8 y1)
 .proc _text_window
 	sta video_text_h
-	jsr popa
-	sta video_text_w
+	jsr popax
+	sta video_text_w+0
+	stx video_text_w+1
 	jsr popa
 	sta video_text_yr
-	jsr popa
-	sta video_text_xr
+	jsr popax
+	sta video_text_xr+0
+	stx video_text_xr+1
 	; make sure within bounds
-	lda video_text_x
-	cmp video_text_xr
+	lda video_text_x+0
+	cmp video_text_xr+0
+	lda video_text_x+1
+	sbc video_text_xr+1
 	bcc reset_position
-	cmp video_text_w
+	lda video_text_x+0
+	cmp video_text_w+0
+	lda video_text_x+1
+	sbc video_text_w+1
 	bcs reset_position
 	lda video_text_y
 	cmp video_text_yr
@@ -92,8 +101,10 @@ _text_xy:
 	bcs reset_position
 	rts
 reset_position:
-	lda video_text_xr
-	sta video_text_x
+	lda video_text_xr+0
+	sta video_text_x+0
+	lda video_text_xr+1
+	sta video_text_x+1
 	lda video_text_yr
 	sta video_text_y
 	rts

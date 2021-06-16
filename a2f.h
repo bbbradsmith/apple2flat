@@ -207,11 +207,11 @@ extern uint8_t disk_volume; // last disk volume
 
 extern uint16 video_w; // pixel dimensons of current video mode
 extern uint8 video_h;
-extern uint8 video_text_x; // text_out position
+extern uint16 video_text_x; // text_out position
 extern uint8 video_text_y;
-extern uint8 video_text_w; // right side of text area
+extern uint16 video_text_w; // right side of text area
 extern uint8 video_text_h; // bottom of text area
-extern uint8 video_text_xr; // left side of text area (after x wrap)
+extern uint16 video_text_xr; // left side of text area (after x wrap)
 extern uint8 video_text_yr; // top of text area
 extern uint8 video_page_w; // page to write/draw: $00 (page 1) or $FF (page 2)
 extern uint8 video_page_r; // page to read/display
@@ -265,8 +265,8 @@ extern void text_printf(const char* format, ...);
 extern void text_vprintf(const char* format, va_list ap);
 extern void text_scroll(sint8 lines); // positive: shift text up, clear bottom, negative: shift text down, clear top
 extern void text_charset(char alt); // 0 = primary character set, 1 = alternat character set (IIe)
-extern void text_xy(uint8 x, uint8 y); // set text output location (faster to set video_text_x/y directly, though)
-extern void text_window(uint8 x0, uint8 y0, uint8 x1, uint8 y1); // confine text to x0<=x<x1, y0<=y<y1
+extern void text_xy(uint16 x, uint8 y); // set text output location (faster to set video_text_x/y directly, though)
+extern void text_window(uint16 x0, uint8 y0, uint16 x1, uint8 y1); // confine text to x0<=x<x1, y0<=y<y1
 extern void text_set_font(const uint8* fontset, uint8 offset); // set high-resolution fontset (beginning at offset character)
 
 // TODO VWF specifically for hires:

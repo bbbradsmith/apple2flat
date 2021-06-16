@@ -80,8 +80,8 @@ _video_mode_text = video_mode_text
 
 .proc video_cls_text
 	; reset cursor
-	lda video_text_xr
-	sta video_text_x
+	lda video_text_xr+0
+	sta video_text_x+0
 	lda video_text_yr
 	sta video_text_y
 	; clear page
@@ -154,9 +154,9 @@ text_copy_row_text:
 	jsr text_row_addr_x_draw_ptr0
 	jsr text_row_addr_y_draw_ptr1
 text_copy_row_draw_ptr0_draw_ptr1:
-	ldy video_text_xr
+	ldy video_text_xr+0
 	:
-		cpy video_text_w
+		cpy video_text_w+0
 		bcs :+
 		lda (draw_ptr0), Y
 		sta (draw_ptr1), Y
@@ -170,9 +170,9 @@ text_clear_row_text:
 	jsr text_row_addr_x_draw_ptr0
 text_clear_row_draw_ptr0:
 	lda #$A0 ; space, normal
-	ldy video_text_xr
+	ldy video_text_xr+0
 	:
-		cpy video_text_w
+		cpy video_text_w+0
 		bcs :+
 		sta (draw_ptr0), Y
 		iny

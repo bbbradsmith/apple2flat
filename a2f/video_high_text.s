@@ -148,9 +148,9 @@ text_copy_row_high:
 	jsr text_row_addr_y_draw_ptr1_high
 	ldx #8
 @line:
-	ldy video_text_xr
+	ldy video_text_xr+0
 	:
-		cpy video_text_w
+		cpy video_text_w+0
 		bcs :+
 		lda (draw_ptr0), Y
 		sta (draw_ptr1), Y
@@ -171,9 +171,9 @@ text_clear_row_high:
 	ldx #8
 @line:
 	lda #0
-	ldy video_text_xr
+	ldy video_text_xr+0
 	:
-		cpy video_text_w
+		cpy video_text_w+0
 		bcs :+
 		sta (draw_ptr0), Y
 		iny

@@ -114,12 +114,15 @@ VIDEO_FUNCTION_TABLE_SIZE = ((VIDEO_FUNCTION_MAX*2)/3)+3
 		bcc :-
 	; default text window
 	lda #0
-	sta video_text_x
+	sta video_text_x+0
+	sta video_text_x+1
 	sta video_text_y
-	sta video_text_xr
+	sta video_text_xr+0
+	sta video_text_xr+1
 	sta video_text_yr
+	sta video_text_w+1
 	lda #40
-	sta video_text_w
+	sta video_text_w+0
 	lda #24
 	sta video_text_h
 	jmp video_mode_set

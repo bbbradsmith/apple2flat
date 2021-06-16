@@ -69,8 +69,8 @@ _video_mode_low_mixed = video_mode_low_mixed
 
 .proc video_cls_low_mixed
 	; reset cursor
-	lda video_text_xr
-	sta video_text_x
+	lda video_text_xr+0
+	sta video_text_x+0
 	lda video_text_yr
 	sta video_text_y
 	; clear graphics

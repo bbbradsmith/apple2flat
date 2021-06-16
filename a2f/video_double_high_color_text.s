@@ -107,9 +107,9 @@ text_copy_row_double_high_color:
 	ldx #8
 	sta $C005 ; aux (RAMWRT)
 @line:
-	ldy video_text_xr
+	ldy video_text_xr+0
 	:
-		cpy video_text_w
+		cpy video_text_w+0
 		bcs :+
 		jsr video_double_read_aux
 		sta (draw_ptr1), Y

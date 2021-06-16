@@ -50,14 +50,14 @@ text_copy_row_double_high_mono:
 	; X = copy from
 	; Y = copy to
 	; odd columns
-	lda video_text_xr
+	lda video_text_xr+0
 	pha
 	lsr
-	sta video_text_xr
-	lda video_text_w
+	sta video_text_xr+0
+	lda video_text_w+0
 	pha
 	lsr
-	sta video_text_w
+	sta video_text_w+0
 	txa
 	pha
 	tya
@@ -69,11 +69,11 @@ text_copy_row_double_high_mono:
 	lda $102, X
 	lsr
 	adc #0
-	sta video_text_w
+	sta video_text_w+0
 	lda $103, X
 	lsr
 	adc #0
-	sta video_text_xr
+	sta video_text_xr+0
 	pla
 	tax
 	jsr text_row_addr_x_draw_ptr0_high
@@ -81,9 +81,9 @@ text_copy_row_double_high_mono:
 	ldx #8
 	sta $C005 ; aux (RAMWRT)
 @line:
-	ldy video_text_xr
+	ldy video_text_xr+0
 	:
-		cpy video_text_w
+		cpy video_text_w+0
 		bcs :+
 		jsr video_double_read_aux
 		sta (draw_ptr1), Y
@@ -99,24 +99,24 @@ text_copy_row_double_high_mono:
 	sta $C004 ; main (RAMWRT)
 text_row_double_high_mono_restore_window:
 	pla
-	sta video_text_w
+	sta video_text_w+0
 	pla
-	sta video_text_xr
+	sta video_text_xr+0
 	rts
 
 text_clear_row_double_high_mono:
 	; X = row to clear
 	; even columns
-	lda video_text_xr
+	lda video_text_xr+0
 	pha
 	lsr
 	adc #0
-	sta video_text_xr
-	lda video_text_w
+	sta video_text_xr+0
+	lda video_text_w+0
 	pha
 	lsr
 	adc #0
-	sta video_text_w
+	sta video_text_w+0
 	txa
 	pha
 	sta $C005 ; aux (RAMWRT)
@@ -126,9 +126,9 @@ text_clear_row_double_high_mono:
 	tsx
 	lda $102, X
 	lsr
-	sta video_text_w
+	sta video_text_w+0
 	lda $103, X
-	sta video_text_xr
+	sta video_text_xr+0
 	pla
 	tax
 	jsr text_clear_row_high
