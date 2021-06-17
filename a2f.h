@@ -217,6 +217,7 @@ extern uint8 video_page_w; // page to write/draw: $00 (page 1) or $FF (page 2)
 extern uint8 video_page_r; // page to read/display
 extern uint8 text_inverse; // $80 (normal text) or $00 (inverse text)
 extern uint8* text_fontset; // high-resolution font set
+extern uint8* text_fontset_width; // nibble-packed widths for VWF font set
 extern uint8 text_fontset_offset; // ASCII offset to beginning of font set (usually $20)
 
 // TODO vysnc ; wait for next video frame (needs separate IIe/IIc implementation), assembly version: call system_detect first, otherwise uses fallback (or if not IIe/IIc)
@@ -268,6 +269,7 @@ extern void text_charset(char alt); // 0 = primary character set, 1 = alternat c
 extern void text_xy(uint16 x, uint8 y); // set text output location (faster to set video_text_x/y directly, though)
 extern void text_window(uint16 x0, uint8 y0, uint16 x1, uint8 y1); // confine text to x0<=x<x1, y0<=y<y1
 extern void text_set_font(const uint8* fontset, uint8 offset); // set high-resolution fontset (beginning at offset character)
+extern void text_set_font_vwf(const uint8* widths, const uint8* fontset, uint8 offset); // set vwf fontset with nibble-packed glyph widths
 
 // TODO VWF specifically for hires:
 // window x will be 0-(140-8) instead of 0-40

@@ -3,7 +3,10 @@
 #include <string.h>
 #include "a2f.h"
 
-extern uint8 font_bin[]; // in a2f_demo.s
+// in a2f_demo.s
+extern uint8 font_bin[];
+extern uint8 font_vwf_bin[];
+extern uint8 font_vwf_wid[];
 
 char quit = 0;
 
@@ -75,7 +78,6 @@ void video_test_low()
 	uint8 c;
 
 redraw:
-	cls_full();
 	if      (!mixed)  video_mode_low();
 	else if (!dmixed) video_mode_low_mixed();
 	else if ( dmixed) video_mode_low_double_mixed();
@@ -132,7 +134,6 @@ void video_test_high_color()
 	uint8 c;
 
 redraw:
-	cls_full();
 	if      (!mixed)  video_mode_high_color();
 	else if (!dmixed) video_mode_high_color_mixed();
 	else if ( dmixed) video_mode_high_color_double_mixed();
@@ -197,7 +198,6 @@ void video_test_high_mono()
 	uint8 c;
 
 redraw:
-	cls_full();
 	if      (!mixed)  video_mode_high_mono();
 	else if (!dmixed) video_mode_high_mono_mixed();
 	else if ( dmixed) video_mode_high_mono_double_mixed();
@@ -305,7 +305,6 @@ void video_test_double_low()
 	uint8 c;
 
 redraw:
-	cls_full();
 	if (!mixed) video_mode_double_low();
 	else        video_mode_double_low_mixed();
 	cls_full();
@@ -371,7 +370,6 @@ void video_test_double_high_color()
 	uint8 c;
 
 redraw:
-	cls_full();
 	if (!mixed) video_mode_double_high_color();
 	else        video_mode_double_high_color_mixed();
 	cls_full();
@@ -431,7 +429,6 @@ void video_test_double_high_mono()
 	uint8 c;
 
 redraw:
-	cls_full();
 	if (!mixed) video_mode_double_high_mono();
 	else        video_mode_double_high_mono_mixed();
 	cls_full();
@@ -475,6 +472,54 @@ redraw:
 		{
 			if      (c == 0x00) text_outs("LOW RAM");
 			else if (c == 0x80) text_outs(" CHECKSUM...");
+			delay(1);
+			++c;
+		}
+	}
+}
+
+void vwf_test()
+{
+	char mono = 0;
+	char flip = 0;
+	char c;
+
+	text_set_font_vwf(font_vwf_wid,font_vwf_bin,0x20);
+
+redraw:
+	if (!mono) video_mode_high_color_vwf();
+	else       video_mode_high_mono_vwf();
+	cls_full();
+	text_window(15,4,265,16);
+
+	text_outs("VARIABLE WIDTH FONT (");
+	text_outs(mono ? "MONO" : "COLOR");
+	text_outs(")\n"
+		"\n"
+		"A font technique inspired by\n"
+		"\x0FOregon Trail\x0E, allowing custom\n"
+		"widths and spacing between\n"
+		"character glyphs.\n"
+		"\n"
+		"M to toggle monochrome\n"
+		"F for window test on page 2");
+	text_xy(15,4);
+
+	video_page_select(flip,flip);
+	while(1)
+	{
+		if (kb_new())
+		{
+			c = kb_get();
+			if      (c == KB_ESC) break;
+			else if (c == 'F' || c == 'f') { video_page_flip(); flip ^= 1; }
+			else if (c == 'M' || c == 'm') { mono = !mono; goto redraw; }
+			c = 0;
+		}
+		else if (video_page_w != 0)
+		{
+			if      (c == 0x00) text_outs("Low RAM");
+			else if (c == 0x80) text_outs(" Checksum......");
 			delay(1);
 			++c;
 		}
@@ -606,7 +651,7 @@ void main_menu()
 	cls_full();
 	video_mode_text();
 	video_cls();
-	text_window(1,1,39,23); // 1 space border
+	text_window(1,0,39,24);
 	text_xy(1,1);
 	text_outs(
 		"  APPLE2FLAT DEMO\n"
@@ -621,6 +666,7 @@ void main_menu()
 		"  7 - VIDEO: DOUBLE HIRES COLOUR\n"
 		"  8 - VIDEO: DOUBLE HIRES MONO\n"
 		"  A - ANIMATION *\n"
+		"  F - VARIABLE WIDTH FONT\n"
 		"  K - KEYBOARD\n"
 		"  P - PADDLES\n"
 		"  D - DISK *\n"
@@ -645,6 +691,7 @@ void main_menu()
 	case '6': video_test_double_low(); break;
 	case '7': video_test_double_high_color(); break;
 	case '8': video_test_double_high_mono(); break;
+	case 'F': case 'f': vwf_test(); break;
 	case 'K': case 'k': keyboard_test(); break;
 	case 'P': case 'p': paddle_test(); break;
 	case 'I': case 'i': system_info(); break;

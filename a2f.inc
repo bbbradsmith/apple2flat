@@ -209,6 +209,7 @@ COD_WHITE       = 15
 .global draw_y1
 .global draw_xh ; high byte for draw_pixel, alias of: draw_x0+1
 .global text_fontset ; pointer to high-resolution font set
+.global text_fontset_width ; pointer to nibble-packed widths for VWF glyphs
 .global text_fontset_offset ; ASCII offset to beginning of font set (usually $20)
 
 ; select video mode driver

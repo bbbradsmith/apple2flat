@@ -137,12 +137,13 @@ def glyph_vfw(img,gx,gy):
         if w < 8:
             for y in range(8):
                 b[y] |= (img.getpixel((gx+w,gy+y)) & 1) << w
-    return (gx+w,gy,b,[w])
+    assert (w>0), "glyph_vfw should not be able to generate 0-width glyph"
+    return (gx+w,gy,b,[w-1])
 
 def paste_glyph_vfw(img,x,y,b,w):
     for py in range(8):
         bp = b[py]
-        for px in range(w):
+        for px in range(w+1):
             img.putpixel((x+px,y+py),bp&1)
             bp >>= 1
 
