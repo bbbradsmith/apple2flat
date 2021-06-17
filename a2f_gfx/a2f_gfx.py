@@ -131,7 +131,7 @@ def glyph_vfw(img,gx,gy):
         return (0,gy+8,bytearray(),[])
     b = bytearray([0]*8)
     w = 0
-    for w in range(min(img.width-gx,15)):
+    for w in range(min(img.width-gx,16)):
         if img.getpixel((gx+w,gy)) >= 2:
             break
         if w < 8:
