@@ -4,18 +4,19 @@ CC65 = $(DP)cc65/bin/cc65
 CA65 = $(DP)cc65/bin/ca65
 LD65 = $(DP)cc65/bin/ld65
 AR65 = $(DP)cc65/bin/ar65
-MAKE = $(DP)make
 PYTHON = python
 MKDIR = mkdir
 OUTDIR = $(DP)temp
 
 ifeq ($(OS),Windows_NT)
 
+MAKE = $(DP)make
 RM = del /Q /F
 DS = $(subst /,\,/)# a single backslash
 
 else
 
+MAKE = make
 RM = rm -f
 DS = /
 
