@@ -13,7 +13,7 @@
 
 .importzp a2f_temp
 
-music_note_length:  .byte  32 ; default 1/2 second
+music_note_length:  .byte  16 ; default 1/4 second
 music_note_octave:  .byte $40 ; default middle-C octave
 music_note_duty:    .byte   1 ; default square
 music_repeat_count: .byte   0 ; no repeats yet
@@ -57,6 +57,7 @@ command_halt:
 	rts
 command_note_direct:
 	sec
+	sbc #$70
 	jmp note
 command_note_octave:
 	and #$0F
@@ -72,6 +73,8 @@ command_octave:
 	asl
 	asl
 	asl
+	sec
+	sbc #$70
 	sta music_note_octave
 	rts
 command_duty:
@@ -118,10 +121,10 @@ note:
 	and #$0F
 	cmp #$0C
 	bcs command_halt ; invalid note
-	txa
+	tax
 	lda music_period0lo, X
 	sta a2f_temp+0
-	lda music_period0lo, X
+	lda music_period0hi, X
 	sta a2f_temp+1
 	lda music_timing8lo, X
 	sta a2f_temp+2
@@ -132,8 +135,6 @@ note:
 	lsr
 	lsr
 	lsr
-	sec
-	sbc #7
 	tax ; X = octave
 	tay ; Y = octave also
 	; shift period to match octave
@@ -151,32 +152,33 @@ note:
 :
 @pitch_end:
 	; shift timing to match octave
-	cpy #7
+	cpy #8
 	bcs @timing_end
 :
 	lsr a2f_temp+3
 	ror a2f_temp+2
 	iny
-	cpy #7
+	cpy #8
 	bcc :-
+	; not bothering to round (timing isn't very precise)
 @timing_end:
 	; multiply timing by music_note_length and divide by 64
 	lda #0
+	sta a2f_temp+5 ; big-endian 5:4 to keep MSB in a2f_temp+4
 	sta a2f_temp+4
-	sta a2f_temp+5
 	lda music_note_length
 	sta a2f_temp+6
-	ldx #5
+	ldx #7
 @multiply:
 	lsr a2f_temp+6 ; multiplier
 	bcc :+
 		lda a2f_temp+2
 		clc
-		adc a2f_temp+4
-		sta a2f_temp+4
-		lda a2f_temp+3
 		adc a2f_temp+5
 		sta a2f_temp+5
+		lda a2f_temp+3
+		adc a2f_temp+4
+		sta a2f_temp+4
 	:
 	dex
 	beq :+
@@ -185,8 +187,8 @@ note:
 	jmp @multiply
 :
 	; make sure result is at least 1
-	lda a2f_temp+4
-	ora a2f_temp+5
+	lda a2f_temp+5
+	ora a2f_temp+4
 	bne :+
 		inc a2f_temp+5
 	:
@@ -200,8 +202,8 @@ note:
 	bne :+
 		inx ; duty 0 = noise, should still act like square timing
 	:
-		lsr a2f_temp+0
-		ror a2f_temp+1
+		lsr a2f_temp+1
+		ror a2f_temp+0
 		dex
 		bne :-
 	; minimum period is 45, adjust for this in case period went too low (preserves pitch despite wrong duty)
@@ -221,15 +223,16 @@ note:
 	lda a2f_temp+3
 	sbc a2f_temp+1
 	sta a2f_temp+3
-	; set up count
-	ldy a2f_temp+4
-	lda a2f_temp+5
-	sta a2f_temp+4
 	; dispatch noise or note
 	ldx music_note_duty
 	beq :+
+		ldy a2f_temp+5
 		jmp sound_pulse
 	:
+		; noise needs double time
+		asl a2f_temp+5
+		rol a2f_temp+4
+		ldy a2f_temp+5
 		jmp sound_noise
 	;
 rest:

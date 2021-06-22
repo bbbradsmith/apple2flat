@@ -19,6 +19,11 @@ void cls_full() // clears both pages and sets 0,0
 	video_page_select(0,0); // switch to page 0 for read and write
 }
 
+void beep()
+{
+	sound_square(CPU_RATE/196,196/4); // 196hz beep, 1/4 second
+}
+
 void video_test_text()
 {
 	uint8 c = 0;
@@ -608,16 +613,23 @@ void paddle_test()
 
 void sound_test()
 {
+	uint8 octave = 4;
+	uint8 duty = 1;
+	uint8 time = 16;
+
+	music_command(0x17+octave);
+	music_command(0x10+duty);
+	music_command(0x20+time-1);
 	video_cls();
 	text_xy(1,5);
 	text_outs("SOUND TEST\n"
-		"1234567890 SQUARE (6=A440)\n"
-		"P PULSE\n"
-		"N NOISE\n"
-		//"\n"
-		// TODO use music_command system instead and provide keyboard:
-		//"  [2] [3]     [4] [5] [6]\n"
-		//"[Q] [W] [E] [R] [T] [Y] [U]\n"
+		"\n"
+		"  [2] [3]     [5] [6] [7]\n"
+		"[Q] [W] [E] [R] [T] [Y] [U]\n"
+		"\n"
+		"OCTAVE:  4  []\n"
+		"DUTY:    1  ASDFGH (A=NOISE)\n"
+		"TIME:   16  <>\n"
 		);
 
 	while(1)
@@ -626,20 +638,33 @@ void sound_test()
 		switch (kb_get())
 		{
 			case KB_ESC: return;
-			case '1': sound_square(65535u,16); break; // 15.57 Hz
-			case '2': sound_square(37109u,28); break; // CPU_RATE/27.5
-			case '3': sound_square(CPU_RATE/55,55); break;
-			case '4': sound_square(CPU_RATE/110,110); break;
-			case '5': sound_square(CPU_RATE/220,220); break;
-			case '6': sound_square(CPU_RATE/440,440); break;
-			case '7': sound_square(CPU_RATE/880,880); break;
-			case '8': sound_square(CPU_RATE/1760,1760); break;
-			case '9': sound_square(CPU_RATE/3520,3520); break;
-			case '0': sound_square(CPU_RATE/7040,7040); break;
-			case 'P': sound_pulse((1*CPU_RATE)/(440*4),(3*CPU_RATE)/(440*4),440); break;
-			case 'N': sound_noise(CPU_RATE/440,440); break;
+			case 'Q': case 'q': music_command(0x60); break;
+			case '2':           music_command(0x61); break;
+			case 'W': case 'w': music_command(0x62); break;
+			case '3':           music_command(0x63); break;
+			case 'E': case 'e': music_command(0x64); break;
+			case 'R': case 'r': music_command(0x65); break;
+			case '5':           music_command(0x66); break;
+			case 'T': case 't': music_command(0x67); break;
+			case '6':           music_command(0x68); break;
+			case 'Y': case 'y': music_command(0x69); break;
+			case '7':           music_command(0x6A); break;
+			case 'U': case 'u': music_command(0x6B); break;
+			case '[': if (octave>0) { --octave; music_command(0x17+octave); } break;
+			case ']': if (octave<8) { ++octave; music_command(0x17+octave); } break;
+			case '<': case ',': if (time> 1) { --time; music_command(0x20+time-1); } break;
+			case '>': case '.': if (time<64) { ++time; music_command(0x20+time-1); } break;
+			case 'A': duty = 0; music_command(0x10+duty); break;
+			case 'S': duty = 1; music_command(0x10+duty); break;
+			case 'D': duty = 2; music_command(0x10+duty); break;
+			case 'F': duty = 3; music_command(0x10+duty); break;
+			case 'G': duty = 4; music_command(0x10+duty); break;
+			case 'H': duty = 5; music_command(0x10+duty); break;
 			default: break;
 		}
+		text_xy(10,10); text_printf("%d",octave);
+		text_xy(10,11); text_printf("%d",duty);
+		text_xy( 9,12); text_printf("%2d",time);
 	}
 }
 
@@ -675,7 +700,7 @@ void unimplemented()
 	video_cls();
 	text_xy(1,10);
 	text_outs(" * NOT YET IMPLEMENTED\n   PRESS ESCAPE");
-	sound_square(CPU_RATE/196,196/2); // 196hz beep, 1/2 second
+	beep();
 	while (kb_get() != KB_ESC);
 }
 
@@ -740,7 +765,7 @@ void main_menu()
 	case 'T': case 't':
 		unimplemented(); break;
 
-	default: break; // TODO beep
+	default: beep(); break;
 	}
 }
 

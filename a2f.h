@@ -153,16 +153,12 @@ extern void music_play(void* data, uint8 mode); // play string of music commands
 // mode 1: stop at halt or keypress
 // mode 2: stop at halt, keypress, or joystick buttons 0/1
 
+// TODO music_play is not fully functional yet
+
 // TODO
 //sound_sweep(a,b,repeats) a+=b each loop
-//sound_logsweep(a,s)
-//music(*data,cancel_mode) can be cancelled by: nothing, keyboard, keyboard + joystick buttons
-//data should be:
-// 0-15 command (i.e. stop, repeat, loop, duty, noise/click/rest)
-// 16-127 set note length
-// 128-255 tone
-// have 1-octave tone table and note-length multiplier
-//music_byte(a) same as 1 byte from music(data...)
+//sound_logsweep(a,s,repeats)
+// maybe just the logsweep version
 
 //
 // Floppy disk
