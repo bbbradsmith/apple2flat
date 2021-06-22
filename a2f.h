@@ -35,6 +35,11 @@ extern void prepare_assert(const char* message);
 #define ASSERT(condition_,message_) { if(!(condition_)) { prepare_assert((message_)); FATAL(); } }
 #endif
 
+// Average rate of CPU cycle (14,318,180 Hz divided by 14 on 64/65 cycles, and 16 on the 65th)
+// Reference: Understanding the Apple II, Jim Sather 1983. Section 3-3.
+#define CPU_RATE  1020484
+
+
 // TODO
 // query avaiable RAM pages
 // RAM banking
@@ -113,6 +118,51 @@ extern uint8 paddleb_poll(); // update only paddle buttons (and returns paddle0_
 extern void paddle0_poll(); // update paddle0 and buttons (avg 1.5ms, max 3ms, 5ms if timeout)
 extern void paddle01_poll(); // update both paddles and buttons (avg 3ms, max 6ms, 10ms if both timeout)
 // TODO uint8 paddle0_digital() automatically apply thresholds and return digital bitmask?
+
+//
+// Sound
+//
+
+extern void sound_square(uint16 cy, uint16 count); // square wave with wavelength of cy CPU cycles (cy >= 90)
+extern void sound_pulse(uint16 cya, uint16 cyb, uint16 count); // pulse wave with separate high/low lengths (cya/cyb >= 45)
+extern void sound_noise(uint16 cy, uint16 count); // randomly flip every cy cycles, count times (cy >= 69)
+
+// music command format:
+// $00    = halt music / reset
+// $01    = rest
+// $02-0C = repeat 2x-13x
+// $0D    = loop
+// $0E    = set repeat point
+// $0F    = set loop point
+// $10    = noise
+// $11    = square (pulse 1/2)
+// $12    = pulse 1/4
+// $13    = pulse 1/8
+// $14    = pulse 1/16
+// $15    = pulse 1/32
+// $16    = pulse 1/64
+// $17-1F = set octave
+// $20-5F = note duration ($5F = 1 second, $20 = 1/64th, $21 = 2/64th...
+// $60-6B = note at last octave
+// $70-FB = direct notes $XY = octave X-7, pitch Y, $B0 = middle C
+// unused note values ($XC-XF) will cause a halt/reset
+
+extern void music_command(uint8 command);
+extern void music_play(void* data, uint8 mode); // play string of music commands
+// mode 0: stop only at halt
+// mode 1: stop at halt or keypress
+// mode 2: stop at halt, keypress, or joystick buttons 0/1
+
+// TODO
+//sound_sweep(a,b,repeats) a+=b each loop
+//sound_logsweep(a,s)
+//music(*data,cancel_mode) can be cancelled by: nothing, keyboard, keyboard + joystick buttons
+//data should be:
+// 0-15 command (i.e. stop, repeat, loop, duty, noise/click/rest)
+// 16-127 set note length
+// 128-255 tone
+// have 1-octave tone table and note-length multiplier
+//music_byte(a) same as 1 byte from music(data...)
 
 //
 // Floppy disk

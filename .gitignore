@@ -12,6 +12,7 @@ temp/*.sym
 temp/*.bin
 temp/*.dsk
 temp/*.wav
+temp/*.bmp
 temp/c/
 *.lnk
 run*.bat

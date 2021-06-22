@@ -101,6 +101,45 @@ PADDLE_HIGH   = 52
 .global paddle01_poll       ; poll both paddles and buttons (avg 3ms, max 6ms, 10ms if both timeout)
 
 ;
+; Sound
+;
+
+.global sound_square ; a2f_temp+1:0 = cycles in full wave, a2f_temp+4:Y = repetitions
+.global sound_pulse ; a2f_temp+1:0, a2f_temp+3:2 = cycles in each half of wave, a2f_temp+4:Y = repetitions
+.global sound_noise ; a2f_temp+1:0 = cycles between random speaker flips, a2f_temp+4:Y = repetitions
+; sound_square: minimum 90cy
+; sound_pulse: minimum 45cy per half
+; sound_noise: minimum 69cy
+
+; music command format:
+; $00    = halt music / reset
+; $01    = rest
+; $02-0C = repeat 2x-13x
+; $0D    = loop
+; $0E    = set repeat point
+; $0F    = set loop point
+; $10    = noise
+; $11    = square (pulse 1/2)
+; $12    = pulse 1/4
+; $13    = pulse 1/8
+; $14    = pulse 1/16
+; $15    = pulse 1/32
+; $16    = pulse 1/64
+; $17-1F = set octave
+; $20-5F = note duration ($5F = 1 second, $20 = 1/64th, $21 = 2/64th...
+; $60-6B = note at last octave
+; $70-FB = direct notes $XY = octave X-7, pitch Y, $B0 = middle C
+; unused note values ($XC-XF) will cause a halt/reset
+
+.global music_command ; A = command
+.global music_play ; A = mode, music_data = pointer to string of commands
+; mode 0: stop only at halt
+; mode 1: stop at halt or keypress
+; mode 2: stop at halt, keypress, or joystick buttons 0/1
+
+.global music_data ; 16-bit pointer to data for music_play
+
+;
 ; Floppy disk
 ;
 

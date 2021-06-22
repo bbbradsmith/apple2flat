@@ -606,6 +606,43 @@ void paddle_test()
 	}
 }
 
+void sound_test()
+{
+	video_cls();
+	text_xy(1,5);
+	text_outs("SOUND TEST\n"
+		"1234567890 SQUARE (6=A440)\n"
+		"P PULSE\n"
+		"N NOISE\n"
+		//"\n"
+		// TODO use music_command system instead and provide keyboard:
+		//"  [2] [3]     [4] [5] [6]\n"
+		//"[Q] [W] [E] [R] [T] [Y] [U]\n"
+		);
+
+	while(1)
+	{
+		while (!kb_new());
+		switch (kb_get())
+		{
+			case KB_ESC: return;
+			case '1': sound_square(65535u,16); break; // 15.57 Hz
+			case '2': sound_square(37109u,28); break; // CPU_RATE/27.5
+			case '3': sound_square(CPU_RATE/55,55); break;
+			case '4': sound_square(CPU_RATE/110,110); break;
+			case '5': sound_square(CPU_RATE/220,220); break;
+			case '6': sound_square(CPU_RATE/440,440); break;
+			case '7': sound_square(CPU_RATE/880,880); break;
+			case '8': sound_square(CPU_RATE/1760,1760); break;
+			case '9': sound_square(CPU_RATE/3520,3520); break;
+			case '0': sound_square(CPU_RATE/7040,7040); break;
+			case 'P': sound_pulse((1*CPU_RATE)/(440*4),(3*CPU_RATE)/(440*4),440); break;
+			case 'N': sound_noise(CPU_RATE/440,440); break;
+			default: break;
+		}
+	}
+}
+
 void system_info()
 {
 	const char* t = "UNKNOWN";
@@ -638,7 +675,7 @@ void unimplemented()
 	video_cls();
 	text_xy(1,10);
 	text_outs(" * NOT YET IMPLEMENTED\n   PRESS ESCAPE");
-	// TODO beep
+	sound_square(CPU_RATE/196,196/2); // 196hz beep, 1/2 second
 	while (kb_get() != KB_ESC);
 }
 
@@ -670,7 +707,7 @@ void main_menu()
 		"  K - KEYBOARD\n"
 		"  P - PADDLES\n"
 		"  D - DISK *\n"
-		"  S - SOUND *\n"
+		"  S - SOUND\n"
 		"  T - TEXT INPUT *\n"
 		"  I - SYSTEM INFO\n"
 		"* = NOT YET READY\n"
@@ -694,12 +731,12 @@ void main_menu()
 	case 'F': case 'f': vwf_test(); break;
 	case 'K': case 'k': keyboard_test(); break;
 	case 'P': case 'p': paddle_test(); break;
+	case 'S': case 's': sound_test(); break;
 	case 'I': case 'i': system_info(); break;
 
 	// unimplemented
 	case 'A': case 'a':
 	case 'D': case 'd':
-	case 'S': case 's':
 	case 'T': case 't':
 		unimplemented(); break;
 
