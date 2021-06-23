@@ -657,18 +657,25 @@ const uint8 music_oneshot[] =
 	0x00, // halt
 };
 
+void raw_click()
+{
+	// flips the speaker bit; should only be audible on every second flip
+	asm ("bit $C030");
+}
+
 void sound_test()
 {
 	uint8 octave = 4;
 	uint8 duty = 1;
 	uint8 time = 16;
+	uint8 sweep = 8;
 
 	music_reset();
 	music_command(0x17+octave);
 	music_command(0x10+duty);
 	music_command(0x20+time-1);
 	video_cls();
-	text_xy(1,5);
+	text_xy(1,3);
 	text_outs("SOUND TEST\n"
 		"\n"
 		"  [2] [3]     [5] [6] [7]\n"
@@ -677,12 +684,14 @@ void sound_test()
 		"OCTAVE:  4  []\n"
 		"DUTY:    1  ASDFGH (A=NOISE)\n"
 		"TIME:   16  <>\n"
+		"SWEEP:   8  ZX\n"
 		"\n"
 		"M = LOOPING MUSIC (CHOPIN OP.28 NO.3)\n"
 		"N = RESUME LOOP\n"
 		"B = ONE-SHOT MUSIC\n"
-		//"X = SWEEP UP\n"
-		//"Z = SWEEP DOWN"
+		"C = SWEEP DOWN\n"
+		"V = SWEEP UP\n"
+		"K = CLICK $C030 (SPEAKER PARITY FLIP)\n"
 		);
 
 	while(1)
@@ -715,13 +724,17 @@ void sound_test()
 			case 'M': case 'm': music_play(music_looping,2); break;
 			case 'N': case 'n': music_resume(2); break;
 			case 'B': case 'b': music_play(music_oneshot,0); break;
-			//case 'X': case 'x': sound_sweep_up(...); break; // TODO
-			//case 'Z': case 'Z': sound_sweep_down(...); break; // TODO
+			case 'Z': case 'z': if (sweep> 1) --sweep; break;
+			case 'X': case 'x': if (sweep<16) ++sweep; break;
+			case 'C': case 'c': sound_sweep_down(CPU_RATE/440,440,sweep); break;
+			case 'V': case 'v': sound_sweep_up(  CPU_RATE/440,440,sweep); break;
+			case 'K': case 'k': raw_click(); break;
 			default: break;
 		}
-		text_xy(10,10); text_printf("%d",octave);
-		text_xy(10,11); text_printf("%d",duty);
-		text_xy( 9,12); text_printf("%2d",time);
+		text_xy(10, 8); text_printf("%d",octave);
+		text_xy(10, 9); text_printf("%d",duty);
+		text_xy( 9,10); text_printf("%2d",time);
+		text_xy( 9,11); text_printf("%2d",sweep);
 	}
 }
 

@@ -39,7 +39,6 @@ extern void prepare_assert(const char* message);
 // Reference: Understanding the Apple II, Jim Sather 1983. Section 3-3.
 #define CPU_RATE  1020484
 
-
 // TODO
 // query avaiable RAM pages
 // RAM banking
@@ -126,6 +125,8 @@ extern void paddle01_poll(); // update both paddles and buttons (avg 3ms, max 6m
 extern void sound_square(uint16 cy, uint16 count); // square wave with wavelength of cy CPU cycles (cy >= 90)
 extern void sound_pulse(uint16 cya, uint16 cyb, uint16 count); // pulse wave with separate high/low lengths (cya/cyb >= 45)
 extern void sound_noise(uint16 cy, uint16 count); // randomly flip every cy cycles, count times (cy >= 69)
+extern void sound_sweep_up(uint16 cy, uint16 count, uint8 shift); // approximate square sweep, shift 1-16 controls speed (16 slowest)
+extern void sound_sweep_down(uint16 cy, uint16 count, uint8 shift);
 
 // music command format:
 // $00    = halt music / reset
@@ -164,11 +165,6 @@ extern uint8 music_resume(uint8 mode); // resumes user-stopped music (returns im
 // mode 1: stop at halt or keypress (does not read keypress, leaves it queued for kb_get)
 // mode 2: stop at halt, keypress, or joystick buttons 0/1
 // (data pointing at zero page will be treated as a halt)
-
-// TODO
-//sound_sweep(a,b,repeats) a+=b each loop
-//sound_logsweep(a,s,repeats)
-// maybe just the logsweep version
 
 //
 // Floppy disk

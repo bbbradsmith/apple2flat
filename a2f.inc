@@ -107,6 +107,7 @@ PADDLE_HIGH   = 52
 .global sound_square ; a2f_temp+1:0 = cycles in full wave, a2f_temp+4:Y = repetitions
 .global sound_pulse ; a2f_temp+1:0, a2f_temp+3:2 = cycles in each half of wave, a2f_temp+4:Y = repetitions
 .global sound_noise ; a2f_temp+1:0 = cycles between random speaker flips, a2f_temp+4:Y = repetitions
+.global sound_sweep ; a2f_temp+1:0 = cycles in full wave, a2f_temp+4:Y = max repetitions, A = speed 1-16 (16=slowest)
 ; sound_square: minimum 90cy
 ; sound_pulse: minimum 45cy per half
 ; sound_noise: minimum 69cy
