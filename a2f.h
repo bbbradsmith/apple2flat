@@ -145,15 +145,25 @@ extern void sound_noise(uint16 cy, uint16 count); // randomly flip every cy cycl
 // $20-5F = note duration ($5F = 1 second, $20 = 1/64th, $21 = 2/64th...
 // $60-6B = note at last octave
 // $70-FB = direct notes $XY = octave X-7, pitch Y, $B0 = middle C
-// unused note values ($XC-XF) will cause a halt/reset
+// (unused note values ($XC-XF) are reserved and will cause a halt/reset)
+// $FE    = no-effect
+// $FF    = first of 2-byte command:
+// $FF, $00    = halt music / reset
+// $FF  $01    = space duration 0
+// $FF, $20-5F = space duration (extra rest that follows any note or rest)
+// $FF, $FE    = no-effect ($FE can be used to ensure not in second-byte mode)
+// $FF, $FF    = halt music / reset
+// (unused values are reserved and will cause a halt/reset)
 
+extern void music_reset(); // resets music commands to default state
 extern void music_command(uint8 command);
-extern void music_play(void* data, uint8 mode); // play string of music commands
-// mode 0: stop only at halt
-// mode 1: stop at halt or keypress
-// mode 2: stop at halt, keypress, or joystick buttons 0/1
 
-// TODO music_play is not fully functional yet
+extern uint8 music_play(void* data, uint8 mode); // play string of music commands, returns nonzero if user-stopped
+extern uint8 music_resume(uint8 mode); // resumes user-stopped music (returns immediately if end of music reached)
+// mode 0: stop only at halt
+// mode 1: stop at halt or keypress (does not read keypress, leaves it queued for kb_get)
+// mode 2: stop at halt, keypress, or joystick buttons 0/1
+// (data pointing at zero page will be treated as a halt)
 
 // TODO
 //sound_sweep(a,b,repeats) a+=b each loop
@@ -164,10 +174,11 @@ extern void music_play(void* data, uint8 mode); // play string of music commands
 // Floppy disk
 //
 
-extern uint8_t disk_read(void* dest, uint16 sector, uint8 count);
+extern uint8 disk_read(void* dest, uint16 sector, uint8 count);
 // extern uint8 disk_write(void* src, uint16 sector, uint8 count);
-extern uint8_t disk_error; // last disk error
-extern uint8_t disk_volume; // last disk volume
+// extern uint8 disk_format(uint8 volume);
+extern uint8 disk_error; // last disk error
+extern uint8 disk_volume; // last disk volume
 
 #define DISK_ERROR_FIND      0x01
 #define DISK_ERROR_DATA      0x02
@@ -175,6 +186,8 @@ extern uint8_t disk_volume; // last disk volume
 // FIND = could not find sector on disk
 // DATA = sector address found, data field missing
 // PARTIAL = sector read but only partially correct (checksum fail)
+
+// TODO drive select?
 
 //
 // Tape
@@ -317,18 +330,6 @@ extern void text_window(uint16 x0, uint8 y0, uint16 x1, uint8 y1); // confine te
 extern void text_set_font(const uint8* fontset, uint8 offset); // set high-resolution fontset (beginning at offset character)
 extern void text_set_font_vwf(const uint8* widths, const uint8* fontset, uint8 offset); // set vwf fontset with nibble-packed glyph widths
 
-// TODO VWF specifically for hires:
-// window x will be 0-(140-8) instead of 0-40
-// glyph is up to 8x8 white pixels
-// text_out will extra-advance text x by glyph width value-1 (X is pixel address, Y is still 8-pixel row)
-// width value includes gutter, can be wider than 8 (i.e. use lsr to just pad 0s) (oregon trail had great 2px gutters)
-// replace copy/clear row with null, no automatic text scrolling
-// starting close to right edge might overflow by 1px into screen memory edge
-// -> do these as an extra 2 video modes for hires
-//    and move pixel stuff from video_high_color/mono into video_high_color_draw to be shared w/o
-//    needing both text routines. (Add "VWF option to demo to show cool text in both mono/color.)
-// font generator: draw vertical 8px magenta line between glyphs to indicate glyph width, enforce 8px max for white
-
 extern void draw_pixel(uint16 x, uint8 y, uint8 c);
 extern uint8 draw_getpixel(uint16 x, uint8 y);
 extern void draw_hline(uint16 x, uint8 y, uint16 w, uint8 c);
@@ -337,12 +338,7 @@ extern void draw_box(uint16 x, uint8 y, uint16 w, uint8 h, uint8 c);
 extern void draw_fillbox(uint16 x, uint8 y, uint16 w, uint8 h, uint8 c);
 extern void draw_line(uint16 x0, uint8 y0, uint16 x1, uint8 y1); // TODO
 extern void draw_ellipse(uint16 x0, uint8 y0, uint16 w, uint8 h); // TODO
-//extern void draw_triangle(); // TODO filled triangle
-//extern void draw_polygon(const uint8* list, color); // TODO can this be done efficiently without multiply?
-// TODO keep track of current graphics mode
-// only operate the IIe double registers if switching from a double mode
-// for polgyon it could determine whether the list is 3-byte XXY or 2-byte XY
-// ... maybe a polygon needs to be triangulated to be efficient... maybe trilist?
+extern void draw_fill(uint16 x, uint8 y, uint8 c); // TODO
 // span fill to chosen boundary colour (using vline) might be effective: https://en.wikipedia.org/wiki/Flood_fill#Span_Filling
 
 // TODO these probably deserve to be per-mode, because they're large code
@@ -378,6 +374,8 @@ extern void draw_ellipse(uint16 x0, uint8 y0, uint16 w, uint8 h); // TODO
 // TODO set attribute high, set attribute double high (used to set "secret" high bit, value = 0 or $80)
 // TODO get for above
 
+// TODO "unpack screen" take contiguous screen that goes across empty bytes at end of rows and respace it
+
 // set text/border colours on IIGS only (call if system_type == SYSTEM_APPLE2GS)
 extern void iigs_color(uint8 text_fg, uint8 text_bg, uint8 border); // low-resolution colour values
 
@@ -386,5 +384,7 @@ extern void iigs_color(uint8 text_fg, uint8 text_bg, uint8 border); // low-resol
 //
 
 void delay(unsigned int ms); // delays roughly this number of milliseconds
+// TODO prng
+// TODO huffmunch?
 
 #endif

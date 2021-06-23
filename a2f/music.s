@@ -4,8 +4,10 @@
 
 .include "../a2f.inc"
 
+.export music_reset
 .export music_command
 .export music_play
+.export music_resume
 
 .import sound_pulse
 .import sound_noise
@@ -14,8 +16,12 @@
 .importzp a2f_temp
 
 music_note_length:  .byte  16 ; default 1/4 second
+music_note_space:   .byte   0 ; default 0
 music_note_octave:  .byte $40 ; default middle-C octave
 music_note_duty:    .byte   1 ; default square
+music_2byte:        .byte   0 ; 2-byte command
+music_play_mode:    .byte   0
+music_paddleb_last: .byte   0 ; last paddle read
 music_repeat_count: .byte   0 ; no repeats yet
 music_repeat_point: .word   0
 music_loop_point:   .word   0
@@ -26,9 +32,60 @@ music_period0hi: .byte $F3,$E6,$D9,$CC,$C1,$B6,$AC,$A2,$99,$90,$88,$81
 music_timing8lo: .byte $5A,$53,$5B,$72,$9A,$D4,$20,$80,$F5,$80,$23,$DE
 music_timing8hi: .byte $10,$11,$12,$13,$14,$15,$17,$18,$19,$1B,$1D,$1E
 
+.proc music_reset
+	lda #16
+	sta music_note_length
+	lda #$40
+	sta music_note_octave
+	lda #1
+	sta music_note_duty
+	lda #0
+	sta music_2byte
+	sta music_note_space
+	sta music_repeat_count
+	sta music_repeat_point+0
+	sta music_repeat_point+1
+	sta music_loop_point+0
+	sta music_loop_point+1
+	rts ; returns with A=0
+.endproc
+
+.proc music_command_2byte ; second byte of 2-byte command
+	ldx #0
+	stx music_2byte
+	cmp #$01
+	bcc music_command_halt
+	beq command_space_off
+	cmp #$20
+	bcc music_command_halt
+	cmp #$60
+	bcc command_space
+	cmp #$FE
+	bne music_command_halt
+	rts ; $FE no-effect
+command_space_off:
+	lda #0
+	sta music_note_space
+	rts
+command_space:
+	sec
+	sbc #($20-1)
+	sta music_note_space
+	rts
+.endproc
+
+music_command_halt:
+	jsr music_reset
+	; A = 0
+	sta music_data+0
+	sta music_data+1
+	rts
+
 .proc music_command ; A = command
+	ldx music_2byte
+	bne music_command_2byte
 	cmp #$FF
-	beq command_halt
+	beq command_2byte
 	cmp #$70
 	bcs command_note_direct
 	cmp #$60
@@ -40,8 +97,8 @@ music_timing8hi: .byte $10,$11,$12,$13,$14,$15,$17,$18,$19,$1B,$1D,$1E
 	cmp #$10
 	bcs command_duty
 	cmp #$01
-	bcs command_rest
-	bcc command_halt
+	beq command_rest
+	bcc music_command_halt
 	cmp #$0D
 	bcc command_repeat
 	beq command_loop
@@ -49,16 +106,21 @@ music_timing8hi: .byte $10,$11,$12,$13,$14,$15,$17,$18,$19,$1B,$1D,$1E
 	beq command_repeat_point
 	bne command_loop_point
 ; commands
-command_halt:
-	lda #0
-	sta music_repeat_count
-	sta music_data+0
-	sta music_data+1
+command_2byte:
+	sta music_2byte
 	rts
 command_note_direct:
+	cmp #$FE
+	bcs :+
 	sec
 	sbc #$70
 	jmp note
+:
+	bne :+
+	rts ; no-effect
+:
+	sta music_2byte
+	rts
 command_note_octave:
 	and #$0F
 	ora music_note_octave
@@ -86,7 +148,9 @@ command_rest:
 command_repeat:
 	inc music_repeat_count
 	cmp music_repeat_count
-	bcs :+
+	bcc :+
+	beq :+
+		; A <= music_repeat_count
 		lda music_repeat_point+0
 		sta music_data+0
 		lda music_repeat_point+1
@@ -120,7 +184,10 @@ note:
 	pha
 	and #$0F
 	cmp #$0C
-	bcs command_halt ; invalid note
+	bcc :+
+		pla
+		jmp music_command_halt ; invalid note
+	:
 	tax
 	lda music_period0lo, X
 	sta a2f_temp+0
@@ -227,16 +294,25 @@ note:
 	ldx music_note_duty
 	beq :+
 		ldy a2f_temp+5
-		jmp sound_pulse
+		jsr sound_pulse
+		jmp :++
 	:
 		; noise needs double time
 		asl a2f_temp+5
 		rol a2f_temp+4
 		ldy a2f_temp+5
-		jmp sound_noise
-	;
+		jsr sound_noise
+	:
+	ldy music_note_space
+	bne rest_y
+end:
+	rts
 rest:
 	ldy music_note_length
+	jsr rest_y
+	ldy music_note_space
+	beq end
+rest_y:
 	:
 		.assert (CPU_RATE/64)<=65535, error, "Rest cycle length must be 16-bit"
 		lda #<(CPU_RATE/64)
@@ -247,10 +323,38 @@ rest:
 	rts
 .endproc
 
-.proc music_play ; A = mode: 0 only halt stops, 1 keypress stops, 2 keypress or joystick stops
-	; TODO store mode and set it up
+.proc music_paddleb_poll ; returns newly pressed buttons in A/Z, stores music_paddleb_last
 	lda #0
-	sta music_repeat_count
+	sta a2f_temp+0
+	lda $C062 ; button 1
+	asl
+	rol a2f_temp+0
+	lda $C061 ; button 0
+	asl
+	rol a2f_temp+0
+	lda a2f_temp+0
+	eor music_paddleb_last
+	and a2f_temp+0
+	pha
+	lda a2f_temp+0
+	sta music_paddleb_last
+	pla
+	rts
+.endproc
+
+music_play: ; A = mode: 0 only halt stops, 1 keypress stops, 2 keypress or joystick stops
+	pha
+	jsr music_reset
+	pla
+music_resume:
+	sta music_play_mode
+	cmp #0
+	beq :+
+		lda KBSTAT ; clear pending keypress flag
+		cmp #2
+		bne :+
+		jsr music_paddleb_poll ; read current state so a new press is required
+	:
 @loop:
 	lda music_data+1
 	bne :+
@@ -266,6 +370,15 @@ rest:
 		inc music_data+1
 	:
 	jsr music_command
-	; TODO check mode and test input if needed
+	lda music_play_mode
+	beq :+
+		ldx KBDATA
+		bmi @stop ; stop on any kepress
+		cmp #2
+		bcc :+
+		jsr music_paddleb_poll
+		bne @stop ; stop on button 0 or 1 pressed
+	:
 	jmp @loop
-.endproc
+@stop:
+	rts

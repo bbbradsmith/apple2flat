@@ -129,15 +129,28 @@ PADDLE_HIGH   = 52
 ; $20-5F = note duration ($5F = 1 second, $20 = 1/64th, $21 = 2/64th...
 ; $60-6B = note at last octave
 ; $70-FB = direct notes $XY = octave X-7, pitch Y, $B0 = middle C
-; unused note values ($XC-XF) will cause a halt/reset
+; (unused note values ($XC-XF) are reserved and will cause a halt/reset)
+; $FE    = no-effect
+; $FF    = first of 2-byte command:
+; $FF, $00    = halt music / reset
+; $FF  $01    = space duration 0
+; $FF, $20-5F = space duration (extra rest that follows any note or rest)
+; $FF, $FE    = no-effect ($FE can be used to ensure not in second-byte mode)
+; $FF, $FF    = halt music / reset
+; (unused values are reserved and will cause a halt/reset)
 
+.global music_raset ; resets music commands to default state
 .global music_command ; A = command
 .global music_play ; A = mode, music_data = pointer to string of commands
+.global music_resume ; A = mode, music_data = pointer to string of commands (skips reset)
 ; mode 0: stop only at halt
-; mode 1: stop at halt or keypress
+; mode 1: stop at halt or keypress (does not read keypress, leaves it pending)
 ; mode 2: stop at halt, keypress, or joystick buttons 0/1
+; (music_data is set to 0 at a halt command,
+; but if user-halted in mode 1/2 you can use music_resume to continue.
+; If music_data is 0, music_resume or music_play will return immediately.)
 
-.global music_data ; 16-bit pointer to data for music_play
+.global music_data ; 16-bit pointer to data for music_play (pointing to zero page is not allowed)
 
 ;
 ; Floppy disk
@@ -155,6 +168,8 @@ DISK_ERROR_PARTIAL = $04 ; sector read but only partially correct (checksum fail
 .global disk_read ; X:A = segment to read, Y = segment count, disk_ptr = destination, returns disk_error
 .global disk_write ; TODO write sector
 .global disk_format ; TODO format track
+
+; TODO drive select?
 
 ;
 ; Tape

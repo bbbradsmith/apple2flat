@@ -611,12 +611,59 @@ void paddle_test()
 	}
 }
 
+const uint8 music_looping[] = // based on Chopin G-Major Prelude (Op. 28, No. 3)
+{
+	0x0F, // loop point
+	0x20 + 7 - 1, // duration 7
+	0x11, // pulse 1/2 (square)
+	0x0E, // repeat point
+	0x97, 0xA2, 0xA7, 0xA9, 0xAB, 0xA9, 0xA7, 0xB4, // G2 D3 G3 A3 B3 A3 G3 E4
+	0xB2, 0xB0, 0xAB, 0xA9, 0xA7, 0xA9, 0xAB, 0xA2, // D4 C4 B3 A3 G3 A3 B3 D3
+	0x16, // pulse 1/64
+	0x02, // repeat 2x
+	0x20 + 2 - 1, 0xFF, 0x20 + 5 - 1, // duration 2 + space 5 (detached)
+	0x11, // pulse 1/2
+	0x99, 0xA4, 0xA9, 0xAB, 0xB1, 0xAB, 0xA9, 0xB6, // A2 E3 A3 B3 Cs4 B3 A3 Fs4
+	0xB4, 0xB2, 0xB1, 0xAB, 0xA9, 0xAB, 0xB1, 0xA4, // E4 D4 Cs4 B3 A3 B3 Cs4 E4
+	0x20 + 7 - 1, 0xFF, 0x01, // duration 7 + space 0
+	0x12, // pulse 1/4
+	0x92, 0x99, 0xA2, 0xA4, 0xA6, 0xA4, 0xA2, 0xAB, // D2 A2 D3 E3 Fs3 E3 D3 B3
+	0xA9, 0xA7, 0xA6, 0xA4, 0xA2, 0xA4, 0xA6, 0x99, // A3 G3 Fs3 E3 D3 E3 Fs3 A2
+	0x0D, // loop
+};
+
+const uint8 music_oneshot[] =
+{
+	0x10, // noise
+	0x0E, // repeat point
+	0x20 + 1  - 1, 0x80, 0xC0, 0xF0, 0xC0, // snare drum
+	0x20 + 3  - 1, 0x01, // rest
+	0x04, // repeat 4x
+	0x0E, // repeat point
+	0x20 + 4  - 1, 0xFB, // cymbal
+	0x20 + 3 - 1, 0x01,
+	0x02, // repeat 2x
+	0x20 + 14 - 1, 0x01,
+	0x0E, // repeat point
+	0x20 + 4 - 1,
+	0x11, 0xD2, // descending D,A,D,A,D,D with narrowing duty
+	0x12, 0xC9,
+	0x13, 0xC2,
+	0x14, 0xB9,
+	0x15, 0xB2,
+	0x16, 0xA2,
+	0x03, // repeat 3x
+	0x20 + 16 - 1, 0x11, 0xA7, // low G, square duty
+	0x00, // halt
+};
+
 void sound_test()
 {
 	uint8 octave = 4;
 	uint8 duty = 1;
 	uint8 time = 16;
 
+	music_reset();
 	music_command(0x17+octave);
 	music_command(0x10+duty);
 	music_command(0x20+time-1);
@@ -630,11 +677,16 @@ void sound_test()
 		"OCTAVE:  4  []\n"
 		"DUTY:    1  ASDFGH (A=NOISE)\n"
 		"TIME:   16  <>\n"
+		"\n"
+		"M = LOOPING MUSIC (CHOPIN OP.28 NO.3)\n"
+		"N = RESUME LOOP\n"
+		"B = ONE-SHOT MUSIC\n"
+		//"X = SWEEP UP\n"
+		//"Z = SWEEP DOWN"
 		);
 
 	while(1)
 	{
-		while (!kb_new());
 		switch (kb_get())
 		{
 			case KB_ESC: return;
@@ -650,16 +702,21 @@ void sound_test()
 			case 'Y': case 'y': music_command(0x69); break;
 			case '7':           music_command(0x6A); break;
 			case 'U': case 'u': music_command(0x6B); break;
-			case '[': if (octave>0) { --octave; music_command(0x17+octave); } break;
-			case ']': if (octave<8) { ++octave; music_command(0x17+octave); } break;
+			case '[': case '{': if (octave>0) { --octave; music_command(0x17+octave); } break;
+			case ']': case '}': if (octave<8) { ++octave; music_command(0x17+octave); } break;
 			case '<': case ',': if (time> 1) { --time; music_command(0x20+time-1); } break;
 			case '>': case '.': if (time<64) { ++time; music_command(0x20+time-1); } break;
-			case 'A': duty = 0; music_command(0x10+duty); break;
-			case 'S': duty = 1; music_command(0x10+duty); break;
-			case 'D': duty = 2; music_command(0x10+duty); break;
-			case 'F': duty = 3; music_command(0x10+duty); break;
-			case 'G': duty = 4; music_command(0x10+duty); break;
-			case 'H': duty = 5; music_command(0x10+duty); break;
+			case 'A': case 'a': duty = 0; music_command(0x10+duty); break;
+			case 'S': case 's': duty = 1; music_command(0x10+duty); break;
+			case 'D': case 'd': duty = 2; music_command(0x10+duty); break;
+			case 'F': case 'f': duty = 3; music_command(0x10+duty); break;
+			case 'G': case 'g': duty = 4; music_command(0x10+duty); break;
+			case 'H': case 'h': duty = 5; music_command(0x10+duty); break;
+			case 'M': case 'm': music_play(music_looping,2); break;
+			case 'N': case 'n': music_resume(2); break;
+			case 'B': case 'b': music_play(music_oneshot,0); break;
+			//case 'X': case 'x': sound_sweep_up(...); break; // TODO
+			//case 'Z': case 'Z': sound_sweep_down(...); break; // TODO
 			default: break;
 		}
 		text_xy(10,10); text_printf("%d",octave);
@@ -690,6 +747,7 @@ void system_info()
 	}
 	text_outs(t);
 	// TODO 80-column card detection?
+	// TODO detection of vsync method?
 	// TODO ram size / page count? / Need interface for banking.
 	while (kb_get() != KB_ESC);
 }

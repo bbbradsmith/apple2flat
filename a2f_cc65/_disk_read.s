@@ -32,5 +32,5 @@ _disk_read:
 	lda disk_temp+0 ; sector
 	ldx disk_temp+1
 	jsr disk_read ; X:A=sector, Y=count, disk_ptr=dest
-	ldx #0 ;CC65 requires X=0 on uint8_t return
+	ldx #0 ;CC65 requires X=0 on uint8 return
 	rts
