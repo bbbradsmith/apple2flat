@@ -110,7 +110,7 @@ PADDLE_HIGH   = 52
 .global sound_sweep ; a2f_temp+1:0 = cycles in full wave, a2f_temp+4:Y = max repetitions, A = speed 1-16 (16=slowest)
 ; sound_square: minimum 90cy
 ; sound_pulse: minimum 45cy per half
-; sound_noise: minimum 69cy
+; sound_noise: minimum 74cy
 
 ; music command format:
 ; $00    = halt music / reset
