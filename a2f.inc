@@ -309,17 +309,14 @@ COD_WHITE       = 15
 .global draw_hline ; draw_x0,y0 = left pixel, draw_x1 = right pixel + 1, A = color
 .global draw_vline
 .global draw_box
-.global draw_fillbox
-.global draw_line ; TODO
-.global draw_ellipse ; TODO
+;.global draw_fillbox
+;.global draw_line ; TODO
+;.global draw_ellipse ; TODO
+.global blit ; X,Y = coordinate, a2f_temp+3:2 = data
 
 .global text_out ; A = character
 .global text_scroll ; A = signed value, positive = lines to shift up (clear bottom), negative = lines to shift down (clear top)
 .global text_charset ; A = 0 primary character set, 1 alternate character set (IIe)
-
-;.global blit_coarse ; TODO
-;.global blit_fine ; TODO
-;.global blit_mask ; TODO
 
 ; set text/border colours on IIGS only
 .global iigs_color ; A = text FG, X = text BG, Y = border (low-resolution colour values)

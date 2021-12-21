@@ -20,6 +20,7 @@
 .import draw_hline_generic
 .import draw_vline_generic
 .import draw_fillbox_generic
+.import blit_double_low
 
 .import draw_pixel_text
 .import draw_getpixel_text
@@ -54,6 +55,7 @@ table:
 	.word draw_hline_generic
 	.word draw_vline_generic
 	.word draw_fillbox_generic
+	.word blit_double_low
 	.word 80
 	.byte 24
 	.assert *-table = VIDEO_FUNCTION_TABLE_SIZE, error, "table entry count incorrect"

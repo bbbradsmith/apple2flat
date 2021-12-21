@@ -7,6 +7,10 @@
 extern uint8 font_bin[];
 extern uint8 font_vwf_bin[];
 extern uint8 font_vwf_wid[];
+extern uint8 leyendecker_lr_bin[];
+//extern uint8 leyendecker_hr_bin[];
+extern uint8 leyendecker_dlr_bin[];
+//extern uint8 leyendecker_dhr_bin[];
 
 char quit = 0;
 
@@ -105,6 +109,7 @@ redraw:
 
 	video_page_select(0,1);
 	draw_fillbox(1,1,34,34,COL_GREEN_LIGHT);
+	blit(2,2,leyendecker_lr_bin);
 	// TODO leyendecker blit?
 	// TODO fine blit? masked blit?
 

@@ -17,6 +17,7 @@
 .export draw_hline
 .export draw_vline
 .export draw_fillbox
+.export blit
 
 .export video_w
 .export video_h
@@ -69,6 +70,7 @@ draw_getpixel:   jmp a:video_null
 draw_hline:      jmp a:video_null
 draw_vline:      jmp a:video_null
 draw_fillbox:    jmp a:video_null
+blit:            jmp a:video_null
 VIDEO_FUNCTION_MAX = *-video_function_table
 .assert VIDEO_FUNCTION_MAX<256, error, "video_function_table too large?"
 video_w:         .word 0

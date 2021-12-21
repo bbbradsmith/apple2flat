@@ -10,6 +10,8 @@
 .export draw_pixel_low
 .export draw_getpixel_low
 .export draw_pixel_low_addr
+.export draw_pixel_low_addr_2y
+.export blit_low
 
 .import video_page_copy_low
 .import video_page_apply
@@ -25,8 +27,13 @@
 
 .importzp a2f_temp
 .importzp draw_ptr
+.importzp draw_ptr0
+.importzp draw_ptr1
 draw_low_color = a2f_temp+2
 draw_low_phase = a2f_temp+3
+blit_w = a2f_temp+4
+blit_h = a2f_temp+5
+blit_temp = a2f_temp+6
 
 .proc video_mode_low
 	lda #<table
@@ -44,6 +51,7 @@ table:
 	.word draw_hline_generic
 	.word draw_vline_generic
 	.word draw_fillbox_generic
+	.word blit_low
 	.word 40
 	.byte 24
 	.assert *-table = VIDEO_FUNCTION_TABLE_SIZE, error, "table entry count incorrect"
@@ -77,13 +85,14 @@ _video_mode_low = video_mode_low
 	jmp video_cls_page
 .endproc
 
-.proc draw_pixel_low_addr ; X/Y = coordinate, clobbers A, sets draw_ptr, draw_low_phase stores parity
+draw_pixel_low_addr: ; X/Y = coordinate, clobbers A, sets draw_ptr, draw_low_phase stores parity
 	tya
 	lsr
 	tay ; Y = Y/2
 	lda #0
 	rol
 	sta draw_low_phase ; store low bit of Y for parity select
+draw_pixel_low_addr_2y: ; X = 0-39, Y = 0-24 (address but Y is a double-row, no "phase")
 	; calculate video address
 	lda video_page_w
 	and #$0C
@@ -95,7 +104,6 @@ _video_mode_low = video_mode_low
 	adc video_rowpos0, Y
 	sta draw_ptr+0
 	rts
-.endproc
 
 .proc draw_pixel_low
 	; X/Y = coordinate, A = value
@@ -141,5 +149,55 @@ _video_mode_low = video_mode_low
 	lsr
 	lsr
 	lsr
+	rts
+.endproc
+
+.proc blit_low
+	; X/2Y = coordinate, draw_ptr1 = data
+	jsr draw_pixel_low_addr_2y ; draw_ptr0 = address
+	ldy #0
+	lda (draw_ptr1), Y
+	sta blit_w
+	iny
+	lda (draw_ptr1), Y
+	sta blit_h
+	iny
+	ldx #0
+@loop:
+	sty blit_temp
+	lda (draw_ptr1), Y
+	pha
+	txa
+	tay
+	pla
+	sta (draw_ptr0), Y
+	ldy blit_temp
+	iny
+	bne :+
+		inc draw_ptr1+1
+	:
+	inx
+	cpx blit_w
+	bcc @loop
+	lda draw_ptr0+0
+	clc
+	adc #<128
+	sta draw_ptr0+0
+	bcc :+
+		inc draw_ptr0+1
+		lda draw_ptr0+1
+		and #$03
+		bne :+ ; past end of page, go to next group of 8 lines
+		lda draw_ptr0+0
+		sec
+		sbc #<($400-40)
+		sta draw_ptr0+0
+		lda draw_ptr0+1
+		sbc #>($400-40)
+		sta draw_ptr0+1
+	:
+	ldx #0
+	dec blit_h
+	bne @loop
 	rts
 .endproc

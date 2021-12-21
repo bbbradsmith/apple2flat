@@ -6,6 +6,7 @@
 
 .export video_mode_double_high_color
 .export _video_mode_double_high_color
+.export blit_double_high_color
 
 .import video_page_apply
 .import video_mode_setup
@@ -23,6 +24,7 @@
 .import text_clear_row_double_high_color
 .import draw_pixel_double_high_color
 .import draw_getpixel_double_high_color
+.import blit_double_high_mono
 
 .proc video_mode_double_high_color
 	lda #<table
@@ -41,6 +43,7 @@ table:
 	.word draw_hline_generic
 	.word draw_vline_generic
 	.word draw_fillbox_generic
+	.word blit_double_high_color
 	.word 140
 	.byte 192
 	.assert *-table = VIDEO_FUNCTION_TABLE_SIZE, error, "table entry count incorrect"
@@ -48,3 +51,10 @@ table:
 
 ; void video_mode_double_high_color()
 _video_mode_double_high_color = video_mode_double_high_color
+
+.proc blit_double_high_color
+	txa
+	asl
+	tax
+	jmp blit_double_high_mono
+.endproc

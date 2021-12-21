@@ -19,9 +19,7 @@
 .export _draw_vline
 .export _draw_box
 .export _draw_fillbox
-.export _blit_coarse
-.export _blit_fine
-.export _blit_mask
+.export _blit
 
 .import popa
 .import popax
@@ -36,9 +34,7 @@
 .import draw_vline
 .import draw_box
 .import draw_fillbox
-.import blit_coarse
-.import blit_fine
-.import blit_mask
+.import blit
 
 .import video_w
 .import video_h
@@ -51,6 +47,7 @@
 .import draw_xh
 
 .importzp a2f_temp
+.importzp draw_ptr1
 
 _video_w = video_w
 _video_h = video_h
@@ -203,14 +200,10 @@ _draw_fillbox:
 	pla ; c
 	jmp draw_fillbox
 
-_blit_coarse:
-	; TODO
-	rts
-
-_blit_fine:
-	; TODO
-	rts
-
-_blit_mask:
-	; TODO
-	rts
+; voit blit(uint8 x, uint8 y, const uint8* data)
+_blit:
+	sta draw_ptr1+0
+	stx draw_ptr1+1
+	jsr popax
+	tay
+	jmp blit

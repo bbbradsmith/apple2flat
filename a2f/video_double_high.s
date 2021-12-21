@@ -6,6 +6,7 @@
 
 .export video_cls_double_high
 .export video_page_copy_double_high
+.export blit_double_high_mono
 
 .proc video_page_copy_double_high
 	; TODO copy page_r to page_w
@@ -19,4 +20,9 @@
 	tax
 	lda #0
 	jmp video_cls_page
+.endproc
+
+.proc blit_double_high_mono
+	; TODO
+	rts
 .endproc

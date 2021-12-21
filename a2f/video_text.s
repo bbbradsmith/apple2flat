@@ -30,6 +30,7 @@
 .import draw_hline_generic
 .import draw_vline_generic
 .import draw_fillbox_generic
+.import video_null
 
 .import text_inverse
 .import draw_y
@@ -55,6 +56,7 @@ table:
 	.word draw_hline_generic
 	.word draw_vline_generic
 	.word draw_fillbox_generic
+	.word video_null
 	.word 40
 	.byte 24
 	.assert *-table = VIDEO_FUNCTION_TABLE_SIZE, error, "table entry count incorrect"

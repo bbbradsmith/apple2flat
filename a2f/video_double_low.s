@@ -9,6 +9,7 @@
 
 .export draw_pixel_double_low
 .export draw_getpixel_double_low
+.export blit_double_low
 
 .import video_page_copy_double_low
 .import video_page_apply
@@ -27,11 +28,16 @@
 .import draw_pixel_low
 .import draw_getpixel_low
 .import draw_pixel_low_addr
+.import draw_pixel_low_addr_2y
 
 .importzp a2f_temp
 .importzp draw_ptr
+.importzp draw_ptr0
+.importzp draw_ptr1
 draw_low_color = a2f_temp+2
 draw_low_phase = a2f_temp+3
+blit_w = a2f_temp+4
+blit_h = a2f_temp+5
 
 .proc video_mode_double_low
 	lda #<table
@@ -50,6 +56,7 @@ table:
 	.word draw_hline_generic
 	.word draw_vline_generic
 	.word draw_fillbox_generic
+	.word blit_double_low
 	.word 80
 	.byte 48
 	.assert *-table = VIDEO_FUNCTION_TABLE_SIZE, error, "table entry count incorrect"
@@ -153,5 +160,54 @@ _video_mode_double_low = video_mode_double_low
 	bcc :+
 		eor #$11
 	:
+	rts
+.endproc
+
+.proc blit_double_low
+	; X/2Y = coordinate, draw_ptr1 = data
+	txa
+	lsr
+	tax
+	; TODO store low bit of X as parity
+	jsr draw_pixel_low_addr_2y ; draw_ptr0 = address
+	ldy #0
+	lda (draw_ptr1), Y
+	sta blit_w
+	iny
+	lda (draw_ptr1), Y
+	sta blit_h
+	iny
+	ldx #0
+@loop:
+	lda (draw_ptr1), Y
+	; TODO alternate store / aux store by parity (aux store needs to nibble rotate right)
+	;sta (draw_ptr0), X
+	; TODO don't use X to index draw ptr, instead increment
+	iny
+	bne :+
+		inc draw_ptr1+1
+	:
+	inx
+	cpx blit_w
+	bcc @loop
+	lda draw_ptr0+0
+	clc
+	adc #<128
+	sta draw_ptr0+0
+	bcc :+
+		inc draw_ptr0+1
+		lda draw_ptr0+1
+		and #$03
+		bne :+ ; past end of page, go to next group of 8 lines
+		lda draw_ptr0+0
+		sec
+		sbc #<($400-40)
+		sta draw_ptr0+0
+		lda draw_ptr0+1
+		sbc #>($400-40)
+		sta draw_ptr0+1
+	:
+	dec blit_h
+	bne @loop
 	rts
 .endproc

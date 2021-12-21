@@ -6,6 +6,7 @@
 
 .export video_mode_high_color
 .export _video_mode_high_color
+.export blit_high_color
 
 .import video_page_apply
 .import video_mode_setup
@@ -22,6 +23,7 @@
 .import draw_pixel_high_color
 .import draw_getpixel_high_color
 .import draw_vline_high_color
+.import blit_high_mono
 
 .proc video_mode_high_color
 	lda #<table
@@ -39,6 +41,7 @@ table:
 	.word draw_hline_generic
 	.word draw_vline_high_color
 	.word draw_fillbox_generic
+	.word blit_high_color
 	.word 140
 	.byte 192
 	.assert *-table = VIDEO_FUNCTION_TABLE_SIZE, error, "table entry count incorrect"
@@ -46,3 +49,11 @@ table:
 
 ; void video_mode_high_color()
 _video_mode_high_color = video_mode_high_color
+
+.proc blit_high_color
+	; X/Y = coordinate, draw_ptr1 = data
+	tya
+	asl
+	tay
+	jmp blit_high_mono
+.endproc

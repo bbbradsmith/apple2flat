@@ -23,6 +23,7 @@
 .import text_clear_row_double_high_mono
 .import draw_pixel_double_high_mono
 .import draw_getpixel_double_high_mono
+.import blit_double_high_mono
 
 .proc video_mode_double_high_mono
 	lda #<table
@@ -42,6 +43,7 @@ table:
 	.word draw_hline_generic
 	.word draw_vline_generic
 	.word draw_fillbox_generic
+	.word blit_double_high_mono
 	.word 560
 	.byte 192
 	.assert *-table = VIDEO_FUNCTION_TABLE_SIZE, error, "table entry count incorrect"

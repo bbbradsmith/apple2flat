@@ -332,40 +332,15 @@ extern void draw_hline(uint16 x, uint8 y, uint16 w, uint8 c);
 extern void draw_vline(uint16 x, uint8 y, uint8 h, uint8 c);
 extern void draw_box(uint16 x, uint8 y, uint16 w, uint8 h, uint8 c);
 extern void draw_fillbox(uint16 x, uint8 y, uint16 w, uint8 h, uint8 c);
-extern void draw_line(uint16 x0, uint8 y0, uint16 x1, uint8 y1); // TODO
-extern void draw_ellipse(uint16 x0, uint8 y0, uint16 w, uint8 h); // TODO
-extern void draw_fill(uint16 x, uint8 y, uint8 c); // TODO
+//extern void draw_line(uint16 x0, uint8 y0, uint16 x1, uint8 y1); // TODO
+//extern void draw_ellipse(uint16 x0, uint8 y0, uint16 w, uint8 h); // TODO
+//extern void draw_fill(uint16 x, uint8 y, uint8 c); // TODO
 // span fill to chosen boundary colour (using vline) might be effective: https://en.wikipedia.org/wiki/Flood_fill#Span_Filling
+extern void blit(uint8 x, uint8 y, const uint8* data);
 
-// TODO these probably deserve to be per-mode, because they're large code
-//extern void blit_coarse(uint16 x0, uint8 y0, const uint8* data, uint8 tw, uint8 th); // TODO
-//extern void blit_fine(uint16 x0, uint8 y0, const uint8* data, uint8 tw, uint8 th); // TODO
-//extern void blit_mask(uint16 x0, uint8 y0, const uint8* data, uint8 tw, uint8 th); // TODO
-// blit coarse low, high, double-low, double-high
-// set-font, pointer to data + ascii start
-// font high, font double high color (does bit doubling for wider font), font double high mono
-
-// blit coarse:
-// low res (1x2) 1b
-// hires mono (7x1) 1b
-// hires color (7x1) 2b
-// double-low res (2x2) 2b
-// double-high res mono (14x1) 2b
-// double-high res colour (7x1) 4b
-
-// blit coarse masked:
-// hires mono (7x1) 2b
-// hires color (7x1) 4b
-// double-high res mono (14x1) 4b
-// double-high res colour (14x1) 8b
-
-// blit fine:
-// hires mono
-// hires color
-
-// blit fine masked:
-// hires mono
-// hires color
+// TODO fine and masked blit for hires
+//extern void blit_high_color_fine(uint16 x0, uint8 y0, const uint8* data, uint8 tw, uint8 th); // TODO
+//extern void blit_high_color_mask(uint16 x0, uint8 y0, const uint8* data, uint8 tw, uint8 th); // TODO
 
 // TODO set attribute high, set attribute double high (used to set "secret" high bit, value = 0 or $80)
 // TODO get for above

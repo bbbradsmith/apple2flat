@@ -22,6 +22,7 @@
 .import draw_pixel_high_color
 .import draw_getpixel_high_color
 .import draw_vline_high_color
+.import blit_high_color
 
 .proc video_mode_high_color_vwf
 	lda #<table
@@ -44,6 +45,7 @@ table:
 	.word draw_hline_generic
 	.word draw_vline_high_color
 	.word draw_fillbox_generic
+	.word blit_high_color
 	.word 140
 	.byte 192
 	.assert *-table = VIDEO_FUNCTION_TABLE_SIZE, error, "table entry count incorrect"
