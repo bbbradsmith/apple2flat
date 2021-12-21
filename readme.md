@@ -7,6 +7,7 @@ This is a CC65 framework for building C or Assembly programs to run on the Apple
 Goals:
 
 * Remove all dependencies on Apple DOS and BASIC.
+* Compatibility with all common Apple II machines (II, II+, IIe, IIc, eIIe, III, IIGS).
 * Unrestricted access to the whole memory space. No need to tiptoe around the OS.
 * Boot from standard format 16-sector floppy disks, or audio tape.
 * Small boot sector, giving more space on the disk for your program and its data.
