@@ -173,7 +173,7 @@ def make_font_vwf(img,count=256):
         (gx,gy,b,w) = glyph_vwf(img,gx,gy)
         ba += b
         wa += w
-        count -= (len(ba)//8)
+        count -= (len(b)//8)
     # pack pairs of widths into nibbles
     if (len(wa) & 1) == 1:
         wa.append(0)
@@ -307,7 +307,7 @@ if __name__ == "__main__" and 'idlelib' not in sys.modules:
         print("font_vwf: %s %s %s" % (file[0],file[1],file[2]))
         (d0,d1) = make_font_vwf(load_img(file[0]))
         open(file[1],"wb").write(d0)
-        open(file[2],"wb").write(d0)
+        open(file[2],"wb").write(d1)
         print("Done.")
         exit(0)
     if file[2] != None: usage() # all remaining commands have only in/out files
