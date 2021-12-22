@@ -234,8 +234,8 @@ extern uint8 disk_volume; // last disk volume
 #define COH_GREEN       0x02
 #define COH_WHITE0      0x03
 #define COH_BLACK1      0x80
-#define COH_ORANGE      0x81
-#define COH_BLUE        0x82
+#define COH_BLUE        0x81
+#define COH_ORANGE      0x82
 #define COH_WHITE1      0x83
 
 // monochrome colours

@@ -16,20 +16,20 @@ USAGE = "Usage:\n" + \
 
 PALETTE = [
     (  0,  0,  0),
-    ( 31, 53,211),
-    (  0,118, 12),
-    (  7,168,224),
-    ( 98, 76,  0),
-    (126,126,126),
-    ( 67,200,  0),
-    ( 93,247,132),
     (147, 11,124),
+    ( 31, 53,211),
     (187, 54,255),
-    (130,130,130),
+    (  0,118, 12),
+    (126,126,126),
+    (  7,168,224),
     (157,172,255),
+    ( 98, 76,  0),
     (249, 86, 29),
+    (130,130,130),
     (255,129,236),
+    ( 67,200,  0),
     (220,205, 22),
+    ( 93,247,132),
     (255,255,255),
     (255,255,  0)] # yellow for transparent
 
@@ -66,6 +66,12 @@ def palette_img(w=16):
 # Convert image to byte-spanning groups
 #
 
+def nibble_rotate_left(v):
+    return ((v << 1) & 0xEE) | ((v >> 3) & 0x11)
+
+def nibble_rotate_right(v):
+    return ((v >> 1) & 0x77) | ((v << 3) & 0x88)
+
 def span_mono(img,x,y): # read monochrome pixels 7x1
     b = 0
     for px in range(7):
@@ -85,10 +91,10 @@ last_hr_group = 0
 def span_hr(img,x,y,last=None):
     global last_hr_group
     group = last if (last != None) else last_hr_group
-    # remap palette: black, magenta, green, orange, blue, white
-    PALMAP = (0,4,2,4, 3,0,2,2, 1,1,5,4, 3,1,3,5,  0)
-    # stored 2-bit pixels, in reverse-bit order
-    BITMAP = (0,2,1,2,1,3)
+    # remap palette: black, purple, green, blue, orange, white
+    PALMAP = (0,1,3,1, 2,0,3,3, 4,4,5,1, 2,4,2,5, 0)
+    # stored 2-bit pixels
+    BITMAP = (0,1,2,1,2,3)
     # generate 14-bit content, and determine shift group
     b = 0
     for px in range(7):
@@ -105,7 +111,7 @@ def span_dhr(img,x,y):
     b = 0
     for px in range(7):
         p = img.getpixel((x+px,y)) & 15
-        # TODO bitreverse or shift P?
+        p = nibble_rotate_right(p) # double hires uses rotated colours
         b = (b >> 4) | (p << 24)
     return bytes([
         (b >>  0) & 0x7F,
@@ -140,8 +146,8 @@ def make_font(img,count=256):
 #
 
 def glyph_vwf(img,gx,gy):
-    while gx < img.width: # skip to next non-magenta area
-        if img.getpixel((gx,gy)) < 2:
+    while gx < img.width: # skip to next non-transparent area
+        if img.getpixel((gx,gy)) < 16:
             break
         gx += 1
     if gx >= img.width: # nothing found, just return to the start of the next row with an empty array
@@ -149,7 +155,7 @@ def glyph_vwf(img,gx,gy):
     b = bytearray([0]*8)
     w = 0
     for w in range(min(img.width-gx,16)):
-        if img.getpixel((gx+w,gy)) >= 2:
+        if img.getpixel((gx+w,gy)) >= 16:
             break
         if w < 8:
             for y in range(8):
@@ -191,14 +197,70 @@ def pad_to(img,x,y):
     imp.paste(img)
     return imp
 
-def make_lores(img):
+def screenify(d,mode=0):
+    if mode == 2: # rotate every second byte (double low res) and split into a double
+        return screenify(bytearray([nibble_rotate_left(v) for v in d[0::2]])) + screenify(d[1::2])
+    if mode == 1: # split double, every second byte
+        return screenify(d[0::2]) + screenify(d[1::2])
+    if len(d) > (40*24): # split 8k hires 8-ways
+        dm = bytearray()
+        for i in range(8):
+            dp = bytearray()
+            for j in range(i*40,len(d),8*40):
+                dp += d[j:j+40]
+            dm += screenify(dp)
+        return dm
+    else: # split 1k lores 3-ways
+        dm = bytearray()
+        for i in range(8):
+            for j in range(i*40,len(d),8*40):
+                dm += d[j:j+40]
+        return dm
+
+def make_lores(img,screen=False):
     img = pad_to(img,1,2)
     d = bytearray()
     d.append(img.width)
     d.append(img.height//2)
     for y in range(0,img.height,2):
-        for x in range(0,img.width):
+        for x in range(0,img.width,1):
             d.append(span_lr(img,x,y))
+    if screen: return screenify(d[2:],0 if (img.width < 60) else 2)
+    return d
+
+def make_mono(img,screen=False):
+    img = pad_to(img,7,1)
+    d = bytearray()
+    d.append(img.width//7)
+    d.append(img.height)
+    for y in range(0,img.height,1):
+        for x in range(0,img.width,7):
+            d.append(span_mono(img,x,y))
+    if screen: return screenify(d[2:],0 if (img.width < 420) else 1)
+    return d
+
+def make_hires(img,screen=False):
+    global last_hr_group
+    last_hr_group = 0
+    img = pad_to(img,7,1)
+    d = bytearray()
+    d.append(img.width//7)
+    d.append(img.height)
+    for y in range(0,img.height,1):
+        for x in range(0,img.width,7):
+            d.extend(span_hr(img,x,y))
+    if screen: return screenify(d[2:],0)
+    return d
+
+def make_double(img,screen=False):
+    img = pad_to(img,7,1)
+    d = bytearray()
+    d.append(img.width//7)
+    d.append(img.height)
+    for y in range(0,img.height,1):
+        for x in range(0,img.width,7):
+            d.extend(span_dhr(img,x,y))
+    if screen: return screenify(d[2:],1)
     return d
 
 #
@@ -217,17 +279,20 @@ def load_img(filename):
 if __name__ == "__main__" and 'idlelib' not in sys.modules:
     command = None
     file = [None,None,None]
+    screen = False
     for i in range(1,len(sys.argv)):
         a = sys.argv[i]
         if a.startswith("-"):
-            # TODO parse options?
-            usage()
+            op = a.lower()
+            if op == "-s": screen = True
+            else: usage()
         elif command == None: command = a.lower()
         elif file[0] == None: file[0] = a
         elif file[1] == None: file[1] = a
         elif file[2] == None: file[2] = a
         else: usage()
     if command == None: usage()
+    if command not in ["palette","font","font_vwf","lores","hires","mono","double"]: usage()
     if file[0] == None: usage() # all commands need at least 1 file
     if command == "palette":
         if file[1] != None: usage()
@@ -247,12 +312,18 @@ if __name__ == "__main__" and 'idlelib' not in sys.modules:
     if file[2] != None: usage() # all remaining commands have only in/out files
     print("%s: %s %s" % (command,file[0],file[1]))
     d = None
-    if command == "font":   d = make_font(load_img(file[0]))
-    if command == "lores":  d = make_lores(load_img(file[0]))
-    if command == "hires":  pass 
-    if command == "mono":   pass
-    if command == "double": pass
+    if command == "font":   d = make_font(  load_img(file[0]))
+    if command == "lores":  d = make_lores( load_img(file[0]),screen)
+    if command == "hires":  d = make_hires( load_img(file[0]),screen)
+    if command == "mono":   d = make_mono(  load_img(file[0]),screen)
+    if command == "double": d = make_double(load_img(file[0]),screen)
     if d == None: usage()
+    if screen: # HACK undo 8/128 skip
+        dp = bytearray()
+        for i in range(0,len(d),120):
+            dp += d[i:i+120]
+            dp += bytearray([0]*8)
+        d = dp
     open(file[1],"wb").write(d)
-    print("Done.")
+    print("Done. (%d bytes written)" % len(d))
     exit(0)

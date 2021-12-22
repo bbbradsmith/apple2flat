@@ -220,8 +220,8 @@ COH_PURPLE      = $01
 COH_GREEN       = $02
 COH_WHITE0      = $03
 COH_BLACK1      = $80
-COH_ORANGE      = $81
-COH_BLUE        = $82
+COH_BLUE        = $81
+COH_ORANGE      = $82
 COH_WHITE1      = $83
 
 ; monochrome colours

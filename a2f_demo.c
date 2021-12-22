@@ -7,10 +7,11 @@
 extern uint8 font_bin[];
 extern uint8 font_vwf_bin[];
 extern uint8 font_vwf_wid[];
-extern uint8 leyendecker_lr_bin[];
-//extern uint8 leyendecker_hr_bin[];
-extern uint8 leyendecker_dlr_bin[];
-//extern uint8 leyendecker_dhr_bin[];
+extern void* leyendecker_lr_seg;
+extern void* leyendecker_dlr_seg;
+extern void* leyendecker_mono_seg;
+extern void* leyendecker_hr_seg;
+extern void* leyendecker_dhr_seg;
 
 char quit = 0;
 
@@ -107,9 +108,12 @@ redraw:
 	for (c=0; c<16; ++c) draw_pixel(2+c,7,draw_getpixel(2+c,5)); // odd->odd
 	draw_fillbox(2,11,6,7,COL_GREEN_DARK);
 
+	// HACK load test
+	video_page_select(0,0);
+	disk_read((void*)0x0400,&leyendecker_lr_seg,4);
+
 	video_page_select(0,1);
 	draw_fillbox(1,1,34,34,COL_GREEN_LIGHT);
-	blit(2,2,leyendecker_lr_bin);
 	// TODO leyendecker blit?
 	// TODO fine blit? masked blit?
 
@@ -172,6 +176,10 @@ redraw:
 		draw_fillbox(10+(c*HCSW),50+HCSW,HCSW,HCSW,((7-c)&3)|(((7-c)&4)<<5));
 	}
 
+	// HACK load test
+	video_page_select(0,0);
+	disk_read((void*)0x2000,&leyendecker_hr_seg,32);
+
 	video_page_select(0,1);
 	draw_fillbox(5,7,31,52,COH_PURPLE);
 	// TODO leyendecker blit?
@@ -228,6 +236,10 @@ redraw:
 		draw_pixel( 13+c,10+c,draw_getpixel( 10+c,11+c));
 		draw_pixel(267-c,10+c,draw_getpixel(270-c,11+c));
 	}
+
+	// HACK load test
+	video_page_select(0,0);
+	disk_read((void*)0x2000,&leyendecker_mono_seg,32);
 
 	video_page_select(0,1);
 	// TODO leyendecker blit?
@@ -405,6 +417,10 @@ redraw:
 		draw_fillbox(10+(c*DHCSW),50      ,DHCSW,DHCSW,c);
 		draw_fillbox(10+(c*DHCSW),50+DHCSW,DHCSW,DHCSW,c);
 	}
+
+	// HACK load test
+	video_page_select(0,0);
+	disk_read((void*)0x2000,&leyendecker_dhr_seg,32); // can't load second page
 
 	video_page_select(0,1);
 	draw_fillbox(5,7,31,52,COD_PURPLE);
