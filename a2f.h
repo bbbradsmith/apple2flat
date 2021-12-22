@@ -350,6 +350,9 @@ extern void blit(uint8 x, uint8 y, const uint8* data);
 // set text/border colours on IIGS only (call if system_type == SYSTEM_APPLE2GS)
 extern void iigs_color(uint8 text_fg, uint8 text_bg, uint8 border); // low-resolution colour values
 
+extern uint8 screen_load(uint16 sector); // load screen graphics from disk
+extern uint8 screen_load_double(uint16 sector);
+
 //
 // Misc
 //

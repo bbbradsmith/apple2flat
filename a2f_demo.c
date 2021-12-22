@@ -10,6 +10,7 @@ extern uint8 font_vwf_wid[];
 extern void* leyendecker_lr_seg;
 extern void* leyendecker_dlr_seg;
 extern void* leyendecker_mono_seg;
+extern void* leyendecker_dmono_seg;
 extern void* leyendecker_hr_seg;
 extern void* leyendecker_dhr_seg;
 
@@ -108,13 +109,8 @@ redraw:
 	for (c=0; c<16; ++c) draw_pixel(2+c,7,draw_getpixel(2+c,5)); // odd->odd
 	draw_fillbox(2,11,6,7,COL_GREEN_DARK);
 
-	// HACK load test
-	video_page_select(0,0);
-	disk_read((void*)0x0400,&leyendecker_lr_seg,4);
-
 	video_page_select(0,1);
 	draw_fillbox(1,1,34,34,COL_GREEN_LIGHT);
-	// TODO leyendecker blit?
 	// TODO fine blit? masked blit?
 
 	video_page_select(flip,flip);
@@ -176,13 +172,8 @@ redraw:
 		draw_fillbox(10+(c*HCSW),50+HCSW,HCSW,HCSW,((7-c)&3)|(((7-c)&4)<<5));
 	}
 
-	// HACK load test
-	video_page_select(0,0);
-	disk_read((void*)0x2000,&leyendecker_hr_seg,32);
-
 	video_page_select(0,1);
 	draw_fillbox(5,7,31,52,COH_PURPLE);
-	// TODO leyendecker blit?
 	// TODO fine blit? masked blit?
 
 	video_page_select(flip,flip);
@@ -237,12 +228,7 @@ redraw:
 		draw_pixel(267-c,10+c,draw_getpixel(270-c,11+c));
 	}
 
-	// HACK load test
-	video_page_select(0,0);
-	disk_read((void*)0x2000,&leyendecker_mono_seg,32);
-
 	video_page_select(0,1);
-	// TODO leyendecker blit?
 	// TODO fine blit? masked blit?
 
 	video_page_select(flip,flip);
@@ -361,7 +347,6 @@ redraw:
 
 	video_page_select(0,1);
 	draw_fillbox(1,1,34,34,COL_GREEN_LIGHT);
-	// TODO leyendecker blit?
 	// TODO fine blit? masked blit?
 
 	video_page_select(flip,flip);
@@ -418,13 +403,8 @@ redraw:
 		draw_fillbox(10+(c*DHCSW),50+DHCSW,DHCSW,DHCSW,c);
 	}
 
-	// HACK load test
-	video_page_select(0,0);
-	disk_read((void*)0x2000,&leyendecker_dhr_seg,32); // can't load second page
-
 	video_page_select(0,1);
 	draw_fillbox(5,7,31,52,COD_PURPLE);
-	// TODO leyendecker blit?
 	// TODO fine blit? masked blit?
 
 	video_page_select(flip,flip);
@@ -480,7 +460,6 @@ redraw:
 	}
 
 	video_page_select(0,1);
-	// TODO leyendecker blit?
 	// TODO fine blit? masked blit?
 
 	video_page_select(flip,flip);
@@ -684,6 +663,35 @@ void raw_click()
 	asm ("bit $C030");
 }
 
+void disk_test()
+{
+	video_cls();
+	text_xy(1,3);
+	text_outs("DISK TEST\n"
+		"\n"
+		"2 - LOAD LORES SCREEN\n"
+		"3 - LOAD HIRES COLOR SCREEN\n"
+		"4 - LOAD HIRES MONO SCREEN\n"
+		"6 - LOAD DOUBLE LORES SCREEN\n"
+		"7 - LOAD DOUBLE HIRES COLOR SCREEN\n"
+		"8 - LOAD DOUBLE HIRES MONO SCREEN\n");
+	while(1)
+	{
+		switch (kb_get())
+		{
+			case KB_ESC: return;
+			case '2': video_mode_low();               video_cls(); screen_load((uint16)&leyendecker_lr_seg); break;
+			case '3': video_mode_high_color();        video_cls(); screen_load((uint16)&leyendecker_hr_seg); break;
+			case '4': video_mode_high_mono();         video_cls(); screen_load((uint16)&leyendecker_mono_seg); break;
+			case '6': video_mode_double_low();        video_cls(); screen_load_double((uint16)&leyendecker_dlr_seg); break;
+			case '7': video_mode_double_high_color(); video_cls(); screen_load_double((uint16)&leyendecker_dhr_seg); break;
+			case '8': video_mode_double_high_mono();  video_cls(); screen_load_double((uint16)&leyendecker_dmono_seg); break;
+			default: break;
+		}
+	}
+	return;
+}
+
 void sound_test()
 {
 	uint8 octave = 4;
@@ -823,7 +831,7 @@ void main_menu()
 		"  F - VARIABLE WIDTH FONT\n"
 		"  K - KEYBOARD\n"
 		"  P - PADDLES\n"
-		"  D - DISK *\n"
+		"  D - DISK\n"
 		"  S - SOUND\n"
 		"  T - TEXT INPUT *\n"
 		"  I - SYSTEM INFO\n"
@@ -848,12 +856,12 @@ void main_menu()
 	case 'F': case 'f': vwf_test(); break;
 	case 'K': case 'k': keyboard_test(); break;
 	case 'P': case 'p': paddle_test(); break;
+	case 'D': case 'd': disk_test(); break;
 	case 'S': case 's': sound_test(); break;
 	case 'I': case 'i': system_info(); break;
 
 	// unimplemented
 	case 'A': case 'a':
-	case 'D': case 'd':
 	case 'T': case 't':
 		unimplemented(); break;
 

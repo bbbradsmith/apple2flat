@@ -53,7 +53,7 @@ table:
 	.word draw_fillbox_generic
 	.word blit_low
 	.word 40
-	.byte 24
+	.byte 48
 	.assert *-table = VIDEO_FUNCTION_TABLE_SIZE, error, "table entry count incorrect"
 .endproc
 

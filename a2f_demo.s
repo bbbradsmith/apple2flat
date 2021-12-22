@@ -5,6 +5,7 @@
 .export _leyendecker_lr_seg
 .export _leyendecker_dlr_seg
 .export _leyendecker_mono_seg
+.export _leyendecker_dmono_seg
 .export _leyendecker_hr_seg
 .export _leyendecker_dhr_seg
 
@@ -27,6 +28,10 @@ _leyendecker_dlr_seg = * >> 8
 .align 256
 _leyendecker_mono_seg = * >> 8
 .incbin "demo_gfx/leyendecker_mono.scr"
+
+.align 256
+_leyendecker_dmono_seg = * >> 8
+.incbin "demo_gfx/leyendecker_dmono.scr"
 
 .align 256
 _leyendecker_hr_seg = * >> 8

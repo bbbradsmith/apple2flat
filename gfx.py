@@ -199,9 +199,9 @@ def pad_to(img,x,y):
 
 def screenify(d,mode=0):
     if mode == 2: # rotate every second byte (double low res) and split into a double
-        return screenify(bytearray([nibble_rotate_left(v) for v in d[0::2]])) + screenify(d[1::2])
+        return screenify(d[1::2]) + screenify(bytearray([nibble_rotate_right(v) for v in d[0::2]]))
     if mode == 1: # split double, every second byte
-        return screenify(d[0::2]) + screenify(d[1::2])
+        return screenify(d[1::2]) + screenify(d[0::2])
     if len(d) > (40*24): # split 8k hires 8-ways
         dm = bytearray()
         for i in range(8):
@@ -215,6 +215,7 @@ def screenify(d,mode=0):
         for i in range(8):
             for j in range(i*40,len(d),8*40):
                 dm += d[j:j+40]
+            dm += bytearray([0]*8) # 8 bytes of padding after every 120
         return dm
 
 def make_lores(img,screen=False):
@@ -318,12 +319,6 @@ if __name__ == "__main__" and 'idlelib' not in sys.modules:
     if command == "mono":   d = make_mono(  load_img(file[0]),screen)
     if command == "double": d = make_double(load_img(file[0]),screen)
     if d == None: usage()
-    if screen: # HACK undo 8/128 skip
-        dp = bytearray()
-        for i in range(0,len(d),120):
-            dp += d[i:i+120]
-            dp += bytearray([0]*8)
-        d = dp
     open(file[1],"wb").write(d)
     print("Done. (%d bytes written)" % len(d))
     exit(0)

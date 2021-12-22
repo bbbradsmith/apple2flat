@@ -167,9 +167,8 @@ DISK_ERROR_PARTIAL = $04 ; sector read but only partially correct (checksum fail
 .global disk_error ; last error code from disk routine
 
 .global disk_read ; X:A = segment to read, Y = segment count, disk_ptr = destination, returns disk_error
-.global disk_write ; TODO write sector
-.global disk_format ; TODO format track
-
+;.global disk_write ; TODO write sector
+;.global disk_format ; TODO format track
 ; TODO drive select?
 
 ;
@@ -320,6 +319,9 @@ COD_WHITE       = 15
 
 ; set text/border colours on IIGS only
 .global iigs_color ; A = text FG, X = text BG, Y = border (low-resolution colour values)
+
+.global screen_load ; X:A = starting sector to load from
+.global screen_load_double ; X:A = sector
 
 ;
 ; Misc

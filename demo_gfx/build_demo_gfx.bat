@@ -4,6 +4,7 @@ python ..\gfx.py font_vwf font_vwf.png font_vwf.bin font_vwf.wid || @goto error
 python ..\gfx.py -s lores leyendecker_lr.png leyendecker_lr.scr || @goto error
 python ..\gfx.py -s lores leyendecker_dlr.png leyendecker_dlr.scr || @goto error
 python ..\gfx.py -s mono leyendecker_mono.png leyendecker_mono.scr || @goto error
+python ..\gfx.py -s mono leyendecker_dmono.png leyendecker_dmono.scr || @goto error
 python ..\gfx.py -s hires leyendecker_hr.png leyendecker_hr.scr || @goto error
 python ..\gfx.py -s double leyendecker_dhr.png leyendecker_dhr.scr || @goto error
 
