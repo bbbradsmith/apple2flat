@@ -95,10 +95,10 @@ def span_lr(img,x,y): # read low-resolution pixels 1x2
         b = (b >> 4) | (p << 4)
     return b
 
+global last_hr_group
 last_hr_group = 0
 
 def span_hr(img,x,y,last=None):
-    global last_hr_group
     group = last if (last != None) else last_hr_group
     # remap palette: black, purple, green, blue, orange, white
     PALMAP = (0,1,3,1, 2,0,3,3, 4,4,5,1, 2,4,2,5, 0)
