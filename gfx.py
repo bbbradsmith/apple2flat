@@ -95,10 +95,10 @@ def span_lr(img,x,y): # read low-resolution pixels 1x2
         b = (b >> 4) | (p << 4)
     return b
 
-global last_hr_group
 last_hr_group = 0
 
 def span_hr(img,x,y,last=None):
+    global last_hr_group
     group = last if (last != None) else last_hr_group
     # remap palette: black, purple, green, blue, orange, white
     PALMAP = (0,1,3,1, 2,0,3,3, 4,4,5,1, 2,4,2,5, 0)
@@ -254,9 +254,9 @@ def make_mono(img,screen=False):
     return d
 
 def make_hires(img,screen=False):
+    global last_hr_group
     if screen and ((img.width != 140) or (img.height != 192)):
         fail("hires -s requires 140x192 image")
-    global last_hr_group
     last_hr_group = 0
     img = pad_to(img,7,1)
     d = bytearray()
@@ -292,10 +292,10 @@ def fail(message):
 def usage():
     fail(USAGE)
 
-global crop
 crop = None
 
 def load_img(filename):
+    global crop
     img = index_image(filename)
     if crop != None:
         img = img.crop((crop[0],crop[1],crop[0]+crop[2],crop[1]+crop[3]))
