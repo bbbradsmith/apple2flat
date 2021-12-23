@@ -8,7 +8,16 @@ import PIL.Image
 import PIL.ImageDraw
 
 USAGE = "Usage:\n" + \
-    "  gfx palette [out.png] - generate palette reference image\n"
+    "  gfx palette out.png - palette reference image\n" + \
+    "  gfx font in.png out.bin - 7x8 font set\n" + \
+    "  gfx font_vwf in.png out.bin out.wid - variable-width font\n" + \
+    "  gfx lores in.png out.bin [-sc] - low or double-low resolution (blit data)\n" + \
+    "  gfx hires in.png out.bin [-sc] - 4x2-color high resolution\n" + \
+    "  gfx double in.png out.bin [-sc] - 16-color double-high-resolution\n" + \
+    "  gfx mono in.png out.bin [-sc] - high or double high resolution monochrome\n" + \
+    "  -s option: creates a full-screen image for screen_load instead of blit\n" + \
+    "  -c=1,2,3,4 option: crops image to top left 1,2 with width 3,4\n" + \
+    ""
 
 #
 # Converting images to indexed palette
@@ -219,6 +228,8 @@ def screenify(d,mode=0):
         return dm
 
 def make_lores(img,screen=False):
+    if screen and (((img.width != 40) and (img.width != 80)) or (img.height != 48)):
+        fail("lores -s requires 40x48 or 80x48 image")
     img = pad_to(img,1,2)
     d = bytearray()
     d.append(img.width)
@@ -230,6 +241,8 @@ def make_lores(img,screen=False):
     return d
 
 def make_mono(img,screen=False):
+    if screen and (((img.width != 280) and (img.width != 560)) or (img.height != 192)):
+        fail("mono -s requires 280x192 or 560x192 image")
     img = pad_to(img,7,1)
     d = bytearray()
     d.append(img.width//7)
@@ -241,6 +254,8 @@ def make_mono(img,screen=False):
     return d
 
 def make_hires(img,screen=False):
+    if screen and ((img.width != 140) or (img.height != 192)):
+        fail("hires -s requires 140x192 image")
     global last_hr_group
     last_hr_group = 0
     img = pad_to(img,7,1)
@@ -254,6 +269,8 @@ def make_hires(img,screen=False):
     return d
 
 def make_double(img,screen=False):
+    if screen and ((img.width != 140) or (img.height != 192)):
+        fail("double -s requires 140x192 image")
     img = pad_to(img,7,1)
     d = bytearray()
     d.append(img.width//7)
@@ -268,13 +285,20 @@ def make_double(img,screen=False):
 # Command line
 #
 
-def usage():
-    print(USAGE)
+def fail(message):
+    print(message)
     sys.exit(1)
+
+def usage():
+    fail(USAGE)
+
+global crop
+crop = None
 
 def load_img(filename):
     img = index_image(filename)
-    # TODO apply global crop option
+    if crop != None:
+        img = img.crop((crop[0],crop[1],crop[0]+crop[2],crop[1]+crop[3]))
     return img
 
 if __name__ == "__main__" and 'idlelib' not in sys.modules:
@@ -286,6 +310,10 @@ if __name__ == "__main__" and 'idlelib' not in sys.modules:
         if a.startswith("-"):
             op = a.lower()
             if op == "-s": screen = True
+            elif op.startswith("-c="):
+                p = [int(v) for v in op[3:].split(",")]
+                if len(p) < 4: usage()
+                crop = c
             else: usage()
         elif command == None: command = a.lower()
         elif file[0] == None: file[0] = a
